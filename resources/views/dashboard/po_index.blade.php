@@ -499,3 +499,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endsection
+{{-- WIP: tampilkan kolom no_invoice di tabel PO --}}
