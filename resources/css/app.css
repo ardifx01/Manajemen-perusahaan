@@ -1,0 +1,261 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styling */
+.nav-link {
+  @apply block px-4 py-2 rounded transition hover:bg-red-600 hover:text-white text-gray-800;
+}
+
+.nav-link-active {
+  @apply block px-4 py-2 rounded bg-red-600 text-white;
+}
+
+/* Utility: hide native arrow of select (cross-browser) */
+select.no-arrow {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none !important; /* Safari/Chrome */
+  background-color: inherit; /* keep bg from Tailwind classes */
+}
+
+/* Remove arrow on IE/Edge (legacy) */
+select.no-arrow::-ms-expand {
+  display: none;
+}
+
+/* --- Fancy toggle animations for LOCK / UNLOCK --- */
+@keyframes press-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+
+.animate-press-pop {
+  animation: press-pop 300ms cubic-bezier(.22,1,.36,1) both;
+}
+
+@keyframes ripple {
+  from { transform: translate(-50%, -50%) scale(0.2); opacity: 0.35; }
+  to { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+}
+
+.ripple-circle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5rem; /* 80px */
+  height: 5rem;
+  border-radius: 9999px;
+  background-color: rgb(99 102 241 / 0.25); /* indigo-500/25 */
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.animate-ripple {
+  animation: ripple 650ms ease-out forwards;
+}
+
+@keyframes glow-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(99,102,241,.45); }
+  100% { box-shadow: 0 0 0 14px rgba(99,102,241,0); }
+}
+
+.animate-glow {
+  animation: glow-pulse 700ms ease-out forwards;
+}
+
+/* --- Form reveal animations --- */
+@keyframes form-tilt-in {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) translateY(10px) rotateX(8deg) scale(0.98);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 1;
+    transform: perspective(1000px) translateY(0) rotateX(0.6deg) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) translateY(0) rotateX(0deg) scale(1);
+  }
+}
+
+.animate-form-in {
+  animation: form-tilt-in 520ms cubic-bezier(.22,1,.36,1) both;
+  transform-origin: 50% 0%;
+}
+
+@keyframes form-tilt-out {
+  0% {
+    opacity: 1;
+    transform: perspective(1000px) translateY(0) rotateX(0deg) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(1000px) translateY(10px) rotateX(6deg) scale(0.985);
+    filter: blur(3px);
+  }
+}
+
+.animate-form-out {
+  animation: form-tilt-out 360ms cubic-bezier(.4,.14,.3,1) both;
+  transform-origin: 50% 0%;
+}
+
+@keyframes field-rise-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.995);
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-form-item {
+  animation: field-rise-in 420ms ease-out both;
+}
+
+/* Simple animation delay helpers */
+.anim-delay-0   { animation-delay: 0ms; }
+.anim-delay-100 { animation-delay: 100ms; }
+.anim-delay-150 { animation-delay: 150ms; }
+.anim-delay-200 { animation-delay: 200ms; }
+.anim-delay-250 { animation-delay: 250ms; }
+.anim-delay-300 { animation-delay: 300ms; }
+.anim-delay-400 { animation-delay: 400ms; }
+
+/* --- Safe area helpers for mobile (iOS notch etc.) --- */
+.pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
+.pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.px-safe {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+/* --- Fancy Logout button styles --- */
+.btn-logout {
+  @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm transition relative overflow-hidden select-none;
+  @apply border-rose-600 text-rose-600 dark:text-rose-300 bg-white dark:bg-transparent;
+}
+
+.btn-logout:hover {
+  @apply text-white bg-rose-600 shadow-[0_8px_24px_rgba(244,63,94,0.35)];
+}
+
+.btn-logout:focus-visible {
+  @apply outline-none ring-2 ring-offset-2 ring-rose-500 dark:ring-offset-gray-900;
+}
+
+.btn-logout .icon {
+  @apply w-5 h-5 transition-transform duration-300;
+}
+
+.btn-logout:hover .icon {
+  transform: translateX(2px) rotate(-3deg);
+}
+
+.btn-logout .label {
+  @apply hidden sm:inline transition-all duration-300;
+}
+
+.btn-logout:hover .label {
+  letter-spacing: 0.02em;
+}
+
+/* sweeping light/shine */
+.btn-logout .shine {
+  position: absolute;
+  top: -50%;
+  left: -30%;
+  width: 20%;
+  height: 200%;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.45) 50%, rgba(255,255,255,0) 100%);
+  transform: rotate(20deg) translateX(-150%);
+  transition: transform 600ms ease;
+  pointer-events: none;
+  filter: blur(0.5px);
+}
+
+.btn-logout:hover .shine {
+  transform: rotate(20deg) translateX(450%);
+}
+
+/* Click run-out sequence */
+@keyframes logout-run-out {
+  0% { transform: translateX(0) scale(1); opacity: 1; }
+  30% { transform: translateX(6px) scale(0.98); opacity: 1; }
+  100% { transform: translateX(120%) scale(0.98); opacity: 0; }
+}
+
+.btn-logout.logout-run {
+  animation: logout-run-out 600ms cubic-bezier(.22,1,.36,1) forwards;
+}
+
+.btn-logout.logout-run .icon { transform: translateX(8px) rotate(-6deg); }
+.btn-logout.logout-run .label { opacity: 0; transform: translateX(4px); }
+
+/* Morph-to-circle + spinner animation */
+.btn-logout .spinner {
+  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; pointer-events: none;
+}
+.btn-logout .spinner:before {
+  content: "";
+  width: 18px; height: 18px; border-radius: 9999px;
+  border: 2.5px solid rgba(255,255,255,.6);
+  border-top-color: #fff;
+  animation: spin 900ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-logout.logout-morph {
+  @apply bg-rose-600 text-white border-transparent;
+  transition-property: background-color, color, border-color, width, border-radius, transform, opacity;
+  transition-duration: 450ms;
+  transition-timing-function: cubic-bezier(.22,1,.36,1);
+}
+.btn-logout.logout-morph .icon,
+.btn-logout.logout-morph .label,
+.btn-logout.logout-morph .shine { opacity: 0; transform: scale(.9); }
+.btn-logout.logout-morph { width: 2.5rem; padding-left: 0; padding-right: 0; }
+.btn-logout.logout-morph { border-radius: 9999px; }
+.btn-logout.logout-morph .spinner { opacity: 1; }
+
+/* --- Chart.js sizing fixes --- */
+/* Make all canvases behave like block-level and never overflow horizontally */
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* Ensure dashboard bar chart follows container width/height */
+#barChart {
+  width: 100% !important;
+  height: 100% !important; /* parent container must define a height */
+}
+
+/* --- Standardized action buttons --- */
+.btn-action {
+  @apply inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+.btn-edit {
+  @apply btn-action text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500 dark:bg-yellow-500 dark:hover:bg-yellow-400 dark:focus:ring-yellow-400;
+}
+
+.btn-delete {
+  @apply btn-action text-white bg-rose-600 hover:bg-rose-700 focus:ring-rose-500 dark:bg-rose-500 dark:hover:bg-rose-400 dark:focus:ring-rose-400;
+}
+
+.btn-icon {
+  @apply w-4 h-4;
+}
