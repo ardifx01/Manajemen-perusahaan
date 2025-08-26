@@ -257,17 +257,21 @@ class SuratJalanController extends Controller
             $ppn = (int) round($subtotal * 0.11);
             $grandTotal = $subtotal + $ppn;
 
-            // Nomor invoice
+            // Nomor invoice: gunakan no_invoice dari PO jika tersedia; fallback ke format lama
             $today = Carbon::now();
-            $invoiceNo = rand(1000, 9999) . ' / CAM-GM / ' . $today->month . ' / ' . $today->format('y');
+            $firstPo = $pos->first();
+            $invoiceNo = trim((string)($firstPo->no_invoice ?? ''));
+            if ($invoiceNo === '') {
+                $invoiceNo = rand(1000, 9999) . ' / CAM-GM / ' . $today->month . ' / ' . $today->format('y');
+            }
 
             $invoiceDetails = [
                 'invoice_no' => $invoiceNo,
                 'invoice_date' => $today->locale('id')->translatedFormat('d F Y'),
-                'customer' => $pos->first()->customer,
-                'address' => trim(($pos->first()->alamat_1 ?? '') . ' ' . ($pos->first()->alamat_2 ?? '')),
-                'no_po' => $pos->first()->no_po ?? '-',
-                'no_surat_jalan' => $pos->first()->no_surat_jalan ?? '-',
+                'customer' => $firstPo->customer,
+                'address' => trim(($firstPo->alamat_1 ?? '') . ' ' . ($firstPo->alamat_2 ?? '')),
+                'no_po' => $firstPo->no_po ?? '-',
+                'no_surat_jalan' => $firstPo->no_surat_jalan ?? '-',
                 'items' => $allItems,
                 'subtotal' => $subtotal,
                 'ppn' => $ppn,

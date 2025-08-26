@@ -72,6 +72,14 @@
                                 <span>No Surat Jalan</span>
                             </div>
                         </th>
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[140px]">
+                            <div class="flex items-center space-x-1 md:space-x-2">
+                                <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>No Invoice</span>
+                            </div>
+                        </th>
                         <!-- Made address columns responsive with min-width -->
                         <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[120px]">
                             <div class="flex items-center space-x-1 md:space-x-2">
@@ -125,6 +133,15 @@
                                 </span>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
+                                <span class="bg-purple-100 dark:bg-slate-700 text-purple-800 dark:text-purple-200 px-2 md:px-3 py-1 rounded-full text-xs font-medium">
+                                    @if($customer->invoice_nomor || $customer->invoice_pt || $customer->invoice_tahun)
+                                        {{ $customer->invoice_nomor ?? '-' }}/{{ $customer->invoice_pt ?? '-' }}/{{ $customer->invoice_tahun ?? '-' }}
+                                    @else
+                                        -
+                                    @endif
+                                </span>
+                            </td>
+                            <td class="px-3 md:px-6 py-3 md:py-4">
                                 <span class="bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-200 px-2 md:px-3 py-1 rounded-full text-xs font-medium">
                                     {{ $customer->address_1 ?? '-' }}
                                 </span>
@@ -137,7 +154,7 @@
                             <td class="px-3 md:px-6 py-3 md:py-4">
                                 <!-- Made action buttons responsive - stack on mobile -->
                                 <div class="flex flex-col sm:flex-row justify-center gap-1 sm:gap-2">
-                                    <button onclick="openEditModal({{ $customer->id }}, '{{ $customer->name }}', '{{ $customer->address_1 }}', '{{ $customer->address_2 }}', '{{ $customer->delivery_note_nomor }}', '{{ $customer->delivery_note_pt }}', '{{ $customer->delivery_note_tahun }}')" 
+                                    <button onclick="openEditModal({{ $customer->id }}, '{{ $customer->name }}', '{{ $customer->address_1 }}', '{{ $customer->address_2 }}', '{{ $customer->delivery_note_nomor }}', '{{ $customer->delivery_note_pt }}', '{{ $customer->delivery_note_tahun }}', '{{ $customer->invoice_nomor }}', '{{ $customer->invoice_pt }}', '{{ $customer->invoice_tahun }}')" 
                                             class="bg-yellow-500 dark:bg-yellow-500 hover:bg-yellow-600 dark:hover:bg-yellow-400 text-white px-2 md:px-4 py-1 md:py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center justify-center space-x-1 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:focus:ring-yellow-400">
                                         <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -161,7 +178,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="7" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center space-y-4">
                                     <div class="bg-gray-100 dark:bg-slate-700 p-6 rounded-full">
                                         <svg class="w-12 h-12 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,6 +244,24 @@
                     </div>
                     <div class="mt-2">
                         <input type="text" id="add_delivery_note_tahun" name="delivery_note_tahun"
+                               class="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               placeholder="Tahun">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Invoice</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-1 items-center">
+                        <input type="text" id="add_invoice_nomor" name="invoice_nomor"
+                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               placeholder="Nomor">
+                        <span class="hidden sm:block text-center text-gray-500 dark:text-slate-400 font-medium text-sm">/</span>
+                        <input type="text" id="add_invoice_pt" name="invoice_pt"
+                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               placeholder="PT">
+                    </div>
+                    <div class="mt-2">
+                        <input type="text" id="add_invoice_tahun" name="invoice_tahun"
                                class="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="Tahun">
                     </div>
@@ -316,6 +351,24 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Invoice</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-1 items-center">
+                        <input type="text" id="edit_invoice_nomor" name="invoice_nomor"
+                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               placeholder="Nomor">
+                        <span class="hidden sm:block text-center text-gray-500 dark:text-slate-400 font-medium text-sm">/</span>
+                        <input type="text" id="edit_invoice_pt" name="invoice_pt"
+                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               placeholder="PT">
+                    </div>
+                    <div class="mt-2">
+                        <input type="text" id="edit_invoice_tahun" name="invoice_tahun"
+                               class="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               placeholder="Tahun">
+                    </div>
+                </div>
+
                 <div class="space-y-2">
                     <div>
                         <label for="edit_address_1" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alamat 1</label>
@@ -367,7 +420,7 @@ function closeAddModal() {
     document.getElementById('addCustomerForm').reset();
 }
 
-function openEditModal(id, name, address1, address2, deliveryNoteNomor, deliveryNotePt, deliveryNoteTahun) {
+function openEditModal(id, name, address1, address2, deliveryNoteNomor, deliveryNotePt, deliveryNoteTahun, invoiceNomor, invoicePt, invoiceTahun) {
     document.getElementById('editModal').classList.remove('hidden');
     document.getElementById('editModal').classList.add('flex');
     document.getElementById('editCustomerForm').action = `/customer/${id}`;
@@ -375,6 +428,9 @@ function openEditModal(id, name, address1, address2, deliveryNoteNomor, delivery
     document.getElementById('edit_delivery_note_nomor').value = deliveryNoteNomor || '';
     document.getElementById('edit_delivery_note_pt').value = deliveryNotePt || '';
     document.getElementById('edit_delivery_note_tahun').value = deliveryNoteTahun || '';
+    document.getElementById('edit_invoice_nomor').value = invoiceNomor || '';
+    document.getElementById('edit_invoice_pt').value = invoicePt || '';
+    document.getElementById('edit_invoice_tahun').value = invoiceTahun || '';
     document.getElementById('edit_address_1').value = address1 || '';
     document.getElementById('edit_address_2').value = address2 || '';
     document.getElementById('edit_name').focus();

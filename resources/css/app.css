@@ -259,3 +259,32 @@ canvas {
 .btn-icon {
   @apply w-4 h-4;
 }
+
+/* --- Dark mode form readability tweaks --- */
+/* Lighter placeholders on dark background */
+.dark input::placeholder,
+.dark textarea::placeholder,
+.dark select::placeholder {
+  color: rgba(229, 231, 235, 0.7); /* tailwind gray-200 ~70% */
+}
+
+/* Make native datepicker icon visible in dark mode */
+.dark .date-input {
+  color-scheme: dark; /* hint browsers to use dark controls where supported */
+}
+
+/* Hide native webkit calendar indicator, we use our own icon */
+.date-input::-webkit-calendar-picker-indicator {
+  opacity: 0; /* hide but keep click area */
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  cursor: pointer;
+}
+
+/* Remove extra controls in some browsers */
+.date-input::-webkit-inner-spin-button,
+.date-input::-webkit-clear-button { display: none; }
+
+/* Ensure pointer still opens picker when clicking our custom icon area */
+.date-input { position: relative; }

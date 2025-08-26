@@ -2,7 +2,7 @@
 @section('title', 'PURCHASE ORDER VENDOR')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 py-4 sm:py-8">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
     <div class="max-w-6xl mx-auto px-2 sm:px-4">
         <!-- Header Section -->
         <div class="bg-white/95 dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
@@ -56,6 +56,11 @@
                                     $deliveryNomor = $deliveryParts[0] ?? '';
                                     $deliveryPt = $deliveryParts[1] ?? '';
                                     $deliveryTahun = $deliveryParts[2] ?? '';
+
+                                    $invoiceParts = explode('/', $c->invoice_number ?? '');
+                                    $invoiceNomor = $invoiceParts[0] ?? '';
+                                    $invoicePt = $invoiceParts[1] ?? '';
+                                    $invoiceTahun = $invoiceParts[2] ?? '';
                                 @endphp
                                 <option value="{{ $c->id }}" 
                                         data-address1="{{ $c->address_1 ?? '' }}" 
@@ -63,6 +68,9 @@
                                         data-delivery-nomor="{{ $deliveryNomor }}"
                                         data-delivery-pt="{{ $deliveryPt }}"
                                         data-delivery-tahun="{{ $deliveryTahun }}"
+                                        data-invoice-nomor="{{ $invoiceNomor }}"
+                                        data-invoice-pt="{{ $invoicePt }}"
+                                        data-invoice-tahun="{{ $invoiceTahun }}"
                                         @selected(old('customer_id', $po->customer_id ?? '') == $c->id)>
                                     {{ $c->name }}
                                 </option>
@@ -72,7 +80,7 @@
 
                     <!-- No PO -->
                     <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-file-invoice text-green-500 mr-1"></i>No PO
                         </label>
                         <input type="text" name="no_po" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('no_po', $po->no_po ?? '') }}" required>
@@ -80,15 +88,20 @@
 
                     <!-- Tanggal PO -->
                     <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-calendar text-red-500 mr-1"></i>Tanggal PO
                         </label>
-                        <input type="date" name="tanggal_po" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('tanggal_po', isset($po) && $po->tanggal_po ? \Carbon\Carbon::parse($po->tanggal_po)->format('Y-m-d') : '') }}" required>
+                        <div class="relative">
+                            <input type="date" name="tanggal_po" class="date-input w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg pl-3 pr-12 sm:pl-4 sm:pr-12 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('tanggal_po', isset($po) && $po->tanggal_po ? \Carbon\Carbon::parse($po->tanggal_po)->format('Y-m-d') : '') }}" required>
+                            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 dark:text-gray-200">
+                                <i class="fa-regular fa-calendar text-base"></i>
+                            </span>
+                        </div>
                     </div>
 
                     <!-- No Invoice (3 bagian) -->
-                    <div class="space-y-2 md:col-span-1 lg:col-span-1">
-                        <label class="block text-sm font-semibold text-gray-700">
+                    <div class="space-y-2 md:col-span-2 lg:col-span-3">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-file-invoice-dollar text-indigo-500 mr-1"></i>No Invoice
                         </label>
                         @php
@@ -97,24 +110,24 @@
                                 $noInvoiceParts = explode('/', $po->no_invoice);
                             }
                         @endphp
-                        <div class="flex flex-col sm:flex-row gap-2 sm:items-center max-w-full sm:max-w-lg">
+                        <div class="flex flex-col sm:flex-row gap-2 sm:items-center w-full min-w-0">
                             <div class="flex gap-2 items-center w-full">
-                                <input type="text" name="no_invoice_nomor" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base w-1/4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_invoice_nomor', $noInvoiceParts[0] ?? '') }}">
+                                <input type="text" id="invoice_nomor" name="no_invoice_nomor" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_invoice_nomor', $noInvoiceParts[0] ?? '') }}">
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
-                                <input type="text" name="no_invoice_pt" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base w-2/4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="PT" value="{{ old('no_invoice_pt', $noInvoiceParts[1] ?? '') }}">
+                                <input type="text" id="invoice_pt" name="no_invoice_pt" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[2] basis-1/2 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="PT" value="{{ old('no_invoice_pt', $noInvoiceParts[1] ?? '') }}">
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
-                                <input type="number" name="no_invoice_tahun" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base w-1/4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Tahun" value="{{ old('no_invoice_tahun', $noInvoiceParts[2] ?? '') }}">
+                                <input type="number" id="invoice_tahun" name="no_invoice_tahun" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Tahun" value="{{ old('no_invoice_tahun', $noInvoiceParts[2] ?? '') }}">
                             </div>
                         </div>
                     </div>
 
                     <!-- No Surat Jalan -->
                     <!-- Made no surat jalan responsive with better mobile layout -->
-                    <div class="space-y-2 md:col-span-1 lg:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700">
+                    <div class="space-y-2 md:col-span-2 lg:col-span-3 md:col-start-1 lg:col-start-1">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-truck text-purple-500 mr-1"></i>No Surat Jalan
                         </label>
-                        <div class="flex flex-col sm:flex-row gap-2 sm:items-center max-w-full sm:max-w-lg">
+                        <div class="flex flex-col sm:flex-row gap-2 sm:items-center w-full min-w-0">
                             @php
                                 $noSuratJalanParts = [];
                                 if (isset($po) && $po->no_surat_jalan) {
@@ -122,11 +135,11 @@
                                 }
                             @endphp
                             <div class="flex gap-2 items-center w-full">
-                                <input type="number" name="no_surat_jalan_nomor" id="delivery_nomor" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base w-1/4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_surat_jalan_nomor', $noSuratJalanParts[0] ?? '') }}" required>
+                                <input type="number" name="no_surat_jalan_nomor" id="delivery_nomor" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_surat_jalan_nomor', $noSuratJalanParts[0] ?? '') }}" required>
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
-                                <input type="text" name="no_surat_jalan_pt" id="delivery_pt" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base w-2/4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="PT" value="{{ old('no_surat_jalan_pt', $noSuratJalanParts[1] ?? '') }}" required>
+                                <input type="text" name="no_surat_jalan_pt" id="delivery_pt" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[2] basis-1/2 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="PT" value="{{ old('no_surat_jalan_pt', $noSuratJalanParts[1] ?? '') }}" required>
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
-                                <input type="number" name="no_surat_jalan_tahun" id="delivery_tahun" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base w-1/4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Tahun" value="{{ old('no_surat_jalan_tahun', $noSuratJalanParts[2] ?? '') }}" required>
+                                <input type="number" name="no_surat_jalan_tahun" id="delivery_tahun" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Tahun" value="{{ old('no_surat_jalan_tahun', $noSuratJalanParts[2] ?? '') }}" required>
                             </div>
                         </div>
                     </div>
@@ -135,17 +148,17 @@
 
                     <!-- Made alamat_1 required and editable, not readonly -->
                     <!-- Alamat 1 -->
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">
-                            <i class="fas fa-map-marker-alt text-blue-500 mr-1"></i>Alamat 1 <span class="text-red-500">*</span>
+                    <div class="space-y-2 md:col-start-1 lg:col-start-1 md:col-span-2 lg:col-span-3">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-1"></i>Alamat 1 <span class="text-red-500"></span>
                         </label>
                         <input type="text" name="address_1" id="address_1" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('address_1', $po->alamat_1 ?? '') }}" required placeholder="Masukkan alamat lengkap">
                     </div>
 
                     <!-- Made alamat_2 editable, not readonly -->
                     <!-- Alamat 2 -->
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">
+                    <div class="space-y-2 md:col-start-1 lg:col-start-1 md:col-span-2 lg:col-span-3">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-map-marker-alt text-blue-500 mr-1"></i>Alamat 2
                         </label>
                         <input type="text" name="address_2" id="address_2" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('address_2', $po->alamat_2 ?? '') }}" placeholder="Alamat tambahan (opsional)">
@@ -154,7 +167,7 @@
                     <!-- CHANGED: Pengirim field from input text to select dropdown -->
                     <!-- Pengirim -->
                     <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-user text-orange-500 mr-1"></i>Pengirim
                         </label>
                         <select name="pengirim" id="pengirim" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-500/30 transition-all duration-200">
@@ -169,7 +182,7 @@
 
                     <!-- Kendaraan -->
                     <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-car text-green-500 mr-1"></i>Kendaraan
                         </label>
                         <select name="kendaraan" id="kendaraan" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-500/30 transition-all duration-200">
@@ -184,7 +197,7 @@
 
                     <!-- No Polisi -->
                     <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-id-card text-yellow-500 mr-1"></i>No Polisi
                         </label>
                         <input type="text" name="no_polisi" id="no_polisi" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-100" value="{{ old('no_polisi', $po->no_polisi ?? '') }}" readonly>
@@ -307,6 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pengirimSelect = document.getElementById('pengirim');
 
+    const invoiceNomorInput = document.getElementById('invoice_nomor');
+    const invoicePtInput = document.getElementById('invoice_pt');
+    const invoiceTahunInput = document.getElementById('invoice_tahun');
+
     function addAutoFillEffect(element) {
         if (element && element.value) {
             element.classList.add('bg-green-50', 'border-green-300');
@@ -426,43 +443,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const deliveryNomor = selected.getAttribute('data-delivery-nomor') || '';
             const deliveryPt = selected.getAttribute('data-delivery-pt') || '';
             const deliveryTahun = selected.getAttribute('data-delivery-tahun') || '';
+
+            const invoiceNomor = selected.getAttribute('data-invoice-nomor') || '';
+            const invoicePt = selected.getAttribute('data-invoice-pt') || '';
+            const invoiceTahun = selected.getAttribute('data-invoice-tahun') || '';
             
-            // Isi dan kunci (readonly) jika autofill
-            if (!address1Input.value) {
-                address1Input.value = address1;
-                if (address1) {
-                    addAutoFillEffect(address1Input);
-                    address1Input.readOnly = true;
-                }
-            }
-            if (!address2Input.value) {
-                address2Input.value = address2;
-                if (address2) {
-                    addAutoFillEffect(address2Input);
-                    address2Input.readOnly = true;
-                }
-            }
-            if (!deliveryNomorInput.value) {
-                deliveryNomorInput.value = deliveryNomor;
-                if (deliveryNomor) {
-                    addAutoFillEffect(deliveryNomorInput);
-                    deliveryNomorInput.readOnly = true;
-                }
-            }
-            if (!deliveryPtInput.value) {
-                deliveryPtInput.value = deliveryPt;
-                if (deliveryPt) {
-                    addAutoFillEffect(deliveryPtInput);
-                    deliveryPtInput.readOnly = true;
-                }
-            }
-            if (!deliveryTahunInput.value) {
-                deliveryTahunInput.value = deliveryTahun;
-                if (deliveryTahun) {
-                    addAutoFillEffect(deliveryTahunInput);
-                    deliveryTahunInput.readOnly = true;
-                }
-            }
+            // Selalu isi ulang dari customer pilihan dan set readonly agar konsisten
+            address1Input.readOnly = false;
+            address2Input.readOnly = false;
+            deliveryNomorInput.readOnly = false;
+            deliveryPtInput.readOnly = false;
+            deliveryTahunInput.readOnly = false;
+            if (invoiceNomorInput) invoiceNomorInput.readOnly = false;
+            if (invoicePtInput) invoicePtInput.readOnly = false;
+            if (invoiceTahunInput) invoiceTahunInput.readOnly = false;
+
+            if (address1Input) { address1Input.value = address1; if (address1) addAutoFillEffect(address1Input); address1Input.readOnly = true; }
+            if (address2Input) { address2Input.value = address2; if (address2) addAutoFillEffect(address2Input); address2Input.readOnly = true; }
+            if (deliveryNomorInput) { deliveryNomorInput.value = deliveryNomor; if (deliveryNomor) addAutoFillEffect(deliveryNomorInput); deliveryNomorInput.readOnly = true; }
+            if (deliveryPtInput) { deliveryPtInput.value = deliveryPt; if (deliveryPt) addAutoFillEffect(deliveryPtInput); deliveryPtInput.readOnly = true; }
+            if (deliveryTahunInput) { deliveryTahunInput.value = deliveryTahun; if (deliveryTahun) addAutoFillEffect(deliveryTahunInput); deliveryTahunInput.readOnly = true; }
+
+            if (invoiceNomorInput) { invoiceNomorInput.value = invoiceNomor; if (invoiceNomor) addAutoFillEffect(invoiceNomorInput); invoiceNomorInput.readOnly = true; }
+            if (invoicePtInput) { invoicePtInput.value = invoicePt; if (invoicePt) addAutoFillEffect(invoicePtInput); invoicePtInput.readOnly = true; }
+            if (invoiceTahunInput) { invoiceTahunInput.value = invoiceTahun; if (invoiceTahun) addAutoFillEffect(invoiceTahunInput); invoiceTahunInput.readOnly = true; }
 
             // Jika customer tidak punya alamat, tetap bisa edit
             if (!address1 && !address1Input.value) {
@@ -477,11 +481,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tambahkan event agar saat user ganti customer, field jadi editable dulu lalu diisi dan dikunci lagi
     customerSelect.addEventListener('change', function() {
-        address1Input.readOnly = false;
-        address2Input.readOnly = false;
-        deliveryNomorInput.readOnly = false;
-        deliveryPtInput.readOnly = false;
-        deliveryTahunInput.readOnly = false;
         updateCustomerAddresses();
     });
 

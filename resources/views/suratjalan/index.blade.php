@@ -46,16 +46,7 @@
     </div>
 
     <!-- Table Section -->
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
-        <!-- Mobile scroll indicator -->
-        <div class="sm:hidden bg-gray-50 px-3 py-1.5 text-xs text-gray-600 border-b">
-            <div class="flex items-center space-x-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-9 8h18"></path>
-                </svg>
-                <span>Geser ke kanan untuk melihat lebih banyak kolom</span>
-            </div>
-        </div>
+    
         
         <!-- Made table much more compact with reduced padding and smaller text -->
         <div class="overflow-x-auto w-full">
@@ -95,6 +86,15 @@
                                 <span class="sm:hidden">No SJ</span>
                             </div>
                         </th>
+                        <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700">
+                            <div class="flex items-center space-x-1">
+                                <svg class="w-3 h-3 text-gray-500 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span class="hidden sm:inline">Invoice</span>
+                                <span class="sm:hidden">Inv</span>
+                            </div>
+                        </th>
                         <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight w-16">
                             <span>Aksi</span>
                         </th>
@@ -127,6 +127,11 @@
                                 {{ $pos->no_surat_jalan }}
                             </span>
                         </td>
+                        <td class="py-1 px-1.5 whitespace-nowrap text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700">
+                            <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-slate-600 dark:text-slate-200">
+                                {{ $pos->no_invoice ?? '-' }}
+                            </span>
+                        </td>
                         <td class="py-1 px-1.5 whitespace-nowrap text-xs font-medium">
                             <!-- Made action buttons more compact -->
                             <div class="flex items-center space-x-0.5">
@@ -148,7 +153,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="py-6 text-center">
+                        <td colspan="7" class="py-6 text-center">
                             <div class="flex flex-col items-center justify-center space-y-2">
                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -628,8 +633,8 @@ function populateInvoice(data) {
     
     // No PO dari database column no_po
     document.getElementById('invoiceNoPO').textContent = first.no_po || '-';
-    // No dari database column no_surat_jalan
-    document.getElementById('invoiceNo').textContent = first.no_surat_jalan || '-';
+    // No Invoice dari database column no_invoice
+    document.getElementById('invoiceNo').textContent = first.no_invoice || '-';
     document.getElementById('invoiceDate').textContent = invoiceDate;
     document.getElementById('invoiceDateLocation').textContent = invoiceDate;
 

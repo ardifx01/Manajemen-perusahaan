@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\POItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -16,6 +19,27 @@ class DashboardController extends Controller
 
         $totalGajiKaryawan = Employee::where('status', 'aktif')->sum('gaji_pokok');
         $rataRataGaji = $karyawanAktif > 0 ? $totalGajiKaryawan / $karyawanAktif : 0;
+
+        // Pendapatan bulanan (sum total item PO bulan ini + PPN 11%)
+        $start = Carbon::now()->startOfMonth();
+        $end   = Carbon::now()->endOfMonth();
+        $monthlySubtotal = POItem::whereHas('po', function ($q) use ($start, $end) {
+                $q->whereBetween('tanggal_po', [$start, $end]);
+            })
+            ->sum('total');
+        $monthlyPpn = (int) round($monthlySubtotal * 0.11);
+        $monthlyRevenue = (int) ($monthlySubtotal + $monthlyPpn);
+
+        // Laporan pendapatan per perusahaan (customer) - NET (tanpa PPN)
+        $revenueByCustomer = POItem::select('pos.customer',
+                DB::raw('COUNT(DISTINCT po_items.po_id) as orders'),
+                DB::raw('SUM(po_items.total) as subtotal')
+            )
+            ->join('pos', 'po_items.po_id', '=', 'pos.id')
+            ->whereBetween('pos.tanggal_po', [$start, $end])
+            ->groupBy('pos.customer')
+            ->orderByDesc('subtotal')
+            ->get();
 
         // Data untuk Chart (tanpa filter tanggal)
         $chartData = [
@@ -43,7 +67,11 @@ class DashboardController extends Controller
             'totalGajiKaryawan',
             'rataRataGaji',
             'chartData',
-            'chartLabels'
+            'chartLabels',
+            'monthlyRevenue',
+            'monthlySubtotal',
+            'monthlyPpn',
+            'revenueByCustomer'
         ));
     }
 }

@@ -8,7 +8,7 @@
     <!-- Statistik - Responsive Grid -->
     <!-- Made statistics grid fully responsive -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
-        <!-- Pendapatan -->
+        <!-- Pendapatan (Net) -->
         <div class="bg-green-100 border border-green-300 rounded-xl p-4 md:p-5 flex items-center space-x-3 md:space-x-4 shadow dark:bg-green-900/30 dark:border-green-700">
             <div class="bg-green-500 text-white p-2 md:p-3 rounded-full flex-shrink-0">
                 <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
@@ -16,8 +16,8 @@
                 </svg>
             </div>
             <div class="min-w-0 flex-1">
-                <div class="text-gray-600 dark:text-gray-300 text-sm md:text-base">Pendapatan</div>
-                <div class="text-lg md:text-xl font-bold truncate">Rp 0</div>
+                <div class="text-gray-600 dark:text-gray-300 text-sm md:text-base">Pendapatan (Net) - Bulan Ini</div>
+                <div class="text-lg md:text-xl font-bold truncate">Rp {{ number_format(($monthlySubtotal ?? 0), 0, ',', '.') }}</div>
             </div>
         </div>
 
@@ -84,6 +84,74 @@
         <!-- Made chart container responsive -->
         <div class="relative h-64 md:h-80 lg:h-96">
             <canvas id="barChart" class="w-full h-full"></canvas>
+        </div>
+    </div>
+
+    <!-- Laporan Pendapatan - diletakkan di bawah chart -->
+    <div class="mt-4 bg-white border border-gray-200 rounded-xl p-4 md:p-6 shadow dark:bg-gray-800 dark:border-gray-700">
+        <h2 class="text-base md:text-lg font-semibold mb-3 text-gray-800 dark:text-gray-100">Laporan Pendapatan - Bulan Ini</h2>
+        
+
+        <!-- Rincian per Perusahaan -->
+        <h3 class="text-sm md:text-base font-semibold mt-5 mb-2 text-gray-800 dark:text-gray-100">Rincian per Perusahaan</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-xs md:text-sm">
+                <thead>
+                    <tr class="text-left text-gray-600 dark:text-gray-300">
+                        <th class="py-2 pr-4">Perusahaan</th>
+                        <th class="py-2 text-right">Pendapatan Net</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse(($revenueByCustomer ?? []) as $row)
+                        <tr class="border-t border-gray-200 dark:border-gray-700">
+                            <td class="py-2 pr-4 text-gray-800 dark:text-gray-100">{{ $row->customer ?? '-' }}</td>
+                            <td class="py-2 text-right text-gray-900 dark:text-gray-100">Rp {{ number_format((int)($row->subtotal ?? 0), 0, ',', '.') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="2" class="py-2 text-center text-gray-500 dark:text-gray-400">Tidak ada data bulan ini</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Ringkasan (Net, PPN, Bruto) - diletakkan di bawah rincian per perusahaan -->
+        <div class="my-4 border-t-2 border-dashed border-emerald-400/70 dark:border-emerald-500/70"></div>
+        <div class="mt-3 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+            <div class="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2">Ringkasan Pendapatan</div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <tbody>
+                        <tr>
+                            <td class="py-2 pr-4 text-gray-600 dark:text-gray-300">Bruto (Net + PPN)</td>
+                            <td class="py-2 text-right text-gray-900 dark:text-gray-100">Rp {{ number_format(($monthlyRevenue ?? 0), 0, ',', '.') }}</td>
+                        </tr>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <td class="py-2 pr-4 text-gray-600 dark:text-gray-300">PPN 11% (−)</td>
+                            <td class="py-2 text-right text-gray-900 dark:text-gray-100">− Rp {{ number_format(($monthlyPpn ?? 0), 0, ',', '.') }}</td>
+                        </tr>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <td class="py-2 pr-4 text-gray-600 dark:text-gray-300">Pendapatan (Net, tanpa PPN)</td>
+                            <td class="py-2 text-right font-semibold text-gray-900 dark:text-gray-100">Rp {{ number_format(($monthlySubtotal ?? 0), 0, ',', '.') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Pendapatan (paling bawah) -->
+    <div class="mt-4 bg-green-100 border border-green-300 rounded-xl p-4 md:p-6 flex items-center space-x-3 md:space-x-4 shadow dark:bg-green-900/30 dark:border-green-700">
+        <div class="bg-green-500 text-white p-2 md:p-3 rounded-full flex-shrink-0">
+            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.333 0-4 1-4 4s2.667 4 4 4 4-1 4-4-2.667-4-4-4z"/>
+            </svg>
+        </div>
+        <div class="min-w-0 flex-1">
+            <div class="text-gray-600 dark:text-gray-300 text-sm md:text-base">Total Pendapatan (Net) - Bulan Ini</div>
+            <div class="text-lg md:text-xl font-bold truncate">Rp {{ number_format(($monthlySubtotal ?? 0), 0, ',', '.') }}</div>
         </div>
     </div>
 </div>

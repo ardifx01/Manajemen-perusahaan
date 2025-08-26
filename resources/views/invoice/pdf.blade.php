@@ -77,13 +77,21 @@
         <h1 style="font-size: 32px; font-weight: bold; letter-spacing: 4px; margin: 0; color:#333;">INVOICE</h1>
     </div>
 
-    <div class="row between mb-4 no-break">
-        <div><strong>No. PO : {{ $invoiceDetails['no_po'] ?? '-' }}</strong></div>
-        <div class="text-center"><strong>No : {{ $invoiceDetails['invoice_no'] ?? '-' }}</strong></div>
-        <div class="text-right"><strong>Date : {{ $invoiceDetails['invoice_date'] ?? '-' }}</strong></div>
-    </div>
+    <table class="no-break" style="width:100%; border-collapse:collapse; margin:0;">
+        <tr>
+            <td style="width:33.33%; text-align:left; vertical-align:bottom; padding:0;">
+                <span style="font-weight:bold;">No. PO : {{ $invoiceDetails['no_po'] ?? '-' }}</span>
+            </td>
+            <td style="width:33.33%; text-align:center; vertical-align:bottom; padding:0;">
+                <span style="font-weight:bold;">No : {{ $invoiceDetails['invoice_no'] ?? '-' }}</span>
+            </td>
+            <td style="width:33.33%; text-align:right; vertical-align:bottom; padding:0;">
+                <span style="font-weight:bold;">Date : {{ $invoiceDetails['invoice_date'] ?? '-' }}</span>
+            </td>
+        </tr>
+    </table>
 
-    <table class="mb-4">
+    <table class="mb-4" style="margin-top: 10px;">
         <thead>
             <tr>
                 <th>DESCRIPTION</th>

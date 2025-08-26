@@ -19,6 +19,7 @@ class Customer extends Model
         'address_1',
         'address_2',
         'delivery_note_number', // Using single field instead of 3 separate fields
+        'invoice_number',
     ];
 
     public function getDeliveryNoteNomorAttribute()
@@ -39,6 +40,27 @@ class Customer extends Model
     {
         if (!$this->delivery_note_number) return null;
         $parts = explode('/', $this->delivery_note_number);
+        return $parts[2] ?? null;
+    }
+
+    public function getInvoiceNomorAttribute()
+    {
+        if (!$this->invoice_number) return null;
+        $parts = explode('/', $this->invoice_number);
+        return $parts[0] ?? null;
+    }
+
+    public function getInvoicePtAttribute()
+    {
+        if (!$this->invoice_number) return null;
+        $parts = explode('/', $this->invoice_number);
+        return $parts[1] ?? null;
+    }
+
+    public function getInvoiceTahunAttribute()
+    {
+        if (!$this->invoice_number) return null;
+        $parts = explode('/', $this->invoice_number);
         return $parts[2] ?? null;
     }
 }

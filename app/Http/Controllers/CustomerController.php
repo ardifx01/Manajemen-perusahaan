@@ -31,6 +31,9 @@ class CustomerController extends Controller
             'delivery_note_nomor' => 'nullable|string|max:50',
             'delivery_note_pt' => 'nullable|string|max:50',
             'delivery_note_tahun' => 'nullable|string|max:10',
+            'invoice_nomor' => 'nullable|string|max:50',
+            'invoice_pt' => 'nullable|string|max:50',
+            'invoice_tahun' => 'nullable|string|max:10',
         ]);
 
         $deliveryNoteParts = [
@@ -46,6 +49,17 @@ class CustomerController extends Controller
 
         // Remove individual delivery note fields as they're not in database
         unset($validated['delivery_note_nomor'], $validated['delivery_note_pt'], $validated['delivery_note_tahun']);
+
+        // Compose invoice number
+        $invoiceParts = [
+            $validated['invoice_nomor'] ?? '',
+            $validated['invoice_pt'] ?? '',
+            $validated['invoice_tahun'] ?? ''
+        ];
+        if (array_filter($invoiceParts)) {
+            $validated['invoice_number'] = implode('/', $invoiceParts);
+        }
+        unset($validated['invoice_nomor'], $validated['invoice_pt'], $validated['invoice_tahun']);
 
         Customer::create($validated);
 
@@ -79,6 +93,9 @@ class CustomerController extends Controller
             'delivery_note_nomor' => 'nullable|string|max:50',
             'delivery_note_pt' => 'nullable|string|max:50',
             'delivery_note_tahun' => 'nullable|string|max:10',
+            'invoice_nomor' => 'nullable|string|max:50',
+            'invoice_pt' => 'nullable|string|max:50',
+            'invoice_tahun' => 'nullable|string|max:10',
         ]);
 
         $deliveryNoteParts = [
@@ -96,6 +113,19 @@ class CustomerController extends Controller
 
         // Remove individual delivery note fields as they're not in database
         unset($validated['delivery_note_nomor'], $validated['delivery_note_pt'], $validated['delivery_note_tahun']);
+
+        // Handle invoice number
+        $invoiceParts = [
+            $validated['invoice_nomor'] ?? '',
+            $validated['invoice_pt'] ?? '',
+            $validated['invoice_tahun'] ?? ''
+        ];
+        if (array_filter($invoiceParts)) {
+            $validated['invoice_number'] = implode('/', $invoiceParts);
+        } else {
+            $validated['invoice_number'] = null;
+        }
+        unset($validated['invoice_nomor'], $validated['invoice_pt'], $validated['invoice_tahun']);
 
         $customer->update($validated);
 
