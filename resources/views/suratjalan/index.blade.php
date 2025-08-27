@@ -10,8 +10,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
                 <div>
-                    <h1 class="text-base sm:text-xl font-bold text-gray-900 dark:text-white">Data Surat Jalan</h1>
-                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-200">Kelola data surat jalan dengan mudah</p>
+                    <h1 class="text-base sm:text-xl font-bold text-gray-900 dark:text-white">Data PO</h1>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-200">Kelola Data PO dengan mudah</p>
                 </div>
             </div>
             
@@ -158,8 +158,8 @@
                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
-                                <p class="text-gray-500 text-sm font-medium">Belum ada data surat jalan</p>
-                                <p class="text-gray-400 text-xs">Data akan muncul setelah Anda menambahkan surat jalan pertama</p>
+                                <p class="text-gray-500 text-sm font-medium">Belum ada Data PO</p>
+                                <p class="text-gray-400 text-xs">Data akan muncul setelah Anda menambahkan Data PO pertama</p>
                             </div>
                         </td>
                     </tr>
@@ -196,7 +196,7 @@
     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Edit Surat Jalan</h3>
+                <h3 class="text-lg font-medium text-gray-900">Edit Data PO</h3>
                 <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

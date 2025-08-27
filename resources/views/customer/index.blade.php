@@ -154,7 +154,7 @@
                             <td class="px-3 md:px-6 py-3 md:py-4">
                                 <!-- Made action buttons responsive - stack on mobile -->
                                 <div class="flex flex-col sm:flex-row justify-center gap-1 sm:gap-2">
-                                    <button onclick="openEditModal({{ $customer->id }}, '{{ $customer->name }}', '{{ $customer->address_1 }}', '{{ $customer->address_2 }}', '{{ $customer->delivery_note_nomor }}', '{{ $customer->delivery_note_pt }}', '{{ $customer->delivery_note_tahun }}', '{{ $customer->invoice_nomor }}', '{{ $customer->invoice_pt }}', '{{ $customer->invoice_tahun }}')" 
+                                    <button onclick="openEditModal({{ $customer->id }}, '{{ $customer->name }}', '{{ $customer->address_1 }}', '{{ $customer->address_2 }}', '{{ $customer->delivery_note_pt }}', '{{ $customer->delivery_note_tahun }}', '{{ $customer->invoice_pt }}', '{{ $customer->invoice_tahun }}')" 
                                             class="bg-yellow-500 dark:bg-yellow-500 hover:bg-yellow-600 dark:hover:bg-yellow-400 text-white px-2 md:px-4 py-1 md:py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center justify-center space-x-1 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:focus:ring-yellow-400">
                                         <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -232,37 +232,26 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Surat Jalan</label>
-                    <!-- Made delivery note inputs responsive -->
-                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-1 items-center">
-                        <input type="text" id="add_delivery_note_nomor" name="delivery_note_nomor"
-                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Nomor">
-                        <span class="hidden sm:block text-center text-gray-500 dark:text-slate-400 font-medium text-sm">/</span>
+                    <!-- Hanya PT dan Tahun -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
                         <input type="text" id="add_delivery_note_pt" name="delivery_note_pt"
-                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="PT">
-                    </div>
-                    <div class="mt-2">
                         <input type="text" id="add_delivery_note_tahun" name="delivery_note_tahun"
-                               class="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="Tahun">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Invoice</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-1 items-center">
-                        <input type="text" id="add_invoice_nomor" name="invoice_nomor"
-                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Nomor">
-                        <span class="hidden sm:block text-center text-gray-500 dark:text-slate-400 font-medium text-sm">/</span>
+                    <!-- Hanya PT dan Tahun -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
                         <input type="text" id="add_invoice_pt" name="invoice_pt"
-                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="PT">
-                    </div>
-                    <div class="mt-2">
                         <input type="text" id="add_invoice_tahun" name="invoice_tahun"
-                               class="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="Tahun">
                     </div>
                 </div>
@@ -335,36 +324,24 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Surat Jalan</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-1 items-center">
-                        <input type="text" id="edit_delivery_note_nomor" name="delivery_note_nomor"
-                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Nomor">
-                        <span class="hidden sm:block text-center text-gray-500 dark:text-slate-400 font-medium text-sm">/</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
                         <input type="text" id="edit_delivery_note_pt" name="delivery_note_pt"
-                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="PT">
-                    </div>
-                    <div class="mt-2">
                         <input type="text" id="edit_delivery_note_tahun" name="delivery_note_tahun"
-                               class="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="Tahun">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Invoice</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-1 items-center">
-                        <input type="text" id="edit_invoice_nomor" name="invoice_nomor"
-                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Nomor">
-                        <span class="hidden sm:block text-center text-gray-500 dark:text-slate-400 font-medium text-sm">/</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
                         <input type="text" id="edit_invoice_pt" name="invoice_pt"
-                               class="sm:col-span-2 px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="PT">
-                    </div>
-                    <div class="mt-2">
                         <input type="text" id="edit_invoice_tahun" name="invoice_tahun"
-                               class="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="Tahun">
                     </div>
                 </div>
@@ -420,15 +397,13 @@ function closeAddModal() {
     document.getElementById('addCustomerForm').reset();
 }
 
-function openEditModal(id, name, address1, address2, deliveryNoteNomor, deliveryNotePt, deliveryNoteTahun, invoiceNomor, invoicePt, invoiceTahun) {
+function openEditModal(id, name, address1, address2, deliveryNotePt, deliveryNoteTahun, invoicePt, invoiceTahun) {
     document.getElementById('editModal').classList.remove('hidden');
     document.getElementById('editModal').classList.add('flex');
     document.getElementById('editCustomerForm').action = `/customer/${id}`;
     document.getElementById('edit_name').value = name;
-    document.getElementById('edit_delivery_note_nomor').value = deliveryNoteNomor || '';
     document.getElementById('edit_delivery_note_pt').value = deliveryNotePt || '';
     document.getElementById('edit_delivery_note_tahun').value = deliveryNoteTahun || '';
-    document.getElementById('edit_invoice_nomor').value = invoiceNomor || '';
     document.getElementById('edit_invoice_pt').value = invoicePt || '';
     document.getElementById('edit_invoice_tahun').value = invoiceTahun || '';
     document.getElementById('edit_address_1').value = address1 || '';

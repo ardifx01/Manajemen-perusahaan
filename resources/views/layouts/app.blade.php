@@ -141,7 +141,7 @@
             <a href="{{ route('suratjalan.index') }}"
                class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('suratjalan.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h6M6 19h12a2 2 0 002-2V7a2 2 0 00-2-2H9l-3 3v11a2 2 0 002 2z"/></svg>
-                <span>Surat Jalan</span>
+                <span>Data PO</span>
             </a>
 
             <a href="{{ route('tanda-terima.index') }}"
@@ -157,18 +157,24 @@
             </a>
 
             <!-- Collapsible: Manajemen Pengguna -->
-            <button type="button" @click="userOpen = !userOpen" :aria-expanded="userOpen.toString()" aria-controls="user-section"
-                    class="w-full text-left px-4 pt-5 pb-2 flex items-center justify-between select-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rounded-md">
-                <span class="text-[11px] md:text-xs font-semibold tracking-wider uppercase text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Manajemen Pengguna</span>
-                <svg x-bind:class="{ 'rotate-90': userOpen }" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <button @click="userOpen = !userOpen"
+                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('users.*') || request()->routeIs('settings') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <span class="inline-flex items-center gap-3">
+                    <svg class="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 19a7 7 0 0114 0"/>
+                    </svg>
+                    Manajemen Pengguna
+                </span>
+                <svg x-bind:class="{ 'rotate-90': userOpen }" class="w-5 h-5 transition-transform duration-300 transform"
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                 </svg>
             </button>
-            <div class="px-4"><div class="h-px bg-gray-200 dark:bg-gray-800"></div></div>
-            <div id="user-section" x-show="userOpen" x-transition.opacity.duration.200ms x-transition.scale.origin-top.duration.250ms class="space-y-1 will-change-transform">
+            <div id="user-section" x-show="userOpen" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
                 <a href="{{ Route::has('users.create') ? route('users.create') : url('/users/create') }}"
-                   class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('users.create') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('users.create') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 19a7 7 0 0114 0"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 8v6m3-3h-6"/>
@@ -178,8 +184,8 @@
 
                 @if(auth()->user()?->is_admin)
                 <a href="{{ route('users.index') }}"
-                   class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('users.index') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('users.index') ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5V9H2v11h5M7 9V7a5 5 0 0110 0v2"/>
                     </svg>
                     <span>Daftar User</span>
@@ -187,9 +193,9 @@
                 @endif
 
                 <a href="{{ route('settings') }}"
-                   class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('settings') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.115c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.116 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.116 2.572c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.116c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.116c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.116-2.572c-1.756-.426-1.756-2.924 0-3.35.53-.128.96-.558 1.116-1.116.94-1.543 3.31-.826 2.37 2.37a1.724 1.724 0 002.573-1.116z"/>
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('settings') ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.115c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.116 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.116 2.572c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.116c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.116c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.116-2.572c-1.756-.426-1.756-2.924 0-3.35.53-.128.96-.558 1.116-1.116.94-1.543 3.31-.826 2.37 2.37a1.724 1.724 0 00-2.573 1.116z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     <span>Pengaturan</span>

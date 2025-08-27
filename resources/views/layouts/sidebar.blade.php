@@ -27,7 +27,7 @@
             $menus = [
                 ['name' => 'Dashboard', 'icon' => 'home', 'route' => 'dashboard'],
                 ['name' => 'Input PO', 'icon' => 'file-plus', 'route' => 'po.create'],
-                ['name' => 'Surat Jalan', 'icon' => 'truck', 'route' => 'suratjalan.index'],
+                ['name' => 'Data PO', 'icon' => 'truck', 'route' => 'suratjalan.index'],
                 ['name' => 'Customer', 'icon' => 'users', 'route' => 'customer.index'],
                 ['name' => 'Produk', 'icon' => 'package', 'route' => 'produk.index'],
                 ['name' => 'Kendaraan', 'icon' => 'truck', 'route' => 'kendaraan.index'],

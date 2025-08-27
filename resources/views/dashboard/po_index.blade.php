@@ -112,7 +112,7 @@
                         @endphp
                         <div class="flex flex-col sm:flex-row gap-2 sm:items-center w-full min-w-0">
                             <div class="flex gap-2 items-center w-full">
-                                <input type="text" id="invoice_nomor" name="no_invoice_nomor" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_invoice_nomor', $noInvoiceParts[0] ?? '') }}">
+                                <input type="number" id="invoice_nomor" name="no_invoice_nomor" inputmode="numeric" pattern="[0-9]*" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_invoice_nomor', $noInvoiceParts[0] ?? '') }}">
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
                                 <input type="text" id="invoice_pt" name="no_invoice_pt" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[2] basis-1/2 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="PT" value="{{ old('no_invoice_pt', $noInvoiceParts[1] ?? '') }}">
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
@@ -324,6 +324,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const invoicePtInput = document.getElementById('invoice_pt');
     const invoiceTahunInput = document.getElementById('invoice_tahun');
 
+    // Batasi input hanya angka untuk field Nomor (invoice & surat jalan)
+    function enforceDigitOnly(el) {
+        if (!el) return;
+        el.addEventListener('input', () => {
+            el.value = (el.value || '').replace(/[^0-9]/g, '');
+        });
+        el.setAttribute('inputmode', 'numeric');
+        el.setAttribute('pattern', '[0-9]*');
+    }
+    enforceDigitOnly(deliveryNomorInput);
+    enforceDigitOnly(invoiceNomorInput);
+
     function addAutoFillEffect(element) {
         if (element && element.value) {
             element.classList.add('bg-green-50', 'border-green-300');
@@ -460,11 +472,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (address1Input) { address1Input.value = address1; if (address1) addAutoFillEffect(address1Input); address1Input.readOnly = true; }
             if (address2Input) { address2Input.value = address2; if (address2) addAutoFillEffect(address2Input); address2Input.readOnly = true; }
-            if (deliveryNomorInput) { deliveryNomorInput.value = deliveryNomor; if (deliveryNomor) addAutoFillEffect(deliveryNomorInput); deliveryNomorInput.readOnly = true; }
+            // Biarkan NOMOR diisi manual oleh pengguna -> kosongkan dan jangan readonly
+            if (deliveryNomorInput) { deliveryNomorInput.value = ''; deliveryNomorInput.placeholder = 'Nomor'; deliveryNomorInput.readOnly = false; }
             if (deliveryPtInput) { deliveryPtInput.value = deliveryPt; if (deliveryPt) addAutoFillEffect(deliveryPtInput); deliveryPtInput.readOnly = true; }
             if (deliveryTahunInput) { deliveryTahunInput.value = deliveryTahun; if (deliveryTahun) addAutoFillEffect(deliveryTahunInput); deliveryTahunInput.readOnly = true; }
 
-            if (invoiceNomorInput) { invoiceNomorInput.value = invoiceNomor; if (invoiceNomor) addAutoFillEffect(invoiceNomorInput); invoiceNomorInput.readOnly = true; }
+            // Biarkan NOMOR INVOICE diisi manual -> kosongkan dan jangan readonly
+            if (invoiceNomorInput) { invoiceNomorInput.value = ''; invoiceNomorInput.placeholder = 'Nomor'; invoiceNomorInput.readOnly = false; }
             if (invoicePtInput) { invoicePtInput.value = invoicePt; if (invoicePt) addAutoFillEffect(invoicePtInput); invoicePtInput.readOnly = true; }
             if (invoiceTahunInput) { invoiceTahunInput.value = invoiceTahun; if (invoiceTahun) addAutoFillEffect(invoiceTahunInput); invoiceTahunInput.readOnly = true; }
 

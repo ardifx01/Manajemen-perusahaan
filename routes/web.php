@@ -17,6 +17,7 @@ use App\Http\Controllers\{
     EmployeeController,
     SalaryController,
     DashboardController,
+    ExpenseController,
     UserController
 };
 
@@ -59,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::view('/invoice', 'dashboard.invoice')->name('invoice');
     Route::view('/tanda-terima', 'dashboard.tanda-terima')->name('tanda-terima');
     Route::view('/jatuh-tempo', 'dashboard.jatuh-tempo')->name('jatuh-tempo');
