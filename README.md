@@ -1,6 +1,8 @@
 <div align="center">
 
 # Manajemen Perusahaan
+![Uploading WhatsApp Image 2025-08-27 at 16.38.45_1ed4a913.jpg…]()
+
 
 Aplikasi manajemen operasional perusahaan berbasis Laravel (WIP). Fokus pada alur PO, Surat Jalan, tagihan, dan master data dengan UI/UX yang rapih, cepat, dan konsisten.
 
