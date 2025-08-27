@@ -1,96 +1,96 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-    <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-    <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-    </p>
+# Manajemen Perusahaan
 
-    ## Manajemen Perusahaan
-    
-    Aplikasi manajemen operasional perusahaan berbasis Laravel. Proyek ini masih aktif dikembangkan (WIP) dan akan terus diperbarui.
-    
-    ### Fitur Utama (progress)
-    - **Purchase Order (PO)**: daftar PO, tambah/ubah, pencarian.
-    - **Surat Jalan**: generate dan kelola surat jalan.
-    - **Invoice & Pembayaran**: pembuatan invoice, relasi ke PO dan pelanggan.
-    - **Master Data**: pelanggan, karyawan, produk.
-    - **Autentikasi**: login, proteksi halaman.
-    
-    ### Tech Stack
-    - Backend: Laravel (PHP)
-    - Frontend: Blade, TailwindCSS, Vite
-    - Database: MySQL/MariaDB
-    - Tools: Composer, Node.js/NPM
-    
-    ---
-    
-    ## Persiapan & Instalasi
-    
-    ### Prasyarat
-    - PHP 8.2+
-    - Composer 2+
-    - Node.js 18+ dan NPM
-    - MySQL/MariaDB
-    
-    ### Langkah Cepat
-    ```bash
-    # 1) Install dependencies PHP & JS
-    composer install
-    npm install
-    
-    # 2) Salin environment & generate key
-    cp .env.example .env  # atau duplikasi manual di Windows
-    php artisan key:generate
-    
-    # 3) Konfigurasi database di .env, lalu migrate (opsional: seed)
-    php artisan migrate
-    # php artisan db:seed
-    
-    # 4) Build asset frontend
-    npm run dev   # untuk pengembangan
-    # npm run build  # untuk produksi
-    
-    # 5) Jalankan server
-    php artisan serve
-    ```
-    
-    ### Variabel Lingkungan (contoh)
-    Pastikan `.env` terisi minimal:
-    
-    ```ini
-    APP_NAME="Manajemen Perusahaan"
-    APP_ENV=local
-    APP_KEY=
-    APP_DEBUG=true
-    APP_URL=http://localhost
-    
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=cam_db
-    DB_USERNAME=root
-    DB_PASSWORD=
-    ```
-    
-    ---
-    
-    ## Skrip NPM yang Berguna
-    - `npm run dev` — Vite dev server (hot reload)
-    - `npm run build` — build produksi
-    - `npm run preview` — preview hasil build
-    
-    ## Roadmap Singkat
-    - [ ] Laporan PO & Invoice (export Excel/PDF)
-    - [ ] Role & Permission
-    - [ ] Notifikasi
-    - [ ] Pengujian otomatis (Pest/PHPUnit)
-    
-    ## Kontribusi
-    Pull Request sangat dipersilakan. Buka issue untuk diskusi bug/fitur. Ikuti gaya commit konvensional jika memungkinkan.
-    
-    ## Lisensi
-    Proyek ini dirilis di bawah lisensi MIT.
+Aplikasi manajemen operasional perusahaan berbasis Laravel (WIP). Fokus pada alur PO, Surat Jalan, tagihan, dan master data dengan UI/UX yang rapih, cepat, dan konsisten.
 
-- [WIP] Menambahkan field no_invoice pada modul PO
+![Laravel](https://img.shields.io/badge/Laravel-10-red?logo=laravel)
+![PHP](https://img.shields.io/badge/PHP-8.2-777bb4?logo=php)
+![Vite](https://img.shields.io/badge/Vite-Frontend-646cff?logo=vite)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38b2ac?logo=tailwind-css)
+
+</div>
+
+---
+
+## Sorotan Pembaruan UI/UX Terbaru
+- **Heading terpusat dan konsisten**: judul-judul utama seperti `Laporan Pendapatan`/`Pengeluaran` ditata ulang agar rapi dan fokus.
+- **Border tabel distandarisasi**: ketebalan/warna garis seragam (mode terang/gelap).
+- **Aksi ringkas**: tombol seperti “Tambah Pengeluaran” disederhanakan menjadi ikon + (dengan aksesibilitas `aria-label`).
+- **Subjudul tak perlu dihilangkan**: tampilan lebih bersih tanpa “(Tabel Gabungan)”.
+- **Sidebar tree untuk Manajemen Pengguna**: sekarang dapat di-expand/collapse seperti `Karyawan` dan `Input PO`.
+- **Ikon sidebar diperbesar**: keterbacaan lebih baik pada `Manajemen Pengguna`.
+
+> Catatan: Mode gelap/terang dapat diganti dari header (toggle theme).
+
+## Fitur Saat Ini
+- **Purchase Order (PO)**: input, daftar, dan pencarian PO.
+- **Surat Jalan / Data PO**: kelola data PO dan ekspor Surat Jalan (Excel).
+- **Master Data**: Customer, Produk, Kendaraan, Pengirim.
+- **Karyawan**: data karyawan dan modul gaji (submenu di sidebar).
+- **Manajemen Pengguna**: tambah user, daftar user (khusus admin), dan Pengaturan.
+- **Jatuh Tempo**: monitoring tagihan jatuh tempo.
+- **Autentikasi**: login dan proteksi halaman.
+
+## Tech Stack
+- Backend: Laravel (PHP)
+- Frontend: Blade, TailwindCSS, Vite
+- Database: MySQL/MariaDB
+- Tools: Composer, Node.js/NPM
+
+---
+
+## Instalasi Cepat
+```bash
+# 1) Install dependencies PHP & JS
+composer install
+npm install
+
+# 2) Salin environment & generate key
+cp .env.example .env  # di Windows bisa salin manual
+php artisan key:generate
+
+# 3) Konfigurasi database di .env, lalu migrate (opsional: seed)
+php artisan migrate
+# php artisan db:seed
+
+# 4) Jalankan asset frontend
+npm run dev   # pengembangan
+# npm run build  # produksi
+
+# 5) Jalankan server
+php artisan serve
+```
+
+### Contoh .env minimal
+```ini
+APP_NAME="Manajemen Perusahaan"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=cam_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+## Skrip NPM
+- `npm run dev` — Vite dev server (hot reload)
+- `npm run build` — build produksi
+- `npm run preview` — preview hasil build
+
+## Roadmap Singkat
+- [ ] Laporan PO & Invoice (ekspor Excel/PDF)
+- [ ] Role & Permission
+- [ ] Notifikasi
+- [ ] Pengujian otomatis (Pest/PHPUnit)
+
+## Kontribusi
+Pull Request dipersilakan. Buka issue untuk diskusi bug/fitur. Gunakan gaya commit konvensional bila memungkinkan.
+
+## Lisensi
+MIT License
