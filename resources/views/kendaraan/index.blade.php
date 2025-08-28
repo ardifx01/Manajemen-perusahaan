@@ -4,25 +4,25 @@
 
 @section('content')
 <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
-    <!-- Header with gradient background -->
-    <div class="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-slate-800 dark:to-slate-700 rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+    <!-- Header: white card style like Customer -->
+    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
         <!-- Made header fully responsive with flex-col on mobile -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
             <div class="flex items-center space-x-3">
                 <!-- Vehicle Icon -->
-                <div class="bg-white bg-opacity-20 dark:bg-white/10 p-2 sm:p-3 rounded-full">
-                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-blue-50 dark:bg-slate-700 p-2 sm:p-3 rounded-full">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0M15 17a2 2 0 104 0"></path>
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Data Kendaraan</h1>
-                    <p class="text-blue-100 mt-1 text-sm sm:text-base">Kelola data kendaraan perusahaan</p>
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">Data Kendaraan</h1>
+                    <p class="text-gray-500 dark:text-slate-400 mt-1 text-sm sm:text-base">Kelola data kendaraan perusahaan</p>
                 </div>
             </div>
-            <!-- Made button full width on mobile -->
-            <button onclick="openAddModal()" class="w-full sm:w-auto bg-white text-blue-600 dark:bg-slate-700 dark:text-blue-200 hover:bg-blue-50 dark:hover:bg-slate-600 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-white dark:focus:ring-blue-300">
+            <!-- Primary blue button to match Customer -->
+            <button onclick="openAddModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-500 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold shadow-md transition-all duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -43,6 +43,18 @@
         </div>
     @endif
 
+    <!-- Toolbar: Search only (no dropdown) -->
+    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
+        <div class="relative">
+            <input id="searchInputKendaraan" type="text" placeholder="Cari kendaraan... (nama)" class="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <span class="absolute left-3 top-2.5 text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"></path>
+                </svg>
+            </span>
+        </div>
+    </div>
+
     <!-- Data Table Card -->
     <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
         <!-- Added scroll indicator and improved mobile table -->
@@ -57,8 +69,8 @@
                 </div>
             </div>
             
-            <table class="min-w-full table-auto">
-                <thead class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-slate-700 dark:to-slate-700 text-white dark:text-slate-200">
+            <table class="min-w-full table-auto" id="kendaraanTable">
+                <thead class="bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-slate-200">
                     <tr>
                         <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold">
                             <div class="flex items-center space-x-1 sm:space-x-2">
@@ -97,7 +109,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
                     @forelse($kendaraans as $index => $kendaraan)
-                        <tr class="hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors duration-200">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200" data-name="{{ strtolower($kendaraan->nama) }}">
                             <td class="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 dark:text-slate-200 font-medium text-sm sm:text-base">{{ $index + 1 }}</td>
                             <td class="px-3 sm:px-6 py-3 sm:py-4">
                                 <div class="flex items-center space-x-2 sm:space-x-3">
@@ -115,27 +127,12 @@
                                 </span>
                             </td>
                             <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                <!-- Made action buttons stack vertically on mobile -->
-                                <div class="flex flex-col sm:flex-row justify-center space-y-1 sm:space-y-0 sm:space-x-2">
-                                    <button onclick="openEditModal({{ $kendaraan->id }}, '{{ $kendaraan->nama }}', '{{ $kendaraan->no_polisi }}')" 
-                                            class="bg-yellow-500 dark:bg-yellow-500 hover:bg-yellow-600 dark:hover:bg-yellow-400 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-1 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:focus:ring-yellow-400">
-                                        <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                        <span>Edit</span>
-                                    </button>
-                                    <form action="{{ route('kendaraan.destroy', $kendaraan->id) }}" method="POST" class="inline w-full sm:w-auto">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="w-full sm:w-auto bg-red-500 dark:bg-red-500 hover:bg-red-600 dark:hover:bg-red-400 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-1 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400"
-                                                onclick="return confirm('Yakin ingin menghapus kendaraan ini?')">
-                                            <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                            <span>Hapus</span>
-                                        </button>
-                                    </form>
+                                <!-- Gunakan komponen aksi seragam -->
+                                <div class="flex justify-center">
+                                    <x-table.action-buttons 
+                                        onEdit="openEditModal({{ $kendaraan->id }}, '{{ $kendaraan->nama }}', '{{ $kendaraan->no_polisi }}')"
+                                        deleteAction="{{ route('kendaraan.destroy', $kendaraan->id) }}"
+                                        confirmText="Yakin ingin menghapus kendaraan ini?" />
                                 </div>
                             </td>
                         </tr>
@@ -372,6 +369,24 @@ window.addEventListener('orientationchange', function() {
             }
         });
     }, 100);
+});
+</script>
+
+<script>
+// Client-side search filter for Kendaraan
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('searchInputKendaraan');
+    if (!input) return;
+    const rows = () => document.querySelectorAll('#kendaraanTable tbody tr');
+
+    input.addEventListener('input', function (e) {
+        const term = (e.target.value || '').toLowerCase().trim();
+        rows().forEach(tr => {
+            const name = (tr.getAttribute('data-name') || '').toLowerCase();
+            const show = !term || name.includes(term);
+            tr.style.display = show ? '' : 'none';
+        });
+    });
 });
 </script>
 @endsection

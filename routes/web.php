@@ -18,6 +18,7 @@ use App\Http\Controllers\{
     SalaryController,
     DashboardController,
     ExpenseController,
+    FinanceController,
     UserController
 };
 
@@ -64,6 +65,13 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/invoice', 'dashboard.invoice')->name('invoice');
     Route::view('/tanda-terima', 'dashboard.tanda-terima')->name('tanda-terima');
     Route::view('/jatuh-tempo', 'dashboard.jatuh-tempo')->name('jatuh-tempo');
+    // Finance dashboard (Pendapatan & Pengeluaran)
+    Route::get('/finance', [FinanceController::class, 'income'])->name('finance.index'); // alias utama diarahkan ke Pendapatan
+    Route::get('/finance/pendapatan', [FinanceController::class, 'income'])->name('finance.income');
+    Route::get('/finance/pengeluaran', [FinanceController::class, 'expense'])->name('finance.expense');
+    // Finance detail (JSON)
+    Route::get('/finance/pendapatan/detail', [FinanceController::class, 'incomeDetail'])->name('finance.income.detail');
+    Route::get('/finance/pengeluaran/detail', [FinanceController::class, 'expenseDetail'])->name('finance.expense.detail');
 
     /*
     |--------------------------------------------------------------------------

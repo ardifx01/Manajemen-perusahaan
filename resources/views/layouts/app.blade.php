@@ -19,6 +19,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     
 </head>
@@ -48,7 +52,12 @@
         </div>
 
         <nav class="flex-1 p-6 space-y-2 text-lg font-medium" @click="$event.target.closest('a') && (mobileSidebarOpen=false)"
-            x-data="{ open: {{ request()->routeIs('produk.*') || request()->routeIs('kendaraan.*') || request()->routeIs('customer.*') || request()->routeIs('pengirim.*') || request()->routeIs('po') || request()->routeIs('po.*') ? 'true' : 'false' }}, employeeOpen: {{ request()->routeIs('employee.*') || request()->routeIs('salary.*') ? 'true' : 'false' }}, userOpen: {{ request()->routeIs('users.*') || request()->routeIs('settings') ? 'true' : 'false' }} }">
+            x-data="{ 
+                open: {{ request()->routeIs('produk.*') || request()->routeIs('kendaraan.*') || request()->routeIs('customer.*') || request()->routeIs('pengirim.*') || request()->routeIs('po') || request()->routeIs('po.*') ? 'true' : 'false' }}, 
+                employeeOpen: {{ request()->routeIs('employee.*') || request()->routeIs('salary.*') ? 'true' : 'false' }}, 
+                userOpen: {{ request()->routeIs('users.*') || request()->routeIs('settings') ? 'true' : 'false' }},
+                financeOpen: {{ request()->routeIs('finance.*') ? 'true' : 'false' }}
+            }">
 
             <a href="{{ route('dashboard') }}"
                class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
@@ -57,6 +66,33 @@
                 </svg>
                 <span>Dashboard</span>
             </a>
+
+            <!-- Finance Tree -->
+            <button @click="financeOpen = !financeOpen"
+                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('finance.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <span class="inline-flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 11V3m0 8a4 4 0 100 8h4a4 4 0 100-8h-4z" />
+                    </svg>
+                    Finance
+                </span>
+                <svg x-bind:class="{ 'rotate-90': financeOpen }" class="w-4 h-4 transition-transform duration-300 transform"
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+            <div x-show="financeOpen" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
+                <a href="{{ route('finance.income') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('finance.income') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 11V3m0 8a4 4 0 100 8h4a4 4 0 100-8h-4z"/></svg>
+                    <span>Pendapatan</span>
+                </a>
+                <a href="{{ route('finance.expense') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('finance.expense') ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-4-4h8"/></svg>
+                    <span>Pengeluaran</span>
+                </a>
+            </div>
 
             <!-- Moved Karyawan menu to be positioned right after Dashboard -->
             <!-- Menambahkan menu Karyawan dengan submenu -->
@@ -301,6 +337,7 @@
 
     
 
+    @stack('modals')
     @stack('scripts')
 
 </body>

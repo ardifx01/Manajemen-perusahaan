@@ -50,7 +50,7 @@
         
         <!-- Made table much more compact with reduced padding and smaller text -->
         <div class="overflow-x-auto w-full">
-            <table class="w-full table-auto min-w-max sm:min-w-full text-xs">
+            <table class="w-full table-auto min-w-full text-xs">
                 <thead class="bg-gray-100 dark:bg-slate-700">
                     <tr>
                         <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700 w-8">
@@ -95,7 +95,7 @@
                                 <span class="sm:hidden">Inv</span>
                             </div>
                         </th>
-                        <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight w-16">
+                        <th class="py-1.5 px-1.5 text-center text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight w-12">
                             <span>Aksi</span>
                         </th>
                     </tr>
@@ -132,23 +132,13 @@
                                 {{ $pos->no_invoice ?? '-' }}
                             </span>
                         </td>
-                        <td class="py-1 px-1.5 whitespace-nowrap text-xs font-medium">
-                            <!-- Made action buttons more compact -->
-                            <div class="flex items-center space-x-0.5">
-                                <!-- Updated editSuratJalan function call to include pengirim parameter -->
-                                <button onclick="editSuratJalan({{ $pos->id }}, '{{ $pos->tanggal_po }}', '{{ $pos->customer }}', '{{ $pos->alamat_1 ?? '' }}', '{{ $pos->alamat_2 ?? '' }}', '{{ $pos->no_surat_jalan }}', '{{ $pos->no_po }}', '{{ $pos->kendaraan }}', '{{ $pos->no_polisi }}', {{ $pos->qty }}, '{{ $pos->qty_jenis }}', '{{ $pos->produk_id }}', {{ $pos->total }}, '{{ $pos->pengirim ?? '' }}')" 
-                                        class="text-yellow-600 hover:text-yellow-900 transition-colors p-0.5" title="Edit">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="deleteSuratJalan({{ $pos->id }})" 
-                                        class="text-red-600 hover:text-red-900 transition-colors p-0.5" title="Hapus">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                        <td class="py-1 px-1.5 text-xs font-medium text-center">
+                            <x-table.action-buttons 
+                                onEdit="window.editSuratJalan({{ $pos->id }}, {!! json_encode($pos->tanggal_po) !!}, {!! json_encode($pos->customer) !!}, {!! json_encode($pos->alamat_1) !!}, {!! json_encode($pos->alamat_2) !!}, {!! json_encode($pos->no_surat_jalan) !!}, {!! json_encode($pos->no_po) !!}, {!! json_encode($pos->kendaraan) !!}, {!! json_encode($pos->no_polisi) !!}, {{ $pos->qty ?? 'null' }}, {!! json_encode($pos->qty_jenis) !!}, {!! json_encode($pos->produk_id) !!}, {{ $pos->total ?? 'null' }}, {!! json_encode($pos->pengirim) !!})"
+                                deleteAction="{{ url('/suratjalan/' . $pos->id) }}"
+                                confirmText="Apakah Anda yakin ingin menghapus data surat jalan ini?"
+                                :useMenu="true"
+                            />
                         </td>
                     </tr>
                     @empty
@@ -185,11 +175,7 @@
     <!-- empty submit button for accessibility -->
     </form>
 
-<!-- Delete Form -->
-<form id="deleteForm" method="POST" style="display: none;">
-    @csrf
-    @method('DELETE')
-</form>
+<!-- Delete Form dihapus: digantikan oleh komponen x-table.action-buttons -->
 
 <!-- Edit Surat Jalan Modal -->
 <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
@@ -531,18 +517,12 @@ function exportSelected() {
     }, 3000);
 }
 
-function deleteSuratJalan(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus data surat jalan ini?')) {
-        const form = document.getElementById('deleteForm');
-        form.action = `/suratjalan/${id}`;
-        form.submit();
-    }
-}
+// Hapus fungsi deleteSuratJalan(): aksi hapus kini ditangani oleh komponen x-table.action-buttons
 
 // Updated editSuratJalan function to handle pengirim parameter
 function editSuratJalan(id, tanggal, customer, alamat1, alamat2, noSuratJalan, noPo, kendaraan, noPolisi, qty, jenis, produkId, total, pengirim) {
     // Set form action
-    document.getElementById('editForm').action = `/suratjalan/${id}`;
+    document.getElementById('editForm').action = "{{ url('/suratjalan') }}/" + id;
     
     // Fill form fields
     document.getElementById('edit_tanggal_po').value = tanggal;
@@ -564,6 +544,9 @@ function editSuratJalan(id, tanggal, customer, alamat1, alamat2, noSuratJalan, n
     // Show modal
     document.getElementById('editModal').classList.remove('hidden');
 }
+
+// Pastikan fungsi tersedia di global scope untuk dipanggil dari inline handler/komponen
+window.editSuratJalan = editSuratJalan;
 
 function closeEditModal() {
     document.getElementById('editModal').classList.add('hidden');

@@ -2,25 +2,37 @@
 
 @section('title', 'Data Customer')
 
+@push('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  .font-inter{font-family:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,'Apple Color Emoji','Segoe UI Emoji'}
+  .hover-card:hover{box-shadow:0 10px 20px -10px rgba(2,6,23,0.2)}
+  .badge{display:inline-flex;align-items:center;border-radius:9999px;padding:.25rem .5rem;font-weight:600;font-size:.75rem}
+  .badge-blue{background:#DBEAFE;color:#1E40AF}
+  .badge-purple{background:#EDE9FE;color:#5B21B6}
+  .divider{border-color:rgba(17,24,39,.08)}
+</style>
+@endpush
+
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <!-- Header with gradient background - Responsive -->
-    <div class="bg-gradient-to-r from-green-600 to-green-800 dark:from-slate-800 dark:to-slate-700 rounded-lg shadow-lg p-4 md:p-6 mb-6">
+<div class="container mx-auto px-4 py-6 font-inter">
+    <!-- Header - White, clean, consistent with dashboard -->
+    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-lg p-4 md:p-6 mb-6">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <!-- Customer Icon -->
-                <div class="bg-white bg-opacity-20 dark:bg-white/10 p-2 md:p-3 rounded-full">
-                    <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full bg-blue-50 dark:bg-slate-700 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-3xl font-bold text-white">Data Customer</h1>
-                    <p class="text-green-100 mt-1 text-sm md:text-base">Kelola data customer perusahaan</p>
+                    <h1 class="text-xl md:text-3xl font-bold text-gray-900 dark:text-slate-100">Data Customer</h1>
+                    <p class="text-gray-500 dark:text-slate-400 mt-1 text-sm md:text-base">Kelola data customer perusahaan</p>
                 </div>
             </div>
-            <!-- Made button responsive with smaller text on mobile -->
-            <button onclick="openAddModal()" class="bg-white text-green-600 hover:bg-green-50 dark:bg-slate-700 dark:text-green-200 dark:hover:bg-slate-600 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 text-sm md:text-base w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-white dark:focus:ring-green-300">
+            <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-sm md:text-base w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-200">
                 <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -41,14 +53,30 @@
         </div>
     @endif
 
-    <!-- Data Table Card - Responsive -->
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
-        <!-- Added horizontal scroll for mobile -->
-        <div class="overflow-x-auto shadow-inner" id="tableContainer">
+    <!-- Toolbar: Search only (no dropdown) -->
+    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm p-4 mb-4">
+        <div class="grid grid-cols-1 gap-3">
+            <div>
+                <label class="sr-only" for="searchInput">Cari</label>
+                <div class="relative">
+                    <input id="searchInput" type="text" placeholder="Cari customer... (nama atau alamat)" class="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    <span class="absolute left-3 top-2.5 text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"></path>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table (desktop/tablet) -->
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden hidden md:block">
+        <div class="overflow-x-auto" id="tableContainer">
             <table class="min-w-full table-auto" id="customerTable">
-                <thead class="bg-gradient-to-r from-green-500 to-green-600 dark:from-slate-700 dark:to-slate-700 text-white dark:text-slate-200">
+                <thead class="bg-gray-50 dark:bg-slate-700/60 text-gray-700 dark:text-slate-200">
                     <tr>
-                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm">
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm border-b divider">
                             <div class="flex items-center space-x-1 md:space-x-2">
                                 <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
@@ -56,7 +84,7 @@
                                 <span>No</span>
                             </div>
                         </th>
-                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[150px]">
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[150px] border-b divider">
                             <div class="flex items-center space-x-1 md:space-x-2">
                                 <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -64,7 +92,7 @@
                                 <span>Nama Customer</span>
                             </div>
                         </th>
-                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[140px]">
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[140px] border-b divider">
                             <div class="flex items-center space-x-1 md:space-x-2">
                                 <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -72,7 +100,7 @@
                                 <span>No Surat Jalan</span>
                             </div>
                         </th>
-                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[140px]">
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[140px] border-b divider">
                             <div class="flex items-center space-x-1 md:space-x-2">
                                 <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -81,7 +109,7 @@
                             </div>
                         </th>
                         <!-- Made address columns responsive with min-width -->
-                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[120px]">
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[120px] border-b divider">
                             <div class="flex items-center space-x-1 md:space-x-2">
                                 <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -90,7 +118,7 @@
                                 <span>Alamat 1</span>
                             </div>
                         </th>
-                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[120px]">
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[120px] border-b divider">
                             <div class="flex items-center space-x-1 md:space-x-2">
                                 <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -99,7 +127,7 @@
                                 <span>Alamat 2</span>
                             </div>
                         </th>
-                        <th class="px-3 md:px-6 py-3 md:py-4 text-center font-semibold text-xs md:text-sm min-w-[140px]">
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-center font-semibold text-xs md:text-sm min-w-[140px] border-b divider">
                             <div class="flex items-center justify-center space-x-1 md:space-x-2">
                                 <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
@@ -111,12 +139,12 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
                     @forelse($customers as $index => $customer)
-                        <tr class="hover:bg-green-50 dark:hover:bg-slate-700 transition-colors duration-200">
+                        <tr class="hover:bg-blue-50/70 dark:hover:bg-slate-700 transition-colors duration-200" data-name="{{ Str::lower($customer->name) }}" data-address="{{ Str::lower(($customer->address_1 ?? '') . ' ' . ($customer->address_2 ?? '')) }}">
                             <td class="px-3 md:px-6 py-3 md:py-4 text-gray-900 dark:text-slate-200 font-medium text-sm">{{ $index + 1 }}</td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
                                 <div class="flex items-center space-x-2 md:space-x-3">
-                                    <div class="bg-green-100 dark:bg-slate-700 p-1 md:p-2 rounded-full">
-                                        <svg class="w-3 h-3 md:w-4 md:h-4 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="bg-blue-50 dark:bg-slate-700 p-1 md:p-2 rounded-full">
+                                        <svg class="w-3 h-3 md:w-4 md:h-4 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                         </svg>
                                     </div>
@@ -124,7 +152,7 @@
                                 </div>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
-                                <span class="bg-blue-100 dark:bg-slate-700 text-blue-800 dark:text-blue-200 px-2 md:px-3 py-1 rounded-full text-xs font-medium">
+                                <span class="badge badge-blue">
                                     @if($customer->delivery_note_nomor || $customer->delivery_note_pt || $customer->delivery_note_tahun)
                                         {{ $customer->delivery_note_nomor ?? '-' }}/{{ $customer->delivery_note_pt ?? '-' }}/{{ $customer->delivery_note_tahun ?? '-' }}
                                     @else
@@ -133,7 +161,7 @@
                                 </span>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
-                                <span class="bg-purple-100 dark:bg-slate-700 text-purple-800 dark:text-purple-200 px-2 md:px-3 py-1 rounded-full text-xs font-medium">
+                                <span class="badge badge-purple">
                                     @if($customer->invoice_nomor || $customer->invoice_pt || $customer->invoice_tahun)
                                         {{ $customer->invoice_nomor ?? '-' }}/{{ $customer->invoice_pt ?? '-' }}/{{ $customer->invoice_tahun ?? '-' }}
                                     @else
@@ -152,28 +180,11 @@
                                 </span>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
-                                <!-- Made action buttons responsive - stack on mobile -->
-                                <div class="flex flex-col sm:flex-row justify-center gap-1 sm:gap-2">
-                                    <button onclick="openEditModal({{ $customer->id }}, '{{ $customer->name }}', '{{ $customer->address_1 }}', '{{ $customer->address_2 }}', '{{ $customer->delivery_note_pt }}', '{{ $customer->delivery_note_tahun }}', '{{ $customer->invoice_pt }}', '{{ $customer->invoice_tahun }}')" 
-                                            class="bg-yellow-500 dark:bg-yellow-500 hover:bg-yellow-600 dark:hover:bg-yellow-400 text-white px-2 md:px-4 py-1 md:py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center justify-center space-x-1 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:focus:ring-yellow-400">
-                                        <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                        <span>Edit</span>
-                                    </button>
-                                    <form action="{{ route('customer.destroy', $customer->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="bg-green-500 dark:bg-green-500 hover:bg-green-600 dark:hover:bg-green-400 text-white px-2 md:px-4 py-1 md:py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center justify-center space-x-1 shadow-md hover:shadow-lg w-full focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
-                                                onclick="return confirm('Yakin ingin menghapus customer ini?')">
-                                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                            <span>Hapus</span>
-                                        </button>
-                                    </form>
-                                </div>
+                                <x-table.action-buttons 
+                                    onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {!! json_encode($customer->delivery_note_pt) !!}, {!! json_encode($customer->delivery_note_tahun) !!}, {!! json_encode($customer->invoice_pt) !!}, {!! json_encode($customer->invoice_tahun) !!})"
+                                    deleteAction="{{ route('customer.destroy', $customer->id) }}"
+                                    confirmText="Yakin ingin menghapus customer ini?"
+                                />
                             </td>
                         </tr>
                     @empty
@@ -188,7 +199,7 @@
                                     <div class="text-center">
                                         <h3 class="text-lg font-medium text-gray-900 dark:text-slate-200 mb-2">Belum ada customer</h3>
                                         <p class="text-gray-500 dark:text-slate-400 mb-4">Mulai dengan menambahkan customer pertama Anda.</p>
-                                        <button onclick="openAddModal()" class="bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-400 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+                                        <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
                                             Tambah Customer
                                         </button>
                                     </div>
@@ -200,7 +211,55 @@
             </table>
         </div>
     </div>
+
+    <!-- Mobile Card List View -->
+    <div class="md:hidden space-y-3">
+        @forelse($customers as $index => $customer)
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm p-4 hover-card" data-name="{{ Str::lower($customer->name) }}" data-address="{{ Str::lower(($customer->address_1 ?? '') . ' ' . ($customer->address_2 ?? '')) }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">{{ $index + 1 }}</span>
+                            <span class="text-gray-900 dark:text-slate-100 font-semibold">{{ $customer->name }}</span>
+                        </div>
+                        <div class="mt-2 space-y-1 text-sm">
+                            <div>Surat Jalan: 
+                                <span class="badge badge-blue">
+                                    @if($customer->delivery_note_nomor || $customer->delivery_note_pt || $customer->delivery_note_tahun)
+                                        {{ $customer->delivery_note_nomor ?? '-' }}/{{ $customer->delivery_note_pt ?? '-' }}/{{ $customer->delivery_note_tahun ?? '-' }}
+                                    @else - @endif
+                                </span>
+                            </div>
+                            <div>Invoice: 
+                                <span class="badge badge-purple">
+                                    @if($customer->invoice_nomor || $customer->invoice_pt || $customer->invoice_tahun)
+                                        {{ $customer->invoice_nomor ?? '-' }}/{{ $customer->invoice_pt ?? '-' }}/{{ $customer->invoice_tahun ?? '-' }}
+                                    @else - @endif
+                                </span>
+                            </div>
+                            <div class="text-gray-700 dark:text-slate-300">Alamat 1: <span class="font-medium">{{ $customer->address_1 ?? '-' }}</span></div>
+                            <div class="text-gray-700 dark:text-slate-300">Alamat 2: <span class="font-medium">{{ $customer->address_2 ?? '-' }}</span></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <x-table.action-buttons 
+                            onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {!! json_encode($customer->delivery_note_pt) !!}, {!! json_encode($customer->delivery_note_tahun) !!}, {!! json_encode($customer->invoice_pt) !!}, {!! json_encode($customer->invoice_tahun) !!})"
+                            deleteAction="{{ route('customer.destroy', $customer->id) }}"
+                            confirmText="Yakin ingin menghapus customer ini?"
+                        />
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm p-6 text-center">
+                <p class="text-gray-600 dark:text-slate-300">Belum ada customer</p>
+                <button onclick="openAddModal()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Tambah Customer</button>
+            </div>
+        @endforelse
+    </div>
 </div>
+
+
 
 <!-- Add Customer Modal - Responsive -->
 <div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
@@ -208,8 +267,8 @@
     <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md sm:max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
             <h3 class="text-base md:text-lg font-semibold text-gray-900 dark:text-slate-100 flex items-center space-x-2">
-                <svg class="w-4 h-4 md:w-5 md:h-5 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                <svg class="w-4 h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
                 </svg>
                 <span>Tambah Customer</span>
             </h3>
@@ -280,7 +339,7 @@
                     Batal
                 </button>
                 <button type="submit" id="addSubmitBtn"
-                        class="px-6 py-2 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-400 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 text-sm order-1 sm:order-2 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400">
+                        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 text-sm order-1 sm:order-2 focus:outline-none focus:ring-2 focus:ring-blue-200">
                     <span>Simpan</span>
                     <div id="addLoading" class="hidden">
                         <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -299,7 +358,7 @@
     <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md sm:max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
             <h3 class="text-base md:text-lg font-semibold text-gray-900 dark:text-slate-100 flex items-center space-x-2">
-                <svg class="w-4 h-4 md:w-5 md:h-5 text-yellow-600 dark:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
                 <span>Edit Customer</span>
@@ -369,7 +428,7 @@
                     Batal
                 </button>
                 <button type="submit" id="editSubmitBtn"
-                        class="px-6 py-2 bg-yellow-500 dark:bg-yellow-500 hover:bg-yellow-600 dark:hover:bg-yellow-400 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 text-sm order-1 sm:order-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:focus:ring-yellow-400">
+                        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 text-sm order-1 sm:order-2 focus:outline-none focus:ring-2 focus:ring-blue-200">
                     <span>Update</span>
                     <div id="editLoading" class="hidden">
                         <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -400,7 +459,13 @@ function closeAddModal() {
 function openEditModal(id, name, address1, address2, deliveryNotePt, deliveryNoteTahun, invoicePt, invoiceTahun) {
     document.getElementById('editModal').classList.remove('hidden');
     document.getElementById('editModal').classList.add('flex');
-    document.getElementById('editCustomerForm').action = `/customer/${id}`;
+    // Set action menggunakan base URL Laravel agar aman di subfolder
+    const form = document.getElementById('editCustomerForm');
+    if (!form) {
+        console.warn('editCustomerForm tidak ditemukan');
+        return;
+    }
+    form.action = "{{ url('/customer') }}/" + id;
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_delivery_note_pt').value = deliveryNotePt || '';
     document.getElementById('edit_delivery_note_tahun').value = deliveryNoteTahun || '';
@@ -445,11 +510,17 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// Pastikan fungsi tersedia di global scope untuk inline onclick
+window.openEditModal = openEditModal;
+window.closeEditModal = closeEditModal;
+
 // Responsive table scroll indicator
 window.addEventListener('DOMContentLoaded', function() {
     const tableContainer = document.getElementById('tableContainer');
     const table = document.getElementById('customerTable');
-    
+    const searchInput = document.getElementById('searchInput');
+    const mobileCards = document.querySelectorAll('.md\\:hidden .hover-card');
+
     function checkScroll() {
         if (tableContainer.scrollWidth > tableContainer.clientWidth) {
             tableContainer.classList.add('shadow-inner');
@@ -457,9 +528,54 @@ window.addEventListener('DOMContentLoaded', function() {
             tableContainer.classList.remove('shadow-inner');
         }
     }
-    
+
     checkScroll();
     window.addEventListener('resize', checkScroll);
+
+    function matchFilter(name, address, query) {
+        if (!query) return true;
+        query = query.toLowerCase();
+        return name.includes(query) || address.includes(query);
+    }
+
+    function applyFilter() {
+        const q = (searchInput?.value || '').toLowerCase().trim();
+
+        // Table rows
+        document.querySelectorAll('#customerTable tbody tr').forEach(tr => {
+            const name = (tr.dataset.name || '').toLowerCase();
+            const address = (tr.dataset.address || '').toLowerCase();
+            const visible = matchFilter(name, address, q);
+            tr.classList.toggle('hidden', !visible);
+        });
+
+        // Mobile cards
+        document.querySelectorAll('.md\\:hidden .hover-card').forEach(card => {
+            const name = (card.dataset.name || '').toLowerCase();
+            const address = (card.dataset.address || '').toLowerCase();
+            const visible = matchFilter(name, address, q);
+            card.classList.toggle('hidden', !visible);
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', applyFilter);
+    }
+    applyFilter();
+});
+
+// Delegasi klik: pastikan tombol Edit selalu memanggil handler
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.js-edit-btn');
+    if (!btn) return;
+    const call = btn.getAttribute('data-editcall');
+    if (!call) return;
+    try {
+        // Eksekusi ekspresi handler yang sudah dibentuk di Blade (mis. window.openEditModal(...))
+        new Function(call)();
+    } catch (err) {
+        console.error('Gagal menjalankan handler edit:', err);
+    }
 });
 </script>
 @endsection

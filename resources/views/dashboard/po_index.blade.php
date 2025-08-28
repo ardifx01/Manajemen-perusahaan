@@ -1,6 +1,21 @@
 @extends('layouts.app')
 @section('title', 'PURCHASE ORDER VENDOR')
 
+@push('styles')
+<!-- Optional modern font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --brand-blue: #2563EB; }
+  .fade-in { animation: fadeIn 220ms ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .bump { animation: bump 260ms ease-out; }
+  @keyframes bump { 0% { transform: scale(1); } 50% { transform: scale(1.025); } 100% { transform: scale(1); } }
+  .font-inter { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji','Segoe UI Emoji'; }
+</style>
+@endpush
+
 @section('content')
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
     <div class="max-w-6xl mx-auto px-2 sm:px-4">
@@ -35,7 +50,7 @@
             </div>
         @endif
 
-        <form action="@isset($po) {{ route('po.update', $po->id) }} @else {{ route('po.store') }} @endisset" method="POST">
+        <form action="@isset($po) {{ route('po.update', $po->id) }} @else {{ route('po.store') }} @endisset" method="POST" class="font-sans font-inter">
             @csrf
             @isset($po) @method('PUT') @endisset
 
@@ -209,6 +224,15 @@
                             <i class="fas fa-boxes text-indigo-500 mr-2"></i>Produk Items
                         </h3>
 
+                        <!-- Table-like header for items (desktop) -->
+                        <div class="hidden md:grid md:grid-cols-12 gap-4 text-xs font-semibold text-gray-500 dark:text-gray-400 px-1">
+                            <div class="md:col-span-4">Produk</div>
+                            <div class="md:col-span-2">Quantity</div>
+                            <div class="md:col-span-2">Harga</div>
+                            <div class="md:col-span-3">Total</div>
+                            <div class="md:col-span-1 text-right">Aksi</div>
+                        </div>
+
                         <!-- Item Row Template (first row) -->
                         <div class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 border rounded-lg bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10">
                             <!-- Produk -->
@@ -251,12 +275,15 @@
                         </div>
                         <!-- Toolbar -->
                         <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-                            <button type="button" id="add-item-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all text-sm w-full sm:w-auto">
+                            <button type="button" id="add-item-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm w-full sm:w-auto">
                                 <i class="fas fa-plus-circle mr-1"></i>Tambah Produk
                             </button>
-                            <div class="mt-2 sm:mt-0 flex justify-end items-center gap-3">
-                                <span class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100">Grand Total:</span>
-                                <input type="number" name="grand_total" id="grand_total" class="w-40 sm:w-60 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-bold text-right" readonly>
+                            <!-- Grand Total Summary Card -->
+                            <div id="grand-summary" class="mt-2 sm:mt-0 w-full sm:w-auto">
+                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm px-4 py-3 flex items-center justify-between gap-4">
+                                    <span class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100">Grand Total</span>
+                                    <input type="number" name="grand_total" id="grand_total" class="w-40 sm:w-56 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm sm:text-base bg-gray-100 dark:bg-gray-900/40 text-gray-800 dark:text-gray-100 font-bold text-right transition-all duration-200" readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -264,28 +291,26 @@
                     <!-- Action Buttons -->
                     <!-- Made buttons responsive with flex-col on mobile -->
                     <div class="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
-                        <div class="flex flex-col sm:flex-row flex-wrap gap-3">
-                            <button type="submit" class="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 flex items-center justify-center shadow-lg">
+                        <div class="flex flex-col sm:flex-row flex-wrap gap-3 items-stretch">
+                            <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-lg transition-all duration-200 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-200">
                                 <i class="fas fa-save mr-2"></i>
                                 @isset($po) Update PO @else Simpan PO @endisset
                             </button>
 
-                        @isset($po)
-                        <button type="button" onclick="document.getElementById('deleteForm').submit()" class="w-full sm:w-auto bg-gradient-to-r from-red-600 to-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center justify-center shadow-lg">
-                            <i class="fas fa-trash mr-2"></i>Hapus PO
-                        </button>
-                        @endisset
+                            @isset($po)
+                                <!-- Gunakan komponen aksi seragam untuk Hapus -->
+                                <div class="w-full sm:w-auto">
+                                    <x-table.action-buttons 
+                                        :onEdit="null"
+                                        deleteAction="{{ route('po.destroy', $po->id) }}"
+                                        confirmText="Yakin ingin menghapus PO ini?" />
+                                </div>
+                            @endisset
+                        </div>
                     </div>
                 </div>
             </div>
         </form>
-
-        @isset($po)
-        <form id="deleteForm" action="{{ route('po.destroy', $po->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?');" class="hidden">
-            @csrf
-            @method('DELETE')
-        </form>
-        @endisset
     </div>
 </div>
 
@@ -382,7 +407,14 @@ document.addEventListener('DOMContentLoaded', () => {
             grand += parseInt((t && t.value) ? t.value : 0);
         });
         const grandInput = document.getElementById('grand_total');
-        if (grandInput) grandInput.value = grand;
+        if (grandInput) {
+            grandInput.value = grand;
+            const summaryCard = document.getElementById('grand-summary');
+            if (summaryCard) {
+                summaryCard.classList.add('bump');
+                setTimeout(() => summaryCard.classList.remove('bump'), 260);
+            }
+        }
     }
 
     function renumberRows() {
@@ -432,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Prevent duplicate listeners by replacing node
             const cleanRow = newRow.cloneNode(true);
             itemsContainer.insertBefore(cleanRow, itemsContainer.querySelector('.flex.flex-col') || null);
+            cleanRow.classList.add('fade-in');
             attachRowEvents(cleanRow);
             renumberRows();
             calculateRowTotal(cleanRow);
