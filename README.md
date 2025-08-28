@@ -17,6 +17,8 @@
     - **Invoice & Pembayaran**: pembuatan invoice, relasi ke PO dan pelanggan.
     - **Master Data**: pelanggan, karyawan, produk.
     - **Autentikasi**: login, proteksi halaman.
+    - **Laporan Keuangan – Pendapatan**: ringkasan pendapatan per bulan (bruto, PPN, net), detail per customer, dan modal rincian transaksi.
+    - **Laporan Keuangan – Pengeluaran**: rekap gaji karyawan dan pengeluaran lain per bulan, termasuk modal rincian.
     
     ### Tech Stack
     - Backend: Laravel (PHP)
@@ -27,6 +29,15 @@
     ## Pratinjau
     
     ![Tampilan Dashboard](docs/screenshot/dashboard.jpg)
+    
+    ### Cara Mengakses Cepat
+    - Dashboard utama: `GET /dashboard`
+    - Laporan Pendapatan: route `finance.income` (contoh: `/finance/income?inc_month=8&inc_year=2025`)
+    - Detail Pendapatan (JSON): route `finance.income.detail`
+    - Laporan Pengeluaran: route `finance.expense` (contoh: `/finance/expense?month=8&year=2025`)
+    - Detail Pengeluaran (JSON): route `finance.expense.detail`
+    - Surat Jalan: `GET /suratjalan`
+    - Purchase Order: `GET /po`
     
     ---
     
@@ -91,10 +102,11 @@
     - [ ] Notifikasi
     - [ ] Pengujian otomatis (Pest/PHPUnit)
     
+    ## Catatan Pengembangan
+    - [WIP] Menambahkan field `no_invoice` pada modul PO
+    
     ## Kontribusi
     Pull Request sangat dipersilakan. Buka issue untuk diskusi bug/fitur. Ikuti gaya commit konvensional jika memungkinkan.
     
     ## Lisensi
     Proyek ini dirilis di bawah lisensi MIT.
-
-- [WIP] Menambahkan field no_invoice pada modul PO
