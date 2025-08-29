@@ -3,7 +3,7 @@
 @section('title', 'Tambah Surat Jalan')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
+<div class="w-full px-4 md:px-6 lg:px-8 py-6">
     <h1 class="text-2xl font-bold mb-6">Tambah Surat Jalan</h1>
 
     @if ($errors->any())

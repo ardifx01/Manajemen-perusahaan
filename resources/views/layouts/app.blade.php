@@ -29,13 +29,20 @@
 <body x-data="{ mobileSidebarOpen: false, desktopSidebarOpen: true }" x-init="
     (() => {
       const mq = window.matchMedia('(min-width: 768px)');
-      const onChange = e => { if (e.matches) { desktopSidebarOpen = true; } };
+      // Initialize state based on current viewport (accounts for browser zoom as well)
+      desktopSidebarOpen = mq.matches;
+      if (mq.matches) { mobileSidebarOpen = false; }
+      const onChange = e => {
+        desktopSidebarOpen = e.matches;
+        // When switching to desktop, ensure mobile sidebar is closed to avoid overlap
+        if (e.matches) { mobileSidebarOpen = false; }
+      };
       if (mq.addEventListener) { mq.addEventListener('change', onChange); } else { mq.addListener(onChange); }
     })();
   " class="flex font-sans bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen flex flex-col transform transition-transform duration-300 fixed inset-y-0 left-0 z-40 -translate-x-full md:fixed md:inset-y-0 md:left-0"
+    <aside id="sidebar" class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen flex flex-col transform transition-transform duration-300 fixed inset-y-0 left-0 z-40 -translate-x-full md:fixed md:inset-y-0 md:left-0 overflow-hidden"
            x-bind:class="{
                 '-translate-x-full': !mobileSidebarOpen,
                 'translate-x-0': mobileSidebarOpen,
@@ -51,11 +58,12 @@
             </button>
         </div>
 
-        <nav class="flex-1 p-6 space-y-2 text-lg font-medium" @click="$event.target.closest('a') && (mobileSidebarOpen=false)"
+        <nav class="flex-1 overflow-y-auto p-6 space-y-2 text-lg font-medium" @click="$event.target.closest('a') && (mobileSidebarOpen=false)"
             x-data="{ 
-                open: {{ request()->routeIs('produk.*') || request()->routeIs('kendaraan.*') || request()->routeIs('customer.*') || request()->routeIs('pengirim.*') || request()->routeIs('po') || request()->routeIs('po.*') ? 'true' : 'false' }}, 
+                open: {{ request()->routeIs('po') || request()->routeIs('po.*') || request()->routeIs('suratjalan.*') ? 'true' : 'false' }}, 
                 employeeOpen: {{ request()->routeIs('employee.*') || request()->routeIs('salary.*') ? 'true' : 'false' }}, 
-                userOpen: {{ request()->routeIs('users.*') || request()->routeIs('settings') ? 'true' : 'false' }},
+                barangOpen: {{ request()->routeIs('barang.*') || request()->routeIs('produk.*') ? 'true' : 'false' }}, 
+                userOpen: {{ request()->routeIs('users.*') ? 'true' : 'false' }},
                 financeOpen: {{ request()->routeIs('finance.*') ? 'true' : 'false' }}
             }">
 
@@ -76,7 +84,7 @@
                     </svg>
                     Finance
                 </span>
-                <svg x-bind:class="{ 'rotate-90': financeOpen }" class="w-4 h-4 transition-transform duration-300 transform"
+                <svg x-bind:class="{ 'rotate-90': financeOpen }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                 </svg>
@@ -94,6 +102,7 @@
                 </a>
             </div>
 
+
             <!-- Moved Karyawan menu to be positioned right after Dashboard -->
             <!-- Menambahkan menu Karyawan dengan submenu -->
             <button @click="employeeOpen = !employeeOpen"
@@ -104,7 +113,7 @@
                     </svg>
                     Karyawan
                 </span>
-                <svg x-bind:class="{ 'rotate-90': employeeOpen }" class="w-4 h-4 transition-transform duration-300 transform"
+                <svg x-bind:class="{ 'rotate-90': employeeOpen }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                 </svg>
@@ -125,14 +134,47 @@
                 </a>
             </div>
 
+            <!-- Menu Barang -->
+            <button @click="barangOpen = !barangOpen"
+                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('barang.*') || request()->routeIs('produk.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <span class="inline-flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    Barang
+                </span>
+                <svg x-bind:class="{ 'rotate-90': barangOpen }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+
+            <div x-show="barangOpen" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
+                <a href="{{ route('produk.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('produk.*') ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V7a2 2 0 00-2-2h-3V3H9v2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"/></svg>
+                    <span>Data Barang</span>
+                </a>
+
+                <a href="{{ route('barang.masuk.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('barang.masuk.*') ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m0 0l-4-4m4 4l4-4"/></svg>
+                    <span>Barang Masuk</span>
+                </a>
+
+                <a href="{{ route('barang.keluar.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('barang.keluar.*') ? 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20V4m0 0l4 4m-4-4L8 8"/></svg>
+                    <span>Barang Keluar</span>
+                </a>
+            </div>
+
             <!-- Parent Menu with Toggle -->
             <button @click="open = !open"
-                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('po') || request()->routeIs('po.*') || request()->routeIs('produk.*') || request()->routeIs('kendaraan.*') || request()->routeIs('customer.*') || request()->routeIs('pengirim.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('po') || request()->routeIs('po.*') || request()->routeIs('suratjalan.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
                     <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18"/></svg>
-                    Input PO
+                    Purchase Order
                 </span>
-                <svg x-bind:class="{ 'rotate-90': open }" class="w-4 h-4 transition-transform duration-300 transform"
+                <svg x-bind:class="{ 'rotate-90': open }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
                      fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                 </svg>
@@ -140,61 +182,23 @@
 
             <!-- Submenu -->
             <div x-show="open" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
-                {{-- Form input PO --}}
+                {{-- Input PO --}}
                 <a href="{{ route('po.index') }}"
                    class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('po') || request()->routeIs('po.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-                    <span>Form input PO</span>
+                    <span>Input PO</span>
                 </a>
-
-                {{-- Data Customer link --}}
-                <a href="{{ route('customer.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('customer.*') ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11c1.657 0 3-1.567 3-3.5S17.657 4 16 4s-3 1.567-3 3.5 1.343 3.5 3 3.5zM8 11c1.657 0 3-1.567 3-3.5S9.657 4 8 4 5 5.567 5 7.5 6.343 11 8 11zm0 2c-2.761 0-5 2.015-5 4.5V20h10v-2.5c0-2.485-2.239-4.5-5-4.5z"/></svg>
-                    <span>Data Customer</span>
-                </a>
-
-                {{-- Data Pengirim menu item with purple color scheme --}}
-                <a href="{{ route('pengirim.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('pengirim.*') ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v4H3zM3 7l3 13h12l3-13"/></svg>
-                    <span>Data Pengirim</span>
-                </a>
-
-                <a href="{{ route('produk.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('produk.*') ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V7a2 2 0 00-2-2h-3V3H9v2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"/></svg>
-                    <span>Data Produk</span>
-                </a>
-
-                <a href="{{ route('kendaraan.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('kendaraan.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-2 3-3h6l3 3 2 2v6h-2a2 2 0 01-4 0H9a2 2 0 01-4 0H3v-6z"/></svg>
-                    <span>Data Kendaraan</span>
+                {{-- Data PO --}}
+                <a href="{{ route('suratjalan.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('suratjalan.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h6M6 19h12a2 2 0 002-2V7a2 2 0 00-2-2H9l-3 3v11a2 2 0 002 2z"/></svg>
+                    <span>Data PO</span>
                 </a>
             </div>
 
-            <a href="{{ route('suratjalan.index') }}"
-               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('suratjalan.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h6M6 19h12a2 2 0 002-2V7a2 2 0 00-2-2H9l-3 3v11a2 2 0 002 2z"/></svg>
-                <span>Data PO</span>
-            </a>
-
-            <a href="{{ route('tanda-terima.index') }}"
-               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('tanda-terima.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                <span>Tanda Terima</span>
-            </a>
-
-            <a href="{{ route('jatuh-tempo.index') }}"
-               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('jatuh-tempo.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3M12 3a9 9 0 100 18 9 9 0 000-18z"/></svg>
-                <span>Jatuh Tempo</span>
-            </a>
-
-            <!-- Collapsible: Manajemen Pengguna -->
+            <!-- Manajemen Pengguna -->
             <button @click="userOpen = !userOpen"
-                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('users.*') || request()->routeIs('settings') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('users.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
                     <svg class="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -202,7 +206,7 @@
                     </svg>
                     Manajemen Pengguna
                 </span>
-                <svg x-bind:class="{ 'rotate-90': userOpen }" class="w-5 h-5 transition-transform duration-300 transform"
+                <svg x-bind:class="{ 'rotate-90': userOpen }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                 </svg>
@@ -227,22 +231,49 @@
                     <span>Daftar User</span>
                 </a>
                 @endif
-
-                <a href="{{ route('settings') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('settings') ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.115c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.116 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.116 2.572c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.116c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.116c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.116-2.572c-1.756-.426-1.756-2.924 0-3.35.53-.128.96-.558 1.116-1.116.94-1.543 3.31-.826 2.37 2.37a1.724 1.724 0 00-2.573 1.116z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <span>Pengaturan</span>
-                </a>
             </div>
+
+            <!-- Pindahkan link Data Customer/Pengirim/Kendaraan ke level atas -->
+            <a href="{{ route('customer.index') }}"
+               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('customer.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11c1.657 0 3-1.567 3-3.5S17.657 4 16 4s-3 1.567-3 3.5 1.343 3.5 3 3.5zM8 11c1.657 0 3-1.567 3-3.5S9.657 4 8 4 5 5.567 5 7.5 6.343 11 8 11zm0 2c-2.761 0-5 2.015-5 4.5V20h10v-2.5c0-2.485-2.239-4.5-5-4.5zm8 0c-.725 0-1.414.131-2.047.364 1.22.903 2.047 2.235 2.047 3.886V20h6v-2.75c0-2.351-2.239-4.25-6-4.25z"/></svg>
+                <span>Data Customer</span>
+            </a>
+
+            <a href="{{ route('pengirim.index') }}"
+               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('pengirim.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v4H3zM3 7l3 13h12l3-13"/></svg>
+                <span>Data Pengirim</span>
+            </a>
+
+            <a href="{{ route('kendaraan.index') }}"
+               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('kendaraan.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-2 3-3h6l3 3 2 2v6h-2a2 2 0 01-4 0H9a2 2 0 01-4 0H3v-6z"/></svg>
+                <span>Data Kendaraan</span>
+            </a>
+
+            
+
+            <a href="{{ route('tanda-terima.index') }}"
+               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('tanda-terima.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <span>Tanda Terima</span>
+            </a>
+
+            <a href="{{ route('jatuh-tempo.index') }}"
+               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('jatuh-tempo.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3M12 3a9 9 0 100 18 9 9 0 000-18z"/></svg>
+                <span>Jatuh Tempo</span>
+            </a>
+
+            
         </nav>
 
         <!-- Sidebar bottom: User + Logout -->
         <div class="mt-auto px-4 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3 min-w-0">
+                <!-- Klik bagian profil untuk membuka Pengaturan -->
+                <a href="{{ route('settings') }}" class="flex items-center gap-3 min-w-0 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg -mx-2 px-2 py-2" title="Buka Pengaturan">
                     <div class="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
                         {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
                     </div>
@@ -250,7 +281,7 @@
                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ auth()->user()->name }}</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ auth()->user()->email }}</div>
                     </div>
-                </div>
+                </a>
                 <form method="POST" action="{{ route('logout') }}" x-data="{ running:false }">
                     @csrf
                     <button type="submit"
@@ -316,9 +347,22 @@
             </div>
         </header>
 
+        @if (request()->routeIs('settings'))
+        <main class="p-10 bg-white dark:bg-gray-900">
+            <div x-data="{ show: false }" x-init="requestAnimationFrame(()=> show = true)"
+                 x-show="show"
+                 x-transition:enter="transform transition ease-out duration-500"
+                 x-transition:enter-start="opacity-0 translate-y-4 scale-[0.98]"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 class="will-change-transform">
+                @yield('content')
+            </div>
+        </main>
+        @else
         <main class="p-10 bg-white dark:bg-gray-900">
             @yield('content')
         </main>
+        @endif
     </div>
 
     <script>
@@ -342,3 +386,6 @@
 
 </body>
 </html>
+
+
+

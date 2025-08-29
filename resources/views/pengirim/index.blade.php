@@ -16,7 +16,7 @@
 @endpush
 
 @section('content')
-<div class="container mx-auto px-4 py-6 font-inter">
+<div class="w-full px-4 md:px-6 lg:px-8 py-6 font-inter">
     <!-- Header - konsisten biru/putih -->
     <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-lg p-4 md:p-6 mb-6">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

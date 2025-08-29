@@ -2,7 +2,7 @@
 @section('title', 'Data Produk')
 
 @section('content')
-<div class="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
+<div class="w-full px-2 sm:px-4 lg:px-8 py-4 sm:py-6">
     <!-- Header: white card style like Customer -->
     <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
         <!-- Made header responsive with flex-col on mobile, flex-row on larger screens -->

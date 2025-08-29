@@ -19,7 +19,9 @@ use App\Http\Controllers\{
     DashboardController,
     ExpenseController,
     FinanceController,
-    UserController
+    UserController,
+    BarangMasukController,
+    BarangKeluarController
 };
 
 /*
@@ -102,6 +104,16 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::resource('produk', ProdukController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Barang Masuk & Barang Keluar
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('barang')->name('barang.')->group(function () {
+        Route::resource('masuk', BarangMasukController::class)->names('masuk');
+        Route::resource('keluar', BarangKeluarController::class)->names('keluar');
+    });
 
     /*
     |--------------------------------------------------------------------------
