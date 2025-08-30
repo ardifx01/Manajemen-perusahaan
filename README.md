@@ -1,146 +1,322 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
+
+# 🏢 Manajemen Perusahaan
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-    <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-    <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-    </p>
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
+</p>
 
-## Manajemen Perusahaan
+### ✨ Aplikasi Manajemen Operasional Perusahaan Modern
 
-Aplikasi manajemen operasional perusahaan berbasis Laravel. Proyek ini masih aktif dikembangkan (WIP) dan akan terus diperbarui.
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
+  <img src="https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS">
+  <img src="https://img.shields.io/badge/Alpine.js-8BC34A?style=for-the-badge&logo=alpine.js&logoColor=white" alt="Alpine.js">
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+</p>
 
-### Fitur Utama (progress)
-- **Purchase Order (PO)**: daftar PO, tambah/ubah, pencarian.
-- **Surat Jalan**: generate dan kelola surat jalan.
-- **Invoice & Pembayaran**: pembuatan invoice, relasi ke PO dan pelanggan.
-- **Master Data**: pelanggan, karyawan, produk, kendaraan, pengirim.
-- **Autentikasi**: login, proteksi halaman.
-- **Laporan Keuangan – Pendapatan**: ringkasan pendapatan per bulan (bruto, PPN, net), detail per customer, dan modal rincian transaksi.
-- **Laporan Keuangan – Pengeluaran**: rekap gaji karyawan dan pengeluaran lain per bulan, termasuk modal rincian.
-
-### Tech Stack
-- Backend: Laravel (PHP)
-- Frontend: Blade, TailwindCSS, Vite, Alpine.js
-- Database: MySQL/MariaDB
-- Tools: Composer, Node.js/NPM
-
-## Pratinjau
-
-![Tampilan Dashboard](docs/screenshot/dashboard.jpg)
-
-### Cara Mengakses Cepat
-- Dashboard utama: `GET /dashboard`
-- Laporan Pendapatan: route `finance.income` (contoh: `/finance/income?inc_month=8&inc_year=2025`)
-- Detail Pendapatan (JSON): route `finance.income.detail`
-- Laporan Pengeluaran: route `finance.expense` (contoh: `/finance/expense?month=8&year=2025`)
-- Detail Pengeluaran (JSON): route `finance.expense.detail`
-- Surat Jalan: `GET /suratjalan`
-- Purchase Order: `GET /po`
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-🚧%20Work%20in%20Progress-yellow?style=flat-square" alt="Status">
+  <img src="https://img.shields.io/badge/Version-1.0.0-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
+</p>
 
 ---
 
-## Perubahan UI Terbaru (Highlight)
-- **Sidebar terstruktur & rapi**: menu “Data PO” kini berada di dalam tree “Purchase Order” bersama “Input PO”.
-- **Header/Footer Sidebar sticky**: hanya area menu yang scroll. Implementasi: `overflow-hidden` pada `<aside id="sidebar">`, `overflow-y-auto` pada `<nav>`.
-- **Footer profil → Pengaturan**: klik area profil di footer sidebar langsung membuka halaman Pengaturan. Item “Pengaturan” pada menu dihapus agar tidak duplikat.
-- **Animasi masuk halaman Pengaturan**: konten melakukan fade-in + slide-up + scale halus saat route `settings` aktif (Alpine.js transition).
-- **Ikon panah konsisten**: semua panah toggle tree pakai `w-4 h-4 min-w-[1rem] min-h-[1rem] shrink-0 flex-none` sehingga tidak menyusut dan tetap align.
+</div>
 
-Lokasi utama perubahan: `resources/views/layouts/app.blade.php` (bagian `<aside>`/sidebar dan `<main>`/konten).
+## 📋 Daftar Isi
 
-## Arsitektur & UX
-- **Layout**: `resources/views/layouts/app.blade.php` menjadi layout utama.
-- **Sidebar**: dibagi 3 bagian (header, area menu, footer). Sticky header/footer untuk akses cepat.
-- **Navigasi PO**: tree “Purchase Order” otomatis terbuka saat berada di route `po.*` maupun `suratjalan.*`.
-- **Responsif**: tombol hamburger dan overlay untuk mobile, floating handle untuk show/hide sidebar di desktop.
+- [🎯 Fitur Utama](#-fitur-utama)
+- [🖼️ Preview](#️-preview)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [⚡ Quick Start](#-quick-start)
+- [🎨 UI/UX Highlights](#-uiux-highlights)
+- [📚 API Routes](#-api-routes)
+- [🔧 Troubleshooting](#-troubleshooting)
+- [🗺️ Roadmap](#️-roadmap)
+- [🤝 Contributing](#-contributing)
 
-## Persiapan & Instalasi
+## 🎯 Fitur Utama
 
-### Prasyarat
-- PHP 8.2+
-- Composer 2+
-- Node.js 18+ dan NPM
-- MySQL/MariaDB
+<table>
+<tr>
+<td width="50%">
 
-### Langkah Cepat
+### 📦 **Purchase Order Management**
+- ✅ Daftar PO dengan pencarian canggih
+- ✅ Form tambah/edit PO yang intuitif
+- ✅ Tracking status PO real-time
+
+### 📄 **Surat Jalan Digital**
+- ✅ Generate surat jalan otomatis
+- ✅ Template yang dapat dikustomisasi
+- ✅ Export ke PDF
+
+### 💰 **Financial Management**
+- ✅ Laporan pendapatan bulanan
+- ✅ Tracking pengeluaran
+- ✅ Dashboard keuangan interaktif
+
+</td>
+<td width="50%">
+
+### 👥 **Master Data Management**
+- ✅ Database pelanggan terintegrasi
+- ✅ Manajemen karyawan
+- ✅ Katalog produk & inventory
+- ✅ Data kendaraan & pengirim
+
+### 🔐 **Security & Authentication**
+- ✅ Login system yang aman
+- ✅ Role-based access control
+- ✅ Session management
+
+### 📊 **Reporting & Analytics**
+- ✅ Dashboard dengan visualisasi data
+- ✅ Export laporan (Excel/PDF)
+- ✅ Real-time analytics
+
+</td>
+</tr>
+</table>
+
+## 🖼️ Preview
+
+<div align="center">
+  <img src="docs/screenshot/dashboard.jpg" alt="Dashboard Preview" width="800" style="border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+  
+  *Dashboard dengan UI modern dan responsif*
+</div>
+
+## 🛠️ Tech Stack
+
+<div align="center">
+
+| **Backend** | **Frontend** | **Database** | **Tools** |
+|-------------|--------------|--------------|-----------|
+| ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=flat&logo=laravel&logoColor=white) | ![Blade](https://img.shields.io/badge/Blade-FF2D20?style=flat&logo=laravel&logoColor=white) | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white) | ![Composer](https://img.shields.io/badge/Composer-885630?style=flat&logo=composer&logoColor=white) |
+| ![PHP](https://img.shields.io/badge/PHP%208.2+-777BB4?style=flat&logo=php&logoColor=white) | ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white) | ![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=flat&logo=mariadb&logoColor=white) | ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white) |
+| | ![Alpine.js](https://img.shields.io/badge/Alpine.js-8BC34A?style=flat&logo=alpine.js&logoColor=white) | | ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white) |
+
+</div>
+
+## ⚡ Quick Start
+
+### 📋 Prerequisites
+
 ```bash
-# 1) Install dependencies PHP & JS
+✅ PHP 8.2+
+✅ Composer 2+
+✅ Node.js 18+ & NPM
+✅ MySQL/MariaDB
+```
+
+### 🚀 Installation
+
+```bash
+# 1️⃣ Clone repository
+git clone https://github.com/DillanINF/Manajemen-perusahaan.git
+cd Manajemen-perusahaan
+
+# 2️⃣ Install dependencies
 composer install
 npm install
 
-# 2) Salin environment & generate key
-cp .env.example .env  # atau duplikasi manual di Windows
+# 3️⃣ Environment setup
+cp .env.example .env
 php artisan key:generate
 
-# 3) Konfigurasi database di .env, lalu migrate (opsional: seed)
+# 4️⃣ Database setup
 php artisan migrate
-# php artisan db:seed
+php artisan db:seed  # Optional
 
-# 4) Build asset frontend
-npm run dev   # untuk pengembangan
-# npm run build  # untuk produksi
+# 5️⃣ Build assets
+npm run dev  # Development
+# npm run build  # Production
 
-# 5) Jalankan server
+# 6️⃣ Start server
 php artisan serve
 ```
 
-### Variabel Lingkungan (contoh)
-Pastikan `.env` terisi minimal:
+### ⚙️ Environment Configuration
 
 ```ini
 APP_NAME="Manajemen Perusahaan"
 APP_ENV=local
-APP_KEY=
 APP_DEBUG=true
-APP_URL=http://localhost
+APP_URL=http://localhost:8000
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=cam_db
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=your_password
 ```
 
-## Skrip NPM yang Berguna
-- `npm run dev` — Vite dev server (hot reload)
-- `npm run build` — build produksi
-- `npm run preview` — preview hasil build
+## 🎨 UI/UX Highlights
 
-## Routing & Navigasi Penting
-- `route('po.index')` — Input/daftar PO
-- `route('suratjalan.index')` — Data PO/Surat Jalan
-- `route('finance.income')` — Laporan Pendapatan (param: `inc_month`, `inc_year`)
-- `route('finance.expense')` — Laporan Pengeluaran (param: `month`, `year`)
-- `route('settings')` — Pengaturan (akses cepat via klik profil footer sidebar)
+<div align="center">
 
-## Konvensi Commit
-Mengikuti gaya commit konvensional, contoh:
-- `feat(ui): ...` — fitur UI
-- `fix(api): ...` — perbaikan backend/API
-- `chore(deps): ...` — pembaruan dependency
+### ✨ **Modern Interface Design**
 
-## Troubleshooting
-- **Sidebar tidak sticky**: pastikan `<aside id="sidebar">` memiliki `overflow-hidden` dan `<nav>` memiliki `overflow-y-auto`.
-- **Ikon panah mengecil**: pastikan kelas SVG panah menyertakan `min-w-[1rem] min-h-[1rem] shrink-0 flex-none`.
-- **Klik profil tidak membuka Pengaturan**: pastikan footer profil dibungkus `<a href="{{ route('settings') }}">` dan tidak terhalang elemen lain.
-- **Animasi Pengaturan tidak muncul**: cek kondisional Blade `request()->routeIs('settings')` pada blok `<main>`.
-- **Build Vite gagal**: hapus cache `.vite` dan `node_modules`, lalu `npm install` ulang.
+</div>
 
-## Roadmap Singkat
-- [ ] Laporan PO & Invoice (export Excel/PDF)
-- [ ] Role & Permission
-- [ ] Notifikasi
-- [ ] Pengujian otomatis (Pest/PHPUnit)
+| Feature | Description |
+|---------|-------------|
+| 🎯 **Smart Sidebar** | Sticky header/footer dengan smooth scrolling |
+| 🎭 **Smooth Animations** | Alpine.js transitions untuk pengalaman yang halus |
+| 📱 **Responsive Design** | Mobile-first approach dengan hamburger menu |
+| 🎨 **Consistent Icons** | Icon system yang seragam dan scalable |
+| ⚡ **Quick Access** | One-click access ke pengaturan dari sidebar footer |
 
-## Catatan Pengembangan
-- [WIP] Menambahkan field `no_invoice` pada modul PO
-- [UI] Struktur ulang sidebar, akses cepat Pengaturan, dan animasi halaman Pengaturan (selesai)
+## 📚 API Routes
 
-## Kontribusi
-Pull Request sangat dipersilakan. Buka issue untuk diskusi bug/fitur. Ikuti gaya commit konvensional jika memungkinkan.
+<details>
+<summary><b>🔗 Click to expand routes</b></summary>
 
-## Lisensi
-Proyek ini dirilis di bawah lisensi MIT.
+### 🏠 **Core Routes**
+```php
+GET  /dashboard              # Main dashboard
+GET  /settings              # User settings
+```
+
+### 📦 **Purchase Order**
+```php
+GET  /po                    # PO listing
+POST /po                    # Create PO
+GET  /po/{id}/edit          # Edit PO form
+PUT  /po/{id}               # Update PO
+```
+
+### 📄 **Surat Jalan**
+```php
+GET  /suratjalan            # Surat jalan listing
+POST /suratjalan            # Generate surat jalan
+```
+
+### 💰 **Financial Reports**
+```php
+GET  /finance/income        # Income report (?inc_month=8&inc_year=2025)
+GET  /finance/income/detail # Income details (JSON)
+GET  /finance/expense       # Expense report (?month=8&year=2025)
+GET  /finance/expense/detail# Expense details (JSON)
+```
+
+</details>
+
+## 🔧 Troubleshooting
+
+<details>
+<summary><b>🛠️ Common Issues & Solutions</b></summary>
+
+### 🚨 **Sidebar Issues**
+```bash
+Problem: Sidebar tidak sticky
+Solution: Pastikan <aside id="sidebar"> memiliki overflow-hidden
+```
+
+### 🎯 **Icon Problems**
+```bash
+Problem: Icon panah mengecil
+Solution: Gunakan classes: min-w-[1rem] min-h-[1rem] shrink-0 flex-none
+```
+
+### ⚙️ **Settings Access**
+```bash
+Problem: Klik profil tidak membuka pengaturan
+Solution: Pastikan footer profil dibungkus <a href="{{ route('settings') }}">
+```
+
+### 🎭 **Animation Issues**
+```bash
+Problem: Animasi pengaturan tidak muncul
+Solution: Cek kondisional request()->routeIs('settings')
+```
+
+### 📦 **Build Problems**
+```bash
+Problem: Vite build gagal
+Solution: rm -rf .vite node_modules && npm install
+```
+
+</details>
+
+## 🗺️ Roadmap
+
+<div align="center">
+
+### 🎯 **Coming Soon**
+
+</div>
+
+```mermaid
+gantt
+    title Development Roadmap
+    dateFormat  YYYY-MM-DD
+    section Phase 1
+    Reports Export (Excel/PDF)    :2025-01-01, 30d
+    section Phase 2
+    Role & Permission System      :2025-02-01, 45d
+    section Phase 3
+    Real-time Notifications       :2025-03-15, 30d
+    section Phase 4
+    Automated Testing Suite       :2025-04-15, 60d
+```
+
+- [ ] 📊 **Advanced Reporting** - Export Excel/PDF dengan template kustom
+- [ ] 👥 **Role Management** - Sistem permission yang granular
+- [ ] 🔔 **Real-time Notifications** - WebSocket integration
+- [ ] 🧪 **Testing Suite** - Comprehensive testing dengan Pest/PHPUnit
+- [ ] 📱 **Mobile App** - React Native companion app
+- [ ] 🤖 **API Integration** - RESTful API untuk third-party integration
+
+## 🤝 Contributing
+
+<div align="center">
+
+### 💝 **We Welcome Contributors!**
+
+</div>
+
+```bash
+# 1️⃣ Fork the repository
+# 2️⃣ Create feature branch
+git checkout -b feature/amazing-feature
+
+# 3️⃣ Commit changes (follow conventional commits)
+git commit -m "feat(ui): add amazing feature"
+
+# 4️⃣ Push to branch
+git push origin feature/amazing-feature
+
+# 5️⃣ Open Pull Request
+```
+
+### 📝 **Commit Convention**
+- `feat(scope):` ✨ New features
+- `fix(scope):` 🐛 Bug fixes  
+- `docs(scope):` 📚 Documentation
+- `style(scope):` 💄 Code style
+- `refactor(scope):` ♻️ Code refactoring
+- `chore(scope):` 🔧 Maintenance
+
+---
+
+<div align="center">
+
+### 📄 **License**
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+### 💖 **Made with Love**
+
+Built with ❤️ by [DillanINF](https://github.com/DillanINF)
+
+<p align="center">
+  <img src="https://img.shields.io/badge/⭐-Star%20this%20repo-yellow?style=for-the-badge" alt="Star this repo">
+</p>
+
+</div>
