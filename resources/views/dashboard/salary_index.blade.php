@@ -15,7 +15,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 dark:text-gray-300">Total Gaji Dibayar</p>
-                    <p class="text-xl font-bold text-green-600 dark:text-green-300">Rp {{ number_format($totalGajiDibayar ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-xl font-bold text-green-600 dark:text-green-300">Rp <span id="statTotalDibayar">{{ number_format($totalGajiDibayar ?? 0, 0, ',', '.') }}</span></p>
                 </div>
             </div>
         </div>
@@ -29,7 +29,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 dark:text-gray-300">Gaji Belum Dibayar</p>
-                    <p class="text-xl font-bold text-red-600 dark:text-red-300">Rp {{ number_format($totalGajiBelumDibayar ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-xl font-bold text-red-600 dark:text-red-300">Rp <span id="statBelumDibayar">{{ number_format($totalGajiBelumDibayar ?? 0, 0, ',', '.') }}</span></p>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 dark:text-gray-300">Karyawan Dibayar</p>
-                    <p class="text-xl font-bold text-blue-600 dark:text-blue-300">{{ $jumlahKaryawanDibayar ?? 0 }}</p>
+                    <p class="text-xl font-bold text-blue-600 dark:text-blue-300"><span id="statKaryawanDibayar">{{ $jumlahKaryawanDibayar ?? 0 }}</span></p>
                 </div>
             </div>
         </div>
@@ -57,7 +57,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 dark:text-gray-300">Rata-rata Gaji</p>
-                    <p class="text-xl font-bold text-purple-600 dark:text-purple-300">Rp {{ number_format($rataRataGaji ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-xl font-bold text-purple-600 dark:text-purple-300">Rp <span id="statRataRata">{{ number_format($rataRataGaji ?? 0, 0, ',', '.') }}</span></p>
                 </div>
             </div>
         </div>
@@ -75,13 +75,21 @@
                     <option value="{{ $i }}">{{ DateTime::createFromFormat('!m', $i)->format('F') }}</option>
                 @endfor
             </select>
-            <!-- Filter Tahun -->
-            <select id="filterTahun" class="appearance-none no-arrow px-3 py-2 border border-gray-300 rounded-md dark:bg-slate-800/60 dark:border-white/10 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/40" onchange="filterKaryawanTable()">
-                <option value="">Semua  Tahun</option>
-                @for($i = 2020; $i <= 2030; $i++)
-                    <option value="{{ $i }}">{{ $i }}</option>
+            <!-- Filter Tahun (hidden untuk filtering, tapi tetap ada) -->
+            <select id="filterTahun" class="hidden" onchange="filterKaryawanTable()">
+                <option value="">Semua Tahun</option>
+                @for($i = 2020; $i <= 2035; $i++)
+                    <option value="{{ $i }}" {{ $i == now()->format('Y') ? 'selected' : '' }}>{{ $i }}</option>
                 @endfor
             </select>
+            <!-- Link Pilih Tahun -->
+            <button type="button" onclick="openYearModal()" 
+                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span id="yearButtonText">Pilih Tahun ({{ now()->format('Y') }})</span>
+            </button>
             <button onclick="openModal('tambahModal')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -89,6 +97,12 @@
                 <span>Tambah Gaji</span>
             </button>
         </div>
+    </div>
+
+    <!-- Peringatan: akumulasi potongan -->
+    <div class="rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-3 py-2 text-sm mb-3 dark:bg-amber-900/20 dark:border-amber-700 dark:text-amber-300">
+        <span class="font-semibold">Peringatan:</span>
+        Potongan pajak, Potongan BPJS, dan potongan lainnya sudah digabungkan. Nilai totalnya ditampilkan pada kolom <span class="font-semibold">Potongan</span>, sedangkan kolom <span class="font-semibold">Total Gaji</span> merupakan gaji bersih setelah seluruh potongan tersebut.
     </div>
 
     <!-- Tabel Gaji -->
@@ -151,6 +165,52 @@
     </div>
 </div>
 
+<!-- Toast peringatan duplikasi (non-blokir) -->
+<div id="toast-duplicate" class="fixed top-4 right-4 z-[60] hidden">
+    <div class="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 shadow-lg dark:bg-amber-900/20 dark:border-amber-700 dark:text-amber-300">
+        <svg class="w-5 h-5 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 5a7 7 0 100 14 7 7 0 000-14z" />
+        </svg>
+        <div class="text-sm">
+            <span class="font-semibold">Peringatan:</span>
+            Data gaji untuk karyawan dan bulan ini sudah ada. Silakan periksa kembali atau gunakan menu edit jika ingin mengubah.
+        </div>
+    </div>
+    <style>
+        #toast-duplicate.show { display:block; animation: fadeOut 3.2s forwards; }
+        #toast-duplicate { display:none; }
+        @keyframes fadeOut { 0%{opacity:1} 80%{opacity:1} 100%{opacity:0; display:none} }
+    </style>
+</div>
+
+<!-- Modal Peringatan Duplikasi (tengah, dengan tombol Kembali) -->
+<div id="duplicateCenterModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[70]">
+    <div class="bg-white rounded-lg shadow-2xl w-11/12 sm:w-[460px] p-6">
+        <div class="flex items-start gap-3">
+            <svg class="w-6 h-6 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 5a7 7 0 100 14 7 7 0 000-14z" />
+            </svg>
+            <div>
+                <h4 class="text-base font-semibold text-gray-900">Duplikasi Data Gaji</h4>
+                <p class="mt-1 text-sm text-gray-600">
+                    Gaji untuk karyawan dan periode yang dipilih sudah tercatat. Silakan periksa kembali atau gunakan menu edit.
+                </p>
+            </div>
+        </div>
+        <div class="mt-5 text-right">
+            <button type="button" onclick="closeDuplicateCenterModal()" class="inline-flex items-center px-4 py-2 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300">Kembali</button>
+        </div>
+    </div>
+    <style>
+        #duplicateCenterModal { display: none; }
+        #duplicateCenterModal.show { display: flex; }
+    </style>
+    <script>
+        function openDuplicateCenterModal(){ document.getElementById('duplicateCenterModal').classList.add('show'); }
+        function closeDuplicateCenterModal(){ document.getElementById('duplicateCenterModal').classList.remove('show'); }
+    </script>
+</div>
+
 <!-- Modal Generate Payroll -->
 <div id="payrollModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
@@ -205,7 +265,7 @@
                 </svg>
             </button>
         </div>
-        <form method="POST" action="{{ route('salary.store') }}" class="space-y-4" onsubmit="prepareFormSubmission(this)">
+        <form method="POST" action="{{ route('salary.store') }}" class="space-y-4" onsubmit="return prepareFormSubmission(this)">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -520,22 +580,32 @@ function updateHiddenField(displayInput, value) {
 function prepareFormSubmission(form) {
     console.log('[v0] Preparing form submission...');
     
-    const currencyFields = ['tunjangan', 'bonus', 'lembur', 'potongan_pajak', 'potongan_bpjs', 'potongan_lain'];
-    
-    currencyFields.forEach(field => {
-        const displayField = document.getElementById(field + '_display');
-        const hiddenField = document.getElementById(field + '_value');
-        
-        if (displayField && hiddenField) {
-            // Only update if hidden field is empty but display field has value
-            if (!hiddenField.value && displayField.value) {
-                const numericValue = displayField.value.replace(/[^\d]/g, '') || '0';
-                hiddenField.value = numericValue;
+    // Cek duplikasi: 1 karyawan hanya boleh 1 gaji per bulan & tahun
+    try {
+        const employeeId = parseInt(form.querySelector('#employee_select')?.value);
+        const bulan = parseInt(form.querySelector('[name="bulan"]')?.value);
+        const tahun = parseInt(form.querySelector('[name="tahun"]')?.value);
+        if (!isNaN(employeeId) && !isNaN(bulan) && !isNaN(tahun)) {
+            const exists = (existingSalariesData || []).some(s => parseInt(s.employee_id) === employeeId && parseInt(s.bulan) === bulan && parseInt(s.tahun) === tahun);
+            if (exists) {
+                // Tampilkan modal tengah dan batalkan submit
+                openDuplicateCenterModal();
+                return false;
             }
-            console.log('[v0] Field', field, 'value:', hiddenField.value);
+        }
+    } catch (e) { console.warn('Duplicate check error:', e); }
+
+    // Normalisasi angka sebelum submit
+    const currencyFields = ['tunjangan', 'bonus', 'lembur', 'potongan_pajak', 'potongan_bpjs', 'potongan_lain'];
+    currencyFields.forEach(field => {
+        const displayField = form.querySelector(`[name="${field}_display"]`);
+        const hiddenField = form.querySelector(`[name="${field}"]`);
+        if (displayField && hiddenField) {
+            const numericValue = displayField.value.replace(/[^\d]/g, '') || '0';
+            hiddenField.value = numericValue;
         }
     });
-    
+
     return true;
 }
 
@@ -545,24 +615,23 @@ function filterKaryawanTable() {
     const filterBulan = document.getElementById('filterBulan').value;
     const filterTahun = document.getElementById('filterTahun').value;
     const rows = document.querySelectorAll('table tbody tr');
+
+    // 1) Tampilkan/sembunyikan baris sesuai pencarian + filter bulan/tahun
     rows.forEach(row => {
         const namaCell = row.querySelector('td');
         if (!namaCell) return;
         const nama = namaCell.textContent.toLowerCase();
 
-        // Ambil periode dari kolom kedua
         const periodeCell = row.querySelectorAll('td')[1];
         let show = nama.includes(input);
 
         if (periodeCell) {
             const periodeText = periodeCell.textContent.trim();
-            // Cek bulan
             if (filterBulan) {
                 const bulanNama = periodeText.split(' ')[0];
-                const bulanIndex = new Date(Date.parse(bulanNama +" 1, 2020")).getMonth() + 1;
+                const bulanIndex = new Date(Date.parse(bulanNama + " 1, 2020")).getMonth() + 1;
                 if (parseInt(filterBulan) !== bulanIndex) show = false;
             }
-            // Cek tahun
             if (filterTahun) {
                 const tahun = periodeText.split(' ')[1];
                 if (tahun !== filterTahun) show = false;
@@ -570,6 +639,101 @@ function filterKaryawanTable() {
         }
         row.style.display = show ? '' : 'none';
     });
+
+    // 2) Hitung ulang kartu statistik berbasis filter bulan/tahun SAJA (abaikan pencarian nama)
+    let totalDibayar = 0;
+    let totalBelumDibayar = 0;
+    let countDibayar = 0;
+    let totalGajiSemua = 0;
+    let countSemua = 0;
+
+    rows.forEach(row => {
+        const tds = row.querySelectorAll('td');
+        if (tds.length < 9) return;
+        const periodeText = tds[1].textContent.trim();
+        const totalGajiText = tds[7].textContent; // kolom Total Gaji
+        const statusText = tds[8].textContent.trim(); // kolom Status
+
+        // Cocokkan bulan/tahun
+        let match = true;
+        if (filterBulan) {
+            const bulanNama = periodeText.split(' ')[0];
+            const bulanIndex = new Date(Date.parse(bulanNama + " 1, 2020")).getMonth() + 1;
+            if (parseInt(filterBulan) !== bulanIndex) match = false;
+        }
+        if (filterTahun) {
+            const tahun = periodeText.split(' ')[1];
+            if (tahun !== filterTahun) match = false;
+        }
+        if (!match) return;
+
+        const nilai = parseInt((totalGajiText || '').replace(/[^\d]/g, '')) || 0;
+        totalGajiSemua += nilai;
+        countSemua += 1;
+        if (statusText.toLowerCase().includes('dibayar')) {
+            totalDibayar += nilai;
+            countDibayar += 1;
+        } else {
+            totalBelumDibayar += nilai;
+        }
+    });
+
+    // Rata-rata berdasarkan baris yang cocok
+    const rata = countSemua > 0 ? Math.round(totalGajiSemua / countSemua) : 0;
+
+    // Update kartu
+    const elDibayar = document.getElementById('statTotalDibayar');
+    const elBelum = document.getElementById('statBelumDibayar');
+    const elKaryawan = document.getElementById('statKaryawanDibayar');
+    const elRata = document.getElementById('statRataRata');
+    if (elDibayar) elDibayar.textContent = formatRupiahInt(totalDibayar);
+    if (elBelum) elBelum.textContent = formatRupiahInt(totalBelumDibayar);
+    if (elKaryawan) elKaryawan.textContent = countDibayar.toString();
+    if (elRata) elRata.textContent = formatRupiahInt(rata);
+}
+
+// Data gaji yang sudah ada (untuk cek duplikasi karyawan+bulan+tahun)
+const existingSalariesData = @json(($salaries ?? collect())->map->only(['employee_id','bulan','tahun'])->values());
+
+// Helper: format ribuan
+function formatRupiahInt(n) {
+    return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+// Set default filter ke bulan/tahun saat ini ketika halaman dibuka
+document.addEventListener('DOMContentLoaded', function() {
+    const fb = document.getElementById('filterBulan');
+    const ft = document.getElementById('filterTahun');
+    const now = new Date();
+    if (fb && !fb.value) fb.value = String(now.getMonth() + 1);
+    if (ft && !ft.value) ft.value = String(now.getFullYear());
+    // Terapkan filter awal dan hitung kartu
+    filterKaryawanTable();
+});
+
+// Tampilkan toast duplikasi
+function showDuplicateToast() {
+    const toast = document.getElementById('toast-duplicate');
+    if (!toast) return;
+    toast.classList.remove('show');
+    void toast.offsetWidth; // reflow untuk restart animasi
+    toast.classList.add('show');
+    // auto hide via CSS animation
+    setTimeout(() => toast.classList.remove('show'), 3300);
+}
+
+// Cek duplikasi berdasarkan pilihan form saat ini (non-blokir)
+function checkDuplicateSelection() {
+    const empEl = document.getElementById('employee_select');
+    const bulanEl = document.querySelector('#tambahModal [name="bulan"]');
+    const tahunEl = document.querySelector('#tambahModal [name="tahun"]');
+    if (!empEl || !bulanEl || !tahunEl) return;
+    const employeeId = parseInt(empEl.value);
+    const bulan = parseInt(bulanEl.value);
+    const tahun = parseInt(tahunEl.value);
+    if (isNaN(employeeId) || isNaN(bulan) || isNaN(tahun)) return;
+    const exists = (existingSalariesData || []).some(s => parseInt(s.employee_id) === employeeId && parseInt(s.bulan) === bulan && parseInt(s.tahun) === tahun);
+    if (exists) showDuplicateToast();
 }
 
 // Data salary untuk validasi payroll (ambil dari backend, array of {bulan, tahun})
@@ -588,6 +752,99 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
             }
         });
+    }
+
+    // Peringatan hanya saat submit (tidak pada perubahan input)
+});
+</script>
+
+<!-- Modal Pilih Tahun -->
+<div id="yearModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Pilih Tahun</h3>
+                <button type="button" onclick="closeYearModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                @foreach(($allYears ?? []) as $year)
+                    <button type="button" onclick="selectYear({{ $year }})" 
+                            class="year-btn px-3 py-2 text-sm font-medium rounded-md border transition-colors {{ $year == now()->format('Y') ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600' }}" 
+                            data-year="{{ $year }}">
+                        {{ $year }}
+                    </button>
+                @endforeach
+            </div>
+            <div class="mt-4 flex justify-end gap-2">
+                <button type="button" onclick="closeYearModal()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500 dark:hover:bg-gray-500">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Modal functions
+function openYearModal() {
+    document.getElementById('yearModal').classList.remove('hidden');
+}
+
+// Set filter tahun ke tahun saat ini saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    const filterTahun = document.getElementById('filterTahun');
+    if (filterTahun && filterTahun.value) {
+        filterKaryawanTable();
+    }
+});
+
+function closeYearModal() {
+    document.getElementById('yearModal').classList.add('hidden');
+}
+
+function selectYear(year) {
+    // Update filter tahun dengan tahun yang dipilih
+    const filterTahun = document.getElementById('filterTahun');
+    const yearButtonText = document.getElementById('yearButtonText');
+    
+    if (filterTahun) {
+        filterTahun.value = year;
+        filterKaryawanTable();
+    }
+    
+    // Update text pada tombol untuk menampilkan tahun yang dipilih
+    if (yearButtonText) {
+        yearButtonText.textContent = 'Pilih Tahun (' + year + ')';
+    }
+    
+    // Update highlighting pada modal
+    document.querySelectorAll('.year-btn').forEach(btn => {
+        if (btn.dataset.year == year) {
+            btn.className = 'year-btn px-3 py-2 text-sm font-medium rounded-md border transition-colors bg-indigo-600 text-white border-indigo-600';
+        } else {
+            btn.className = 'year-btn px-3 py-2 text-sm font-medium rounded-md border transition-colors bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600';
+        }
+    });
+    
+    closeYearModal();
+}
+
+// Close modal when clicking outside
+document.getElementById('yearModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeYearModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeYearModal();
     }
 });
 </script>

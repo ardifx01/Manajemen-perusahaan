@@ -13,25 +13,34 @@
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <div class="relative">
-                    <select x-model="filters.month" @change="applyFilters()" class="no-arrow appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-lg pl-3 pr-9 py-2 shadow-sm hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:hover:border-blue-400 dark:focus:ring-blue-400">
+                    <select x-model="filters.month" @change="applyFilters()" class="no-arrow appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-lg pl-9 pr-9 py-2 shadow-sm hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:hover:border-blue-400 dark:focus:ring-blue-400">
                         <template x-for="(m, idx) in months" :key="idx">
                             <option :value="String(idx+1)" :selected="String(idx+1)===filters.month" x-text="m"></option>
                         </template>
                     </select>
+                    <span class="pointer-events-none absolute inset-y-0 left-2 flex items-center text-gray-400 dark:text-gray-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </span>
                     <span class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 dark:text-gray-400">
                         <i class="fa-solid fa-chevron-down text-xs"></i>
                     </span>
                 </div>
-                <div class="relative">
-                    <select x-model="filters.year" @change="applyFilters()" class="no-arrow appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-lg pl-3 pr-9 py-2 shadow-sm hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:hover:border-blue-400 dark:focus:ring-blue-400">
-                        <template x-for="y in years" :key="y">
-                            <option :value="String(y)" :selected="String(y)===filters.year" x-text="y"></option>
-                        </template>
-                    </select>
-                    <span class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 dark:text-gray-400">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </span>
-                </div>
+                <!-- Filter Tahun (hidden untuk filtering, tapi tetap ada) -->
+                <select x-model="filters.year" @change="applyFilters()" class="hidden">
+                    <template x-for="y in allYears" :key="y">
+                        <option :value="String(y)" :selected="String(y)===filters.year" x-text="y"></option>
+                    </template>
+                </select>
+                <!-- Link Pilih Tahun -->
+                <button type="button" @click="openYearModal()" 
+                        class="inline-flex items-center px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span x-text="'Pilih Tahun (' + filters.year + ')'"></span>
+                </button>
                 <a :href="filterUrl()" @click.prevent="applyFilters()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow transition dark:bg-blue-600/80 dark:hover:bg-blue-500">
                     <i class="fa-solid fa-rotate"></i>
                     <span>Terapkan</span>
@@ -172,6 +181,40 @@
             </table>
         </div>
     </div>
+    
+    <!-- Modal Pilih Tahun -->
+    <div x-show="yearModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/40" @click="closeYearModal()"></div>
+        <div class="relative bg-white w-[92vw] max-w-lg rounded-2xl shadow-lg overflow-hidden dark:bg-gray-800">
+            <div class="px-5 py-4 border-b flex items-center justify-between dark:border-gray-700">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Pilih Tahun</h3>
+                <button type="button" @click="closeYearModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5">
+                <div class="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                    <template x-for="year in allYears" :key="year">
+                        <button type="button" @click="selectYear(year)" 
+                                class="px-3 py-2 text-sm font-medium rounded-md border transition-colors"
+                                :class="String(year) === filters.year ? 
+                                        'bg-indigo-600 text-white border-indigo-600' : 
+                                        'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600'"
+                                x-text="year">
+                        </button>
+                    </template>
+                </div>
+            </div>
+            <div class="px-5 py-3 border-t bg-gray-50 text-right dark:border-gray-700 dark:bg-gray-900/40">
+                <button type="button" @click="closeYearModal()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500 dark:hover:bg-gray-500">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -179,17 +222,8 @@
 function financeDashboard(incMonth, incYear, revenueNetByMonth, revenueByCustomerByMonth, monthlySubtotal, monthlyPpn, monthlyRevenue) {
     return {
         months: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
-        years: (()=>{
-            const cur = new Date().getFullYear();
-            const sel = Number(incYear||cur);
-            const start = Math.min(sel, cur) - 5;
-            const end   = Math.max(sel, cur) + 5;
-            const pool = [];
-            for (let y=start; y<=end; y++) pool.push(y);
-            // place selected year first, then others (dedup)
-            const others = pool.filter(y => y !== sel);
-            return [sel, ...others];
-        })(),
+        allYears: @js($allYears ?? []),
+        yearModalOpen: false,
         filters: { month: String(incMonth), year: String(incYear) },
         summary: { bruto: 0, ppn: 0, net: 0, trendBruto: 0.0, trendPPN: 0.0, trendNet: 0.0 },
         monthly: [],
@@ -304,6 +338,12 @@ function financeDashboard(incMonth, incYear, revenueNetByMonth, revenueByCustome
                 map.set(key, cur);
             }
             return Array.from(map.values()).sort((a,b)=> b.net - a.net);
+        },
+        openYearModal(){ this.yearModalOpen = true; },
+        closeYearModal(){ this.yearModalOpen = false; },
+        selectYear(year){
+            this.filters.year = String(year);
+            this.closeYearModal();
         }
     }
 }

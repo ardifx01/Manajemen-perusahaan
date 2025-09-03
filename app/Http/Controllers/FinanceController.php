@@ -16,6 +16,9 @@ class FinanceController extends Controller
     {
         $incMonth = (int) ($request->get('inc_month') ?? $request->get('month') ?? (int) Carbon::now()->format('n'));
         $incYear  = (int) ($request->get('inc_year')  ?? $request->get('year')  ?? (int) Carbon::now()->format('Y'));
+        
+        // Array tahun untuk modal
+        $allYears = range(2020, 2035);
 
         $start = Carbon::create($incYear, $incMonth, 1)->startOfMonth();
         $end   = (clone $start)->endOfMonth();
@@ -69,7 +72,7 @@ class FinanceController extends Controller
         }
 
         return view('dashboard.finance_index', compact(
-            'incMonth', 'incYear',
+            'incMonth', 'incYear', 'allYears',
             'monthlySubtotal', 'monthlyPpn', 'monthlyRevenue',
             'revenueNetByMonth', 'revenueByCustomer', 'revenueByCustomerByMonth'
         ));
@@ -80,6 +83,9 @@ class FinanceController extends Controller
     {
         $bulanNow = (int) $request->get('month', (int) Carbon::now()->format('n'));
         $tahunNow = (int) $request->get('year',  (int) Carbon::now()->format('Y'));
+        
+        // Array tahun untuk modal
+        $allYears = range(2020, 2035);
 
         // Gaji per karyawan bulan/tahun dipilih
         $salaryByEmployee = Salary::with(['employee:id,nama_karyawan'])
@@ -134,7 +140,7 @@ class FinanceController extends Controller
         $combinedYearlyExpenseTotal = (int) ($yearlySalaryTotal + $yearlyOtherExpenseTotal);
 
         return view('dashboard.finance_expense', compact(
-            'bulanNow','tahunNow',
+            'bulanNow','tahunNow','allYears',
             'salaryByEmployee','monthlySalaryTotal','salaryByMonth','yearlySalaryTotal',
             'otherExpensesMonthly','monthlyOtherExpenseTotal','expensesByMonth','yearlyOtherExpenseTotal',
             'combinedMonthlyExpense','combinedYearlyExpenseTotal'

@@ -47,14 +47,59 @@
 
     <!-- Table Section -->
     
+        <!-- Ringkasan Total PO per Bulan -->
+        <div class="mb-3 sm:mb-4">
+            @php($namaBulanFull=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'])
+            @php($tahunTerpilihLocal = (int) (request('year') ?? ($tahunNow ?? now()->format('Y'))))
+
+            <!-- Header ringkasan + filter tahun -->
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-sm sm:text-base font-semibold text-gray-800 dark:text-slate-100">Ringkasan Total PO per Bulan</h2>
+                <!-- Link Pilih Tahun -->
+                <button type="button" onclick="openYearModal()" 
+                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Pilih Tahun ({{ $tahunTerpilihLocal }})
+                </button>
+            </div>
+
+            <!-- Grid bulan yang bisa diklik -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                @for($m=1;$m<=12;$m++)
+                    @php($stat = isset($monthlyStats) ? ($monthlyStats[$m] ?? null) : null)
+                    @php($isActive = ((int)($bulanNow ?? now()->format('n'))) === $m)
+                    <a href="{{ route('suratjalan.index', ['month' => $m, 'year' => $tahunTerpilihLocal]) }}" class="block focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg">
+                        <div class="p-2 rounded-lg border text-xs sm:text-sm transition-colors hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700/40
+                                    {{ $isActive ? 'bg-yellow-50 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-600' : 'bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700' }}">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-gray-700 dark:text-slate-200">{{ $namaBulanFull[$m-1] }}</span>
+                                @if($isActive)
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">Bulan dipilih</span>
+                                @endif
+                            </div>
+                            <div class="mt-1 flex items-center justify-between">
+                                <span class="text-[11px] text-gray-500 dark:text-slate-300">Transaksi</span>
+                                <span class="font-medium text-gray-700 dark:text-slate-100">{{ (int)($stat->total_count ?? 0) }}</span>
+                            </div>
+                            <div class="mt-0.5 flex items-center justify-between">
+                                <span class="text-[11px] text-gray-500 dark:text-slate-300">Total</span>
+                                <span class="font-semibold text-green-700 dark:text-green-400">Rp {{ number_format((float)($stat->total_sum ?? 0), 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </a>
+                @endfor
+            </div>
+        </div>
         
-        <!-- Made table much more compact with reduced padding and smaller text -->
-        <div class="overflow-x-auto w-full">
-            <table class="w-full table-auto min-w-full text-xs">
+        
+        <div class="w-full">
+            <table class="w-full table-auto text-[11px] sm:text-xs break-words">
                 <thead class="bg-gray-100 dark:bg-slate-700">
                     <tr>
                         <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700 w-8">
-                            <input type="checkbox" id="selectAll" class="rounded border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-200 focus:ring-gray-500 dark:focus:ring-slate-500 w-3 h-3 bg-white dark:bg-slate-800">
+                            <span class="sr-only">Pilih</span>
                         </th>
                         <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700">
                             <div class="flex items-center space-x-1">
@@ -65,7 +110,7 @@
                                 <span class="sm:hidden">Tgl</span>
                             </div>
                         </th>
-                        <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700">
+                        <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700 hidden sm:table-cell">
                             <div class="flex items-center space-x-1">
                                 <svg class="w-3 h-3 text-gray-500 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -86,7 +131,7 @@
                                 <span class="sm:hidden">No SJ</span>
                             </div>
                         </th>
-                        <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700">
+                        <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700 hidden sm:table-cell">
                             <div class="flex items-center space-x-1">
                                 <svg class="w-3 h-3 text-gray-500 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -105,14 +150,14 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                         <!-- Made all table cells much more compact with minimal padding -->
                         <td class="py-1 px-1.5 whitespace-nowrap text-xs border-r border-gray-200 dark:border-slate-700">
-                            <input type="checkbox" name="selected_ids[]" value="{{ $pos->id }}" class="row-checkbox rounded border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-200 focus:ring-gray-500 dark:focus:ring-slate-500 w-3 h-3 bg-white dark:bg-slate-800">
+                            <input type="radio" name="selected_id" value="{{ $pos->id }}" class="row-radio border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-200 focus:ring-gray-500 dark:focus:ring-slate-500 w-3 h-3 bg-white dark:bg-slate-800">
                         </td>
                         <td class="py-1 px-1.5 whitespace-nowrap text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700">
                             <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-slate-600 dark:text-slate-200">
                                 {{ \Carbon\Carbon::parse($pos->tanggal_po)->format('d/m/y') }}
                             </span>
                         </td>
-                        <td class="py-1 px-1.5 whitespace-nowrap text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700">
+                        <td class="py-1 px-1.5 whitespace-normal text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700 hidden sm:table-cell">
                             <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-slate-600 dark:text-slate-200">
                                 {{ $pos->no_po }}
                             </span>
@@ -122,12 +167,12 @@
                                 {{ $pos->customer }}
                             </span>
                         </td>
-                        <td class="py-1 px-1.5 whitespace-nowrap text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700">
+                        <td class="py-1 px-1.5 whitespace-normal text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700">
                             <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-slate-600 dark:text-slate-200">
                                 {{ $pos->no_surat_jalan }}
                             </span>
                         </td>
-                        <td class="py-1 px-1.5 whitespace-nowrap text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700">
+                        <td class="py-1 px-1.5 whitespace-normal text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700 hidden sm:table-cell">
                             <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-slate-600 dark:text-slate-200">
                                 {{ $pos->no_invoice ?? '-' }}
                             </span>
@@ -318,18 +363,17 @@
         <div class="mt-3">
             <!-- Modal Header with Controls -->
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Preview Invoice</h3>
-                <div class="flex space-x-2">
+                <div class="flex space-x-2 ml-auto items-center">
+                    <button onclick="closeInvoiceModal()" class="text-gray-400 hover:text-gray-600" aria-label="Close">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     <button onclick="printInvoice()" class="w-full sm:w-auto h-9 px-4 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors text-sm inline-flex items-center justify-center leading-none">
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                         </svg>
                         Print
-                    </button>
-                    <button onclick="closeInvoiceModal()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
                     </button>
                 </div>
             </div>
@@ -376,13 +420,13 @@
                     </div>
                 </div>
                 <!-- Invoice Table -->
-                <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+                <table id="invoiceTable" style="width:100%; border-collapse: collapse; margin-bottom: 20px; table-layout: auto;">
                     <thead>
                         <tr>
-                            <th style="border: 1px solid #000; padding: 8px; text-align: center;">DESCRIPTION</th>
-                            <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 15%;">QTY</th>
-                            <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">UNIT PRICE</th>
-                            <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">AMMOUNT</th>
+                            <th id="thDesc" style="border: 1px solid #000; padding: 8px; text-align: center;">DESCRIPTION</th>
+                            <th id="thQty" style="border: 1px solid #000; padding: 8px; text-align: center; width: 15%;">QTY</th>
+                            <th id="thUnit" style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">UNIT PRICE</th>
+                            <th id="thAmt" style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">AMMOUNT</th>
                         </tr>
                     </thead>
                     <tbody id="invoiceItems"></tbody>
@@ -418,10 +462,12 @@
                         </p>
                     </div>
                     <div style="width: 35%; text-align: center;">
-                        <p style="margin: 0; margin-bottom: 25px;"><strong>Bekasi, <span id="invoiceDateLocation"></span></strong></p>
-                        <div style="margin: 0 auto; width: 130px; margin-bottom: 20px;">
+                        <p style="margin: 0; margin-bottom: 105px;"><strong>Bekasi, <span id="invoiceDateLocation"></span></strong></p>
+                        <div class="signature-stamp" style="display:none; margin: 0 auto; width: 130px; margin-bottom: 20px;">
+                            <!-- Logo perusahaan di area tanda tangan disembunyikan sesuai permintaan -->
                             <img src="{{ asset('image/LOGO.png') }}" alt="Company Stamp" style="width: 130px; height: 90px; object-fit: contain; opacity: 0.9;">
                         </div>
+
                         <p style="margin: 0; font-size: 10px;">
                             <strong><u>NANIK PURNAMI</u></strong><br>
                             <span style="font-size: 8px;">DIREKTUR UTAMA</span>
@@ -433,42 +479,95 @@
     </div>
 </div>
 
+<!-- Modal Pilih Tahun -->
+<div id="yearModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Pilih Tahun</h3>
+                <button type="button" onclick="closeYearModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                @php($selectedYear = (int) (request('year') ?? ($tahunNow ?? now()->format('Y'))))
+                @foreach(($allYears ?? []) as $year)
+                    <button type="button" onclick="selectYear({{ $year }})" 
+                            class="year-btn px-3 py-2 text-sm font-medium rounded-md border transition-colors
+                                   {{ $selectedYear === (int) $year ? 
+                                      'bg-indigo-600 text-white border-indigo-600' : 
+                                      'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                        {{ $year }}
+                    </button>
+                @endforeach
+            </div>
+            <div class="mt-4 flex justify-end gap-2">
+                <button type="button" onclick="closeYearModal()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500 dark:hover:bg-gray-500">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Modal functions
+function openYearModal() {
+    document.getElementById('yearModal').classList.remove('hidden');
+}
+
+function closeYearModal() {
+    document.getElementById('yearModal').classList.add('hidden');
+}
+
+function selectYear(year) {
+    const currentMonth = {{ (int)($bulanNow ?? now()->format('n')) }};
+    
+    // Redirect dengan parameter tahun yang dipilih
+    const url = new URL(window.location.href);
+    url.searchParams.set('year', year);
+    url.searchParams.set('month', currentMonth);
+    
+    window.location.href = url.toString();
+}
+
+// Close modal when clicking outside
+document.getElementById('yearModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeYearModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeYearModal();
+    }
+});
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const rowRadios = document.querySelectorAll('.row-radio');
     const exportBtn = document.getElementById('exportBtn');
     const exportControls = document.getElementById('exportControls');
     const selectedCount = document.getElementById('selectedCount');
     const exportForm = document.getElementById('exportForm');
     const selectedIdsInput = document.getElementById('selectedIds');
 
-    // Handle select all functionality
-    selectAllCheckbox.addEventListener('change', function() {
-        rowCheckboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-        updateExportControls();
-    });
-
-    // Handle individual row selection
-    rowCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            updateSelectAllState();
+    // Handle individual row selection (radio)
+    rowRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
             updateExportControls();
         });
     });
 
-    function updateSelectAllState() {
-        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        selectAllCheckbox.checked = checkedBoxes.length === rowCheckboxes.length;
-        selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < rowCheckboxes.length;
-    }
-
     function updateExportControls() {
-        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        const count = checkedBoxes.length;
-        
+        const selected = document.querySelector('.row-radio:checked');
+        const count = selected ? 1 : 0;
         if (count > 0) {
             exportControls.classList.remove('hidden');
             selectedCount.textContent = `${count} dipilih`;
@@ -481,11 +580,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function exportSelected() {
-    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-    const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+    const selected = document.querySelector('.row-radio:checked');
+    const selectedIds = selected ? [selected.value] : [];
     console.log(selectedIds); // Pastikan ID yang dikirim benar
-    
-    // Jika tidak ada yang dipilih, biarkan kosong untuk ekspor semua
 
     const exportBtn = document.getElementById('exportBtn');
     const exportForm = document.getElementById('exportForm');
@@ -501,7 +598,7 @@ function exportSelected() {
     `;
     exportBtn.disabled = true;
 
-    // Set selected IDs (or empty) and submit form
+    // Set selected IDs (or empty) and submit form (empty => export all)
     selectedIdsInput.value = selectedIds.length > 0 ? JSON.stringify(selectedIds) : '';
     exportForm.submit();
 
@@ -560,12 +657,12 @@ document.getElementById('editModal').addEventListener('click', function(e) {
 
 // Generate Invoice dengan format PT. CAM JAYA ABADI
 function generateInvoice() {
-    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-    if (checkedBoxes.length === 0) {
-        alert('Pilih minimal satu data untuk membuat invoice');
+    const selected = document.querySelector('.row-radio:checked');
+    if (!selected) {
+        alert('Pilih satu data untuk membuat invoice');
         return;
     }
-    const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+    const selectedIds = [selected.value];
 
     fetch("{{ route('suratjalan.invoice.data') }}", {
         method: "POST",
@@ -635,6 +732,27 @@ function populateInvoice(data) {
         }
     });
 
+    // Tentukan mode tampilan berdasarkan jumlah item
+    const count = allItems.length;
+    const mode = count <= 12 ? 'normal' : (count <= 22 ? 'compact' : 'ultra');
+    const fs = mode === 'normal' ? '12px' : (mode === 'compact' ? '11px' : '10px');
+    const pad = mode === 'normal' ? '8px' : (mode === 'compact' ? '6px' : '4px');
+    const lh = mode === 'normal' ? 1.3 : (mode === 'compact' ? 1.2 : 1.1);
+    const wQty = mode === 'normal' ? '15%' : (mode === 'compact' ? '13%' : '12%');
+    const wUnit = mode === 'normal' ? '20%' : (mode === 'compact' ? '18%' : '16%');
+    const wAmt = mode === 'normal' ? '20%' : (mode === 'compact' ? '18%' : '16%');
+
+    // Set table fixed layout dan lebar kolom dinamis
+    const tableEl = document.getElementById('invoiceTable');
+    if (tableEl) tableEl.style.tableLayout = 'fixed';
+    const thDesc = document.getElementById('thDesc');
+    const thQty = document.getElementById('thQty');
+    const thUnit = document.getElementById('thUnit');
+    const thAmt = document.getElementById('thAmt');
+    if (thQty) thQty.style.width = wQty;
+    if (thUnit) thUnit.style.width = wUnit;
+    if (thAmt) thAmt.style.width = wAmt;
+
     allItems.forEach(it => {
         const qty = parseInt(it.qty || 0);
         const totalAmount = parseInt(it.total || 0);
@@ -653,22 +771,24 @@ function populateInvoice(data) {
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td style="border: 1px solid #000; padding: 8px; vertical-align: top; font-weight: bold;">${produkName}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: top; font-weight: bold;">${qty} ${jenis}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: right; vertical-align: top; font-weight: bold;">Rp. ${unitPrice.toLocaleString('id-ID')}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: right; vertical-align: top; font-weight: bold;">Rp. ${totalAmount.toLocaleString('id-ID')}</td>
+            <td style="border: 1px solid #000; padding: ${pad}; vertical-align: top; font-weight: bold; font-size:${fs}; line-height:${lh}; word-break: break-word;">${produkName}</td>
+            <td style="border: 1px solid #000; padding: ${pad}; text-align: center; vertical-align: top; font-weight: bold; font-size:${fs}; line-height:${lh};">${qty} ${jenis}</td>
+            <td style="border: 1px solid #000; padding: ${pad}; text-align: right; vertical-align: top; font-weight: bold; font-size:${fs}; line-height:${lh};">Rp. ${unitPrice.toLocaleString('id-ID')}</td>
+            <td style="border: 1px solid #000; padding: ${pad}; text-align: right; vertical-align: top; font-weight: bold; font-size:${fs}; line-height:${lh};">Rp. ${totalAmount.toLocaleString('id-ID')}</td>
         `;
         itemsContainer.appendChild(row);
     });
     
-    // Tambah baris kosong seperti di foto (10 baris kosong)
-    for (let i = 0; i < 10; i++) {
+    // Tambah baris kosong hanya jika item sedikit agar tetap rapi (tanpa memaksa overflow)
+    const maxFiller = mode === 'normal' ? 10 : (mode === 'compact' ? 6 : 0);
+    const fillerCount = Math.max(0, maxFiller - count);
+    for (let i = 0; i < fillerCount; i++) {
         const emptyRow = document.createElement('tr');
         emptyRow.innerHTML = `
-            <td style="border: 1px solid #000; padding: 8px; height: 25px;">&nbsp;</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center;">&nbsp;</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: right;">&nbsp;</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: right;">&nbsp;</td>
+            <td style=\"border: 1px solid #000; padding: ${pad}; height: 22px;\">&nbsp;</td>
+            <td style=\"border: 1px solid #000; padding: ${pad}; text-align: center;\">&nbsp;</td>
+            <td style=\"border: 1px solid #000; padding: ${pad}; text-align: right;\">&nbsp;</td>
+            <td style=\"border: 1px solid #000; padding: ${pad}; text-align: right;\">&nbsp;</td>
         `;
         itemsContainer.appendChild(emptyRow);
     }
@@ -699,27 +819,40 @@ function closeInvoiceModal() {
 
 function printInvoice() {
     const printContent = document.getElementById('invoiceContent').innerHTML;
-    const originalContent = document.body.innerHTML;
-    
-    document.body.innerHTML = `
-        <div style="width: 210mm; min-height: 297mm; margin: 0; padding: 20mm; background: white; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4;">
-            ${printContent}
-        </div>
-    `;
-    
-    window.print();
-    document.body.innerHTML = originalContent;
-    location.reload();
+    const html = `
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>Print Invoice</title>
+            <style>
+                @page { size: A4 portrait; margin: 10mm; }
+                html, body { margin: 0; padding: 0; }
+                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .page { width: 210mm; min-height: 297mm; padding: 10mm; margin: 0 auto; background: #fff; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.3; }
+                table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                th, td { border: 1px solid #000; word-break: break-word; }
+                /* Sembunyikan logo perusahaan pada area tanda tangan saat print */
+                .signature-stamp { display: none !important; }
+            </style>
+        </head>
+        <body onload="window.print(); window.onafterprint = function(){ window.close(); }">
+            <div class="page">${printContent}</div>
+        </body>
+        </html>`;
+    const w = window.open('', '_blank');
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
 }
 
 // Trigger server-side PDF generation for selected Surat Jalan
 function downloadInvoicePDF() {
-    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-    if (checkedBoxes.length === 0) {
-        alert('Pilih minimal satu data untuk membuat invoice PDF');
+    const selected = document.querySelector('.row-radio:checked');
+    if (!selected) {
+        alert('Pilih satu data untuk membuat invoice PDF');
         return;
     }
-    const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+    const selectedIds = [selected.value];
     const pdfForm = document.getElementById('pdfForm');
     const pdfIds = document.getElementById('selectedIdsPdf');
     pdfIds.value = JSON.stringify(selectedIds);

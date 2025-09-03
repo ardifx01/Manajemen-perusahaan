@@ -7,6 +7,8 @@ use App\Models\Invoice;
 use App\Models\POItem;
 use App\Models\Salary;
 use App\Models\Expense;
+use App\Models\BarangMasuk;
+use App\Models\BarangKeluar;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -147,6 +149,29 @@ class DashboardController extends Controller
         $combinedMonthlyExpense = (int) ($monthlySalaryTotal + $monthlyOtherExpenseTotal);
         $combinedYearlyExpenseTotal = (int) ($yearlySalaryTotal + $yearlyOtherExpenseTotal);
 
+        // Barang Masuk & Barang Keluar - total unit bulan berjalan (berdasarkan field tanggal)
+        $barangMasukMonthlyQty = (int) BarangMasuk::whereMonth('tanggal', $bulanNow)
+            ->whereYear('tanggal', $tahunNow)
+            ->sum('qty');
+        $barangKeluarMonthlyQty = (int) BarangKeluar::whereMonth('tanggal', $bulanNow)
+            ->whereYear('tanggal', $tahunNow)
+            ->sum('qty');
+
+        // Daftar tahun untuk selector (2025-2030 sebagai default, plus tahun sekarang jika di luar range)
+        $currentYear = (int) Carbon::now()->format('Y');
+        $defaultYears = range(2025, 2030);
+        
+        // Tambahkan tahun sekarang jika tidak dalam range 2025-2030
+        if ($currentYear < 2025 || $currentYear > 2030) {
+            $defaultYears[] = $currentYear;
+            sort($defaultYears);
+        }
+        
+        $availableYears = $defaultYears;
+        
+        // Daftar semua tahun untuk modal (dari 2020 sampai 2035)
+        $allYears = range(2020, 2035);
+
         // Data untuk Chart (tanpa filter tanggal)
         $chartData = [
             'karyawan' => [],
@@ -198,7 +223,13 @@ class DashboardController extends Controller
             'combinedMonthlyExpense',
             'combinedYearlyExpenseTotal',
             // total invoice untuk kartu
-            'invoiceCount'
+            'invoiceCount',
+            // barang masuk/keluar bulan ini
+            'barangMasukMonthlyQty',
+            'barangKeluarMonthlyQty',
+            // selector tahun
+            'availableYears',
+            'allYears'
         ));
     }
 }

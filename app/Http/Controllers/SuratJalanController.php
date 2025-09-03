@@ -17,10 +17,37 @@ class SuratJalanController extends Controller
     /**
      * Menampilkan daftar Surat Jalan.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // PERBAIKAN: Hilangkan constraint yang menyebabkan relasi return true
+        // Ambil filter bulan/tahun dari query string
+        $month = (int) ($request->get('month') ?: now()->format('n'));
+        $year  = (int) ($request->get('year')  ?: now()->format('Y'));
+
+        // Daftar tahun dari database
+        $dbYears = DB::table('pos')
+            ->selectRaw('DISTINCT YEAR(tanggal_po) as y')
+            ->pluck('y')
+            ->map(fn($v) => (int) $v);
+
+        // Rentang tahun 2025-2030 sebagai default
+        $currentYear = (int) Carbon::now()->format('Y');
+        $defaultYears = range(2025, 2030);
+        
+        // Tambahkan tahun sekarang jika tidak dalam range 2025-2030
+        if ($currentYear < 2025 || $currentYear > 2030) {
+            $defaultYears[] = $currentYear;
+            sort($defaultYears);
+        }
+        
+        $availableYears = collect($defaultYears);
+        
+        // Daftar semua tahun untuk modal (dari 2020 sampai 2035)
+        $allYears = range(2020, 2035);
+
+        // PERBAIKAN: Hilangkan constraint yang menyebabkan relasi return true, dan tambahkan filter periode
         $suratjalan = PO::with(['produkRel', 'kendaraanRel'])
+            ->when($year, fn($q) => $q->whereYear('tanggal_po', $year))
+            ->when($month, fn($q) => $q->whereMonth('tanggal_po', $month))
             ->orderBy('created_at', 'desc')
             ->get()
             ->filter(function ($po) {
@@ -31,9 +58,11 @@ class SuratJalanController extends Controller
         // Ambil semua produk untuk dropdown
         $produk = Produk::all();
 
-        // PERBAIKAN: Hilangkan constraint yang bermasalah
+        // PERBAIKAN: Hilangkan constraint yang bermasalah + filter periode
         $pos = PO::with(['produkRel', 'kendaraanRel'])
             ->whereHas('produkRel') // Only get POs that have valid produk relationship
+            ->when($year, fn($q) => $q->whereYear('tanggal_po', $year))
+            ->when($month, fn($q) => $q->whereMonth('tanggal_po', $month))
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -48,12 +77,26 @@ class SuratJalanController extends Controller
             ->orderBy('pengirim', 'asc')
             ->get();
 
+        // Ringkasan total PO per bulan pada tahun terpilih
+        $monthlyStats = DB::table('pos')
+            ->selectRaw('MONTH(tanggal_po) as month, SUM(total) as total_sum, COUNT(*) as total_count')
+            ->when($year, fn($q) => $q->whereYear('tanggal_po', $year))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
         return view('suratjalan.index', [
-            'suratjalan' => $suratjalan,
-            'produk'     => $produk,
-            'pos'        => $pos,
-            'kendaraans' => $kendaraans,
-            'pengirims'  => $pengirims // CHANGE: Tambahkan pengirims ke view
+            'suratjalan'      => $suratjalan,
+            'produk'          => $produk,
+            'pos'             => $pos,
+            'kendaraans'      => $kendaraans,
+            'pengirims'       => $pengirims, // CHANGE: Tambahkan pengirims ke view
+            'availableYears'  => $availableYears,
+            'allYears'        => $allYears,
+            'bulanNow'        => $month,
+            'tahunNow'        => $year,
+            'monthlyStats'    => $monthlyStats,
         ]);
     }
 

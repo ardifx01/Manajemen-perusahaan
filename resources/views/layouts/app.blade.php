@@ -41,7 +41,7 @@
     })();
   " class="flex font-sans bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100">
 
-    <!-- Sidebar -->
+   
     <aside id="sidebar" class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen flex flex-col transform transition-transform duration-300 fixed inset-y-0 left-0 z-40 -translate-x-full md:fixed md:inset-y-0 md:left-0 overflow-hidden"
            x-bind:class="{
                 '-translate-x-full': !mobileSidebarOpen,
@@ -49,12 +49,26 @@
                 'md:translate-x-0': desktopSidebarOpen,
                 'md:-translate-x-full': !desktopSidebarOpen
            }">
-        <div class="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:justify-center md:px-0">
-            <img src="{{ asset('image/cam.png') }}" alt="Logo Perusahaan" class="h-10">
-            <!-- Close (mobile) using hamburger icon on the right -->
-            <button type="button" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    @click="mobileSidebarOpen = false; window.dispatchEvent(new Event('forcechartresize'))" aria-label="Tutup sidebar">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <div class="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4">
+            <img src="{{ asset('image/cam.png') }}" alt="Logo Perusahaan" class="h-10 ml-2 md:ml-3">
+            
+            <button type="button"
+                    class="inline-flex items-center justify-center h-10 w-10 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 ml-auto"
+                    @click="if (window.matchMedia('(min-width: 768px)').matches) { desktopSidebarOpen = !desktopSidebarOpen; window.dispatchEvent(new Event('forcechartresize')); } else { mobileSidebarOpen = !mobileSidebarOpen }"
+                    :aria-expanded="(window.matchMedia('(min-width: 768px)').matches ? desktopSidebarOpen : mobileSidebarOpen).toString()"
+                    aria-label="Toggle sidebar">
+                
+                <svg class="hidden md:block w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              
+                <svg class="md:hidden w-6 h-6" x-show="!mobileSidebarOpen" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                
+                <svg class="md:hidden w-6 h-6" x-show="mobileSidebarOpen" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
             </button>
         </div>
 
@@ -75,7 +89,34 @@
                 <span>Dashboard</span>
             </a>
 
-            <!-- Finance Tree -->
+            <button @click="open = !open"
+                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('po') || request()->routeIs('po.*') || request()->routeIs('suratjalan.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <span class="inline-flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18"/></svg>
+                    Purchase Order
+                </span>
+                <svg x-bind:class="{ 'rotate-90': open }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
+                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+    
+      
+            <div x-show="open" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
+                {{-- Input PO --}}
+                <a href="{{ route('po.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('po') || request()->routeIs('po.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+                    <span>Input PO</span>
+                </a>
+                {{-- Data PO --}}
+                <a href="{{ route('suratjalan.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('suratjalan.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h6M6 19h12a2 2 0 002-2V7a2 2 0 00-2-2H9l-3 3v11a2 2 0 002 2z"/></svg>
+                    <span>Data PO</span>
+                </a>
+            </div>
+            
             <button @click="financeOpen = !financeOpen"
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('finance.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
@@ -102,9 +143,6 @@
                 </a>
             </div>
 
-
-            <!-- Moved Karyawan menu to be positioned right after Dashboard -->
-            <!-- Menambahkan menu Karyawan dengan submenu -->
             <button @click="employeeOpen = !employeeOpen"
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('employee.*') || request()->routeIs('salary.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
@@ -119,7 +157,6 @@
                 </svg>
             </button>
 
-            <!-- Submenu Karyawan -->
             <div x-show="employeeOpen" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
                 <a href="{{ route('employee.index') }}"
                    class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('employee.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
@@ -139,7 +176,7 @@
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('barang.*') || request()->routeIs('produk.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
                     <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    Barang
+                    Data Master
                 </span>
                 <svg x-bind:class="{ 'rotate-90': barangOpen }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -153,49 +190,25 @@
                     <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V7a2 2 0 00-2-2h-3V3H9v2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"/></svg>
                     <span>Data Barang</span>
                 </a>
-
-                <a href="{{ route('barang.masuk.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('barang.masuk.*') ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m0 0l-4-4m4 4l4-4"/></svg>
-                    <span>Barang Masuk</span>
+                <a href="{{ route('kendaraan.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('kendaraan.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-2 3-3h6l3 3 2 2v6h-2a2 2 0 01-4 0H9a2 2 0 01-4 0H3v-6z"/></svg>
+                    <span>Data Kendaraan</span>
                 </a>
-
-                <a href="{{ route('barang.keluar.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('barang.keluar.*') ? 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20V4m0 0l4 4m-4-4L8 8"/></svg>
-                    <span>Barang Keluar</span>
+                <a href="{{ route('customer.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('customer.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11c1.657 0 3-1.567 3-3.5S17.657 4 16 4s-3 1.567-3 3.5 1.343 3.5 3 3.5zM8 11c1.657 0 3-1.567 3-3.5S9.657 4 8 4 5 5.567 5 7.5 6.343 11 8 11zm0 2c-2.761 0-5 2.015-5 4.5V20h10v-2.5c0-2.485-2.239-4.5-5-4.5zm8 0c-.725 0-1.414.131-2.047.364 1.22.903 2.047 2.235 2.047 3.886V20h6v-2.75c0-2.351-2.239-4.25-6-4.25z"/></svg>
+                    <span>Data Customer</span>
+                </a>
+                <a href="{{ route('pengirim.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('pengirim.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v4H3zM3 7l3 13h12l3-13"/></svg>
+                    <span>Data Pengirim</span>
                 </a>
             </div>
 
             <!-- Parent Menu with Toggle -->
-            <button @click="open = !open"
-                    class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('po') || request()->routeIs('po.*') || request()->routeIs('suratjalan.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                <span class="inline-flex items-center gap-3">
-                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18"/></svg>
-                    Purchase Order
-                </span>
-                <svg x-bind:class="{ 'rotate-90': open }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
-                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                </svg>
-            </button>
-
-            <!-- Submenu -->
-            <div x-show="open" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
-                {{-- Input PO --}}
-                <a href="{{ route('po.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('po') || request()->routeIs('po.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-                    <span>Input PO</span>
-                </a>
-                {{-- Data PO --}}
-                <a href="{{ route('suratjalan.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('suratjalan.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h6M6 19h12a2 2 0 002-2V7a2 2 0 00-2-2H9l-3 3v11a2 2 0 002 2z"/></svg>
-                    <span>Data PO</span>
-                </a>
-            </div>
-
+            
             <!-- Manajemen Pengguna -->
             <button @click="userOpen = !userOpen"
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('users.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
@@ -208,11 +221,11 @@
                 </span>
                 <svg x-bind:class="{ 'rotate-90': userOpen }" class="w-4 h-4 min-w-[1rem] min-h-[1rem] transition-transform duration-300 transform shrink-0 flex-none"
                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                </svg>
-            </button>
-            <div id="user-section" x-show="userOpen" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
-                <a href="{{ Route::has('users.create') ? route('users.create') : url('/users/create') }}"
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+                <div id="user-section" x-show="userOpen" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
+                    <a href="{{ Route::has('users.create') ? route('users.create') : url('/users/create') }}"
                    class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('users.create') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -224,33 +237,16 @@
 
                 @if(auth()->user()?->is_admin)
                 <a href="{{ route('users.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('users.index') ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5V9H2v11h5M7 9V7a5 5 0 0110 0v2"/>
-                    </svg>
-                    <span>Daftar User</span>
-                </a>
-                @endif
-            </div>
-
-            <!-- Pindahkan link Data Customer/Pengirim/Kendaraan ke level atas -->
-            <a href="{{ route('customer.index') }}"
-               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('customer.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11c1.657 0 3-1.567 3-3.5S17.657 4 16 4s-3 1.567-3 3.5 1.343 3.5 3 3.5zM8 11c1.657 0 3-1.567 3-3.5S9.657 4 8 4 5 5.567 5 7.5 6.343 11 8 11zm0 2c-2.761 0-5 2.015-5 4.5V20h10v-2.5c0-2.485-2.239-4.5-5-4.5zm8 0c-.725 0-1.414.131-2.047.364 1.22.903 2.047 2.235 2.047 3.886V20h6v-2.75c0-2.351-2.239-4.25-6-4.25z"/></svg>
-                <span>Data Customer</span>
+                class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('users.index') ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5V9H2v11h5M7 9V7a5 5 0 0110 0v2"/>
+                </svg>
+                <span>Daftar User</span>
             </a>
+            @endif
+        </div>
 
-            <a href="{{ route('pengirim.index') }}"
-               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('pengirim.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v4H3zM3 7l3 13h12l3-13"/></svg>
-                <span>Data Pengirim</span>
-            </a>
-
-            <a href="{{ route('kendaraan.index') }}"
-               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('kendaraan.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-2 3-3h6l3 3 2 2v6h-2a2 2 0 01-4 0H9a2 2 0 01-4 0H3v-6z"/></svg>
-                <span>Data Kendaraan</span>
-            </a>
+            <!-- Link-link Data digabung dalam submenu Data Master di atas -->
 
             
 
@@ -308,22 +304,17 @@
     <!-- Overlay for mobile sidebar -->
     <div x-show="mobileSidebarOpen" class="fixed inset-0 z-30 bg-black/40 md:hidden" @click="mobileSidebarOpen=false" x-transition.opacity></div>
 
-    <!-- Floating handle to show sidebar on desktop when hidden -->
-    <button type="button" x-show="!desktopSidebarOpen" class="hidden md:flex fixed top-1/2 -translate-y-1/2 left-2 z-50 h-10 w-10 items-center justify-center rounded-md bg-white/90 dark:bg-gray-800/90 backdrop-blur shadow border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-            @click="desktopSidebarOpen = true" aria-label="Tampilkan sidebar" title="Tampilkan sidebar" x-transition.opacity>
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-    </button>
-
-    <!-- Floating handle to hide sidebar on desktop when visible -->
-    <button type="button" x-show="desktopSidebarOpen" class="hidden md:flex fixed top-1/2 -translate-y-1/2 left-64 translate-x-2 z-50 h-10 w-10 items-center justify-center rounded-md bg-white/90 dark:bg-gray-800/90 backdrop-blur shadow border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-            @click="desktopSidebarOpen = false" aria-label="Sembunyikan sidebar" title="Sembunyikan sidebar" x-transition.opacity>
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-    </button>
+    
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col md:ml-64" x-bind:class="{ 'md:ml-64': desktopSidebarOpen, 'md:ml-0': !desktopSidebarOpen }">
         <header class="sticky top-0 z-30 h-16 bg-white/90 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-3">
+                <!-- Hamburger (desktop only) to restore sidebar when hidden -->
+                <button type="button" class="hidden md:inline-flex items-center justify-center h-10 w-10 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        x-show="!desktopSidebarOpen" @click="desktopSidebarOpen = true" aria-label="Tampilkan sidebar" title="Tampilkan sidebar">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
                 <!-- Hamburger (mobile only) toggles open/close -->
                 <button type="button" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         @click="mobileSidebarOpen = !mobileSidebarOpen" aria-controls="sidebar" :aria-expanded="mobileSidebarOpen.toString()" aria-label="Toggle sidebar">

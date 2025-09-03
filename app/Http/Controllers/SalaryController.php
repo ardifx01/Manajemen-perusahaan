@@ -14,6 +14,9 @@ class SalaryController extends Controller
         $salaries = Salary::with('employee')->latest()->get();
         $employees = Employee::aktif()->get();
         
+        // Daftar tahun untuk modal (dari 2020 sampai 2035)
+        $allYears = range(2020, 2035);
+        
         // Statistik
         $totalGajiDibayar = Salary::dibayar()->sum('total_gaji');
         $totalGajiBelumDibayar = Salary::belumDibayar()->sum('total_gaji');
@@ -26,7 +29,8 @@ class SalaryController extends Controller
             'totalGajiDibayar',
             'totalGajiBelumDibayar', 
             'jumlahKaryawanDibayar',
-            'rataRataGaji'
+            'rataRataGaji',
+            'allYears'
         ));
     }
 

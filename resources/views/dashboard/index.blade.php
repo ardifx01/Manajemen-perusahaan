@@ -60,39 +60,146 @@
             </div>
         </div>
 
-        <!-- Barang Keluar -->
-        <div class="bg-purple-100 border border-purple-300 rounded-xl p-4 md:p-5 flex items-center space-x-3 md:space-x-4 shadow sm:col-span-2 lg:col-span-1 dark:bg-purple-900/30 dark:border-purple-700">
-            <div class="bg-purple-500 text-white p-2 md:p-3 rounded-full flex-shrink-0">
-                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 16l4-4-4-4m0 8V4"/>
-                </svg>
-            </div>
-            <div class="min-w-0 flex-1">
-                <div class="text-gray-600 dark:text-gray-300 text-sm md:text-base">Barang Keluar</div>
-                <div class="text-lg md:text-xl font-bold truncate">0 Unit</div>
-            </div>
-        </div>
-
         <!-- Tombol Print dan PDF - Responsive -->
         <!-- Made buttons responsive and properly positioned -->
         
     </div>
 
-    <!-- Grafik - Responsive -->
+    <!-- Filter Bulan & Tahun -->
+    <div class="mb-3 flex items-center justify-end gap-2">
+        <!-- Selector Bulan -->
+        <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-2">
+            @php($bulanTerpilih = (int) ($bulanNow ?? now()->format('n')))
+            @php($tahunTerpilih = (int) (request('year') ?? request('inc_year') ?? ($tahunNow ?? now()->format('Y'))))
+            
+            <!-- Hidden fields untuk menjaga parameter lain -->
+            <input type="hidden" name="year" value="{{ $tahunTerpilih }}">
+            <input type="hidden" name="inc_year" value="{{ $tahunTerpilih }}">
+            
+            <!-- Bulan dikirim ke keduanya: month & inc_month -->
+            <div class="relative">
+                <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18"/></svg>
+                <select name="month" aria-label="Pilih bulan"
+                        class="appearance-none pl-9 pr-8 py-1.5 text-sm rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-700"
+                        onchange="this.form.inc_month.value=this.value; this.form.submit();">
+                    @php($namaBulan=['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'])
+                    @for($m=1;$m<=12;$m++)
+                        <option value="{{ $m }}" {{ $bulanTerpilih===$m?'selected':'' }}>{{ $namaBulan[$m] }}</option>
+                    @endfor
+                </select>
+                <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" /></svg>
+            </div>
+            <input type="hidden" name="inc_month" value="{{ $bulanTerpilih }}">
+        </form>
+        
+        <!-- Link Pilih Tahun -->
+        <button type="button" onclick="openYearModal()" 
+                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Pilih Tahun ({{ (int) (request('year') ?? request('inc_year') ?? ($tahunNow ?? now()->format('Y'))) }})
+        </button>
+    </div>
+
+    <!-- Grafik Keuangan: Pendapatan (Net) vs Pengeluaran -->
     <div class="bg-white border border-gray-200 rounded-xl p-4 md:p-6 shadow dark:bg-gray-800 dark:border-gray-700">
-        <h2 class="text-base md:text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Statistik Barang Masuk & Keluar</h2>
-        <!-- Made chart container responsive -->
+        <h2 class="text-base md:text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Statistik Keuangan</h2>
         <div class="relative h-64 md:h-80 lg:h-96">
             <canvas id="barChart" class="w-full h-full"></canvas>
         </div>
     </div>
 
-    
+    <!-- Ringkasan Data (Tabel) -->
+    <div class="mt-6 bg-white border border-gray-200 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700">
+        <!-- Header + Controls -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 border-b border-gray-200 dark:border-gray-700">
+            <div>
+                <h3 class="text-base md:text-lg font-semibold text-gray-800 dark:text-gray-100">Ringkasan Bulanan</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Lihat data sesuai bulan & tahun yang dipilih</p>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-700 border-b border-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-semibold">Metrix</th>
+                        <th class="text-left px-4 py-3 font-semibold">Nilai</th>
+                        <th class="text-left px-4 py-3 font-semibold">Periode</th>
+                        <th class="text-left px-4 py-3 font-semibold">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-4 py-3 text-gray-700 dark:text-gray-200">Pendapatan (Net)</td>
+                        <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Rp {{ number_format(($monthlySubtotal ?? 0), 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $namaBulan[$bulanNow ?? now()->format('n')] ?? '' }} {{ $tahunNow ?? now()->format('Y') }}</td>
+                        <td class="px-4 py-3"><a href="{{ route('finance.income') }}" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300">Detail</a></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-4 py-3 text-gray-700 dark:text-gray-200">Pengeluaran</td>
+                        <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Rp {{ number_format(($combinedMonthlyExpense ?? 0), 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $namaBulan[$bulanNow ?? now()->format('n')] ?? '' }} {{ $tahunNow ?? now()->format('Y') }}</td>
+                        <td class="px-4 py-3"><a href="{{ route('finance.expense') }}" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300">Detail</a></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-4 py-3 text-gray-700 dark:text-gray-200">Total Karyawan</td>
+                        <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">{{ $totalKaryawan ?? 0 }} Orang</td>
+                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $tahunNow ?? now()->format('Y') }}</td>
+                        <td class="px-4 py-3"><a href="{{ route('employee.index') }}" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300">Kelola</a></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-4 py-3 text-gray-700 dark:text-gray-200">Total Invoice</td>
+                        <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">{{ $invoiceCount ?? 0 }} Invoice</td>
+                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $tahunNow ?? now()->format('Y') }}</td>
+                        <td class="px-4 py-3"><a href="{{ route('suratjalan.index') }}" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-300">Lihat</a></td>
+                    </tr>
+                    <!-- Baris Barang Masuk/Keluar dihapus -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     
     <!-- Total Pendapatan (paling bawah) -->
     
  </div>
+
+<!-- Modal Pilih Tahun -->
+<div id="yearModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Pilih Tahun</h3>
+                <button type="button" onclick="closeYearModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                @php($selectedYear = (int) (request('year') ?? request('inc_year') ?? ($tahunNow ?? now()->format('Y'))))
+                @foreach(($allYears ?? []) as $year)
+                    <button type="button" onclick="selectYear({{ $year }})" 
+                            class="year-btn px-3 py-2 text-sm font-medium rounded-md border transition-colors
+                                   {{ $selectedYear === (int) $year ? 
+                                      'bg-indigo-600 text-white border-indigo-600' : 
+                                      'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                        {{ $year }}
+                    </button>
+                @endforeach
+            </div>
+            <div class="mt-4 flex justify-end gap-2">
+                <button type="button" onclick="closeYearModal()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500 dark:hover:bg-gray-500">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
  @endsection
 
 
@@ -100,6 +207,44 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Modal functions
+function openYearModal() {
+    document.getElementById('yearModal').classList.remove('hidden');
+}
+
+function closeYearModal() {
+    document.getElementById('yearModal').classList.add('hidden');
+}
+
+function selectYear(year) {
+    const currentMonth = {{ (int)($bulanNow ?? now()->format('n')) }};
+    const currentIncMonth = {{ (int)($incMonth ?? now()->format('n')) }};
+    
+    // Redirect dengan parameter tahun yang dipilih
+    const url = new URL(window.location.href);
+    url.searchParams.set('year', year);
+    url.searchParams.set('inc_year', year);
+    url.searchParams.set('month', currentMonth);
+    url.searchParams.set('inc_month', currentIncMonth);
+    
+    window.location.href = url.toString();
+}
+
+// Close modal when clicking outside
+document.getElementById('yearModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeYearModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeYearModal();
+    }
+});
+
+// Chart.js code
 (function(){
   const canvasEl = document.getElementById('barChart');
   if (!canvasEl) return;

@@ -11,6 +11,7 @@ class UserController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('admin')->only(['index', 'store', 'destroy']);
     }
 
     public function create()
@@ -20,10 +21,6 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        if (! $request->user()?->is_admin) {
-            abort(403);
-        }
-
         $users = User::query()
             ->latest('id')
             ->paginate(10)
@@ -34,15 +31,12 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        // Only admin can create users; allow everyone to view the form
-        if (! $request->user()?->is_admin) {
-            return back()->with('error', 'Anda tidak memiliki izin untuk menambahkan user.')->withInput();
-        }
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'is_admin' => ['required', 'boolean'],
         ]);
 
         // Password hashing is handled by User model cast ('password' => 'hashed')
@@ -50,6 +44,7 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
+            'is_admin' => $validated['is_admin'],
         ]);
 
         return redirect()->route('users.create')->with('status', 'user-created');
@@ -57,10 +52,6 @@ class UserController extends Controller
 
     public function destroy(Request $request, User $user)
     {
-        if (! $request->user()?->is_admin) {
-            abort(403);
-        }
-
         if ($request->user()->id === $user->id) {
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
