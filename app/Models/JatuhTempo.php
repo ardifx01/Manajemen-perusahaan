@@ -20,6 +20,8 @@ class JatuhTempo extends Model
         'jumlah_terbayar',
         'sisa_tagihan',
         'status_pembayaran',
+        // Approval status: Pending | ACC | Reject
+        'status_approval',
         'hari_terlambat',
         'denda',
         'catatan',
@@ -34,35 +36,14 @@ class JatuhTempo extends Model
         'reminder_sent' => 'boolean',
     ];
 
-    // Accessor untuk menghitung hari terlambat
-    public function getHariTerlambatAttribute()
-    {
-        if ($this->status_pembayaran === 'Lunas') {
-            return 0;
-        }
-        
-        $today = Carbon::now();
-        $dueDate = Carbon::parse($this->tanggal_jatuh_tempo);
-        
-        return $today->gt($dueDate) ? $today->diffInDays($dueDate) : 0;
-    }
-
-    // Accessor untuk status overdue
-    public function getIsOverdueAttribute()
-    {
-        return $this->hari_terlambat > 0 && $this->status_pembayaran !== 'Lunas';
-    }
-
     // Accessor untuk warna status
     public function getStatusColorAttribute()
     {
         switch ($this->status_pembayaran) {
-            case 'Lunas':
+            case 'Accept':
                 return 'green';
-            case 'Sebagian':
+            case 'Pending':
                 return 'yellow';
-            case 'Belum Bayar':
-                return $this->is_overdue ? 'red' : 'gray';
             default:
                 return 'gray';
         }

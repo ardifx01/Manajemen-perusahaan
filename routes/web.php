@@ -66,7 +66,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::view('/invoice', 'dashboard.invoice')->name('invoice');
     Route::view('/tanda-terima', 'dashboard.tanda-terima')->name('tanda-terima');
-    Route::view('/jatuh-tempo', 'dashboard.jatuh-tempo')->name('jatuh-tempo');
+    // Route static berikut dinonaktifkan agar tidak menimpa controller JatuhTempoController@index
+    // Route::view('/jatuh-tempo', 'dashboard.jatuh-tempo')->name('jatuh-tempo');
     // Finance dashboard (Pendapatan & Pengeluaran)
     Route::get('/finance', [FinanceController::class, 'income'])->name('finance.index'); // alias utama diarahkan ke Pendapatan
     Route::get('/finance/pendapatan', [FinanceController::class, 'income'])->name('finance.income');
@@ -203,6 +204,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{jatuhTempo}', [JatuhTempoController::class, 'update'])->name('update');
         Route::delete('/{jatuhTempo}', [JatuhTempoController::class, 'destroy'])->name('destroy');
         Route::patch('/{jatuhTempo}/payment', [JatuhTempoController::class, 'markAsPaid'])->name('mark-paid');
+        Route::get('/{id}/send-reminder', [JatuhTempoController::class, 'sendReminder'])->name('send-reminder');
+        Route::post('/{id}/update-status', [JatuhTempoController::class, 'updateStatus'])->name('update-status');
+        Route::put('/{id}/update-deadline', [JatuhTempoController::class, 'updateDeadline'])->name('update-deadline');
     });
 
     /*
@@ -248,4 +252,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| API Routes for Notifications
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api')->group(function () {
+    Route::get('/jatuh-tempo/notifications', [App\Http\Controllers\Api\NotificationController::class, 'jatuhTempoNotifications']);
 });

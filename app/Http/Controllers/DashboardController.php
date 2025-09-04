@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\POItem;
+use App\Models\PO;
 use App\Models\Salary;
 use App\Models\Expense;
 use App\Models\BarangMasuk;
@@ -22,12 +23,6 @@ class DashboardController extends Controller
         $karyawanAktif = Employee::where('status', 'aktif')->count();
         $karyawanBaru = 0; // Tidak pakai filter tanggal, set manual ke 0 atau sesuai logika lain
 
-        // Total Invoice
-        $invoiceCount = Invoice::count();
-
-        $totalGajiKaryawan = Employee::where('status', 'aktif')->sum('gaji_pokok');
-        $rataRataGaji = $karyawanAktif > 0 ? $totalGajiKaryawan / $karyawanAktif : 0;
-
         // Filter terpisah:
         // - Pengeluaran: month/year
         // - Pendapatan: inc_month/inc_year
@@ -37,6 +32,15 @@ class DashboardController extends Controller
         $incYear  = (int) request()->get('inc_year', (int) Carbon::now()->format('Y'));
 
         // Hormati tahun yang dipilih user; tidak ada pemaksaan ke tahun tertentu
+
+        // Total Invoice (diambil dari Surat Jalan/PO) sesuai bulan & tahun terpilih
+        // Menggunakan field tanggal_po pada tabel PO
+        $invoiceCount = (int) PO::whereYear('tanggal_po', $tahunNow)
+            ->whereMonth('tanggal_po', $bulanNow)
+            ->count();
+
+        $totalGajiKaryawan = Employee::where('status', 'aktif')->sum('gaji_pokok');
+        $rataRataGaji = $karyawanAktif > 0 ? $totalGajiKaryawan / $karyawanAktif : 0;
 
         // Pendapatan bulanan (sum total item PO bulan incMonth/incYear + PPN 11%)
         $start = Carbon::create($incYear, $incMonth, 1)->startOfMonth();

@@ -181,7 +181,7 @@
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
                                 <x-table.action-buttons 
-                                    onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {!! json_encode($customer->delivery_note_pt) !!}, {!! json_encode($customer->delivery_note_tahun) !!}, {!! json_encode($customer->invoice_pt) !!}, {!! json_encode($customer->invoice_tahun) !!})"
+                                    onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {!! json_encode($customer->delivery_note_pt) !!}, {!! json_encode($customer->delivery_note_tahun) !!}, {!! json_encode($customer->invoice_pt) !!}, {!! json_encode($customer->invoice_tahun) !!}, {{ $customer->payment_terms_days ?? 30 }})"
                                     deleteAction="{{ route('customer.destroy', $customer->id) }}"
                                     confirmText="Yakin ingin menghapus customer ini?"
                                 />
@@ -243,7 +243,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                         <x-table.action-buttons 
-                            onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {!! json_encode($customer->delivery_note_pt) !!}, {!! json_encode($customer->delivery_note_tahun) !!}, {!! json_encode($customer->invoice_pt) !!}, {!! json_encode($customer->invoice_tahun) !!})"
+                            onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {!! json_encode($customer->delivery_note_pt) !!}, {!! json_encode($customer->delivery_note_tahun) !!}, {!! json_encode($customer->invoice_pt) !!}, {!! json_encode($customer->invoice_tahun) !!}, {{ $customer->payment_terms_days ?? 30 }})"
                             deleteAction="{{ route('customer.destroy', $customer->id) }}"
                             confirmText="Yakin ingin menghapus customer ini?"
                         />
@@ -313,6 +313,19 @@
                                class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
                                placeholder="Tahun">
                     </div>
+                </div>
+
+                <div>
+                    <label for="add_payment_terms_days" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Terms Pembayaran (Hari)</label>
+                    <div class="relative">
+                        <input type="number" id="add_payment_terms_days" name="payment_terms_days" min="1" max="365" value="30"
+                               class="w-full px-3 py-2 pr-12 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               placeholder="30">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <span class="text-gray-500 dark:text-slate-400 text-sm">hari</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Default jangka waktu pembayaran untuk customer ini</p>
                 </div>
 
                 <div class="space-y-2">
@@ -405,6 +418,19 @@
                     </div>
                 </div>
 
+                <div>
+                    <label for="edit_payment_terms_days" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Terms Pembayaran (Hari)</label>
+                    <div class="relative">
+                        <input type="number" id="edit_payment_terms_days" name="payment_terms_days" min="1" max="365" value="30"
+                               class="w-full px-3 py-2 pr-12 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                               placeholder="30">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <span class="text-gray-500 dark:text-slate-400 text-sm">hari</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Default jangka waktu pembayaran untuk customer ini</p>
+                </div>
+
                 <div class="space-y-2">
                     <div>
                         <label for="edit_address_1" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alamat 1</label>
@@ -456,7 +482,7 @@ function closeAddModal() {
     document.getElementById('addCustomerForm').reset();
 }
 
-function openEditModal(id, name, address1, address2, deliveryNotePt, deliveryNoteTahun, invoicePt, invoiceTahun) {
+function openEditModal(id, name, address1, address2, deliveryNotePt, deliveryNoteTahun, invoicePt, invoiceTahun, paymentTermsDays) {
     document.getElementById('editModal').classList.remove('hidden');
     document.getElementById('editModal').classList.add('flex');
     // Set action menggunakan base URL Laravel agar aman di subfolder
@@ -471,6 +497,7 @@ function openEditModal(id, name, address1, address2, deliveryNotePt, deliveryNot
     document.getElementById('edit_delivery_note_tahun').value = deliveryNoteTahun || '';
     document.getElementById('edit_invoice_pt').value = invoicePt || '';
     document.getElementById('edit_invoice_tahun').value = invoiceTahun || '';
+    document.getElementById('edit_payment_terms_days').value = paymentTermsDays || 30;
     document.getElementById('edit_address_1').value = address1 || '';
     document.getElementById('edit_address_2').value = address2 || '';
     document.getElementById('edit_name').focus();

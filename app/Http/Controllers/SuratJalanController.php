@@ -7,10 +7,12 @@ use App\Models\SuratJalan;
 use App\Models\PO;
 use App\Models\Produk;
 use App\Models\Kendaraan;
+use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
 use App\Exports\SuratJalanExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use App\Models\JatuhTempo;
 
 class SuratJalanController extends Controller
 {
@@ -142,7 +144,38 @@ class SuratJalanController extends Controller
                 ->withInput();
         }
 
-        PO::create($data);
+        $po = PO::create($data);
+
+        // Sinkronisasi ke Jatuh Tempo: gunakan payment_terms_days bila ada, fallback +1 bulan
+        try {
+            $invoiceKey = $po->no_invoice ?: $po->no_surat_jalan; // pakai invoice jika ada, jika tidak pakai no_surat_jalan
+            $tanggalInvoice = Carbon::parse($po->tanggal_po);
+            // Cari terms customer berdasarkan nama pada PO
+            $customer = Customer::where('name', $po->customer)->first();
+            $termsDays = (int) (($customer->payment_terms_days ?? 0));
+            if ($termsDays > 0) {
+                $tanggalJatuhTempo = (clone $tanggalInvoice)->addDays($termsDays);
+            } else {
+                $tanggalJatuhTempo = (clone $tanggalInvoice)->addMonth();
+            }
+
+            JatuhTempo::updateOrCreate(
+                ['no_invoice' => $invoiceKey],
+                [
+                    'no_po' => $po->no_po,
+                    'customer' => $po->customer,
+                    'tanggal_invoice' => $tanggalInvoice->format('Y-m-d'),
+                    'tanggal_jatuh_tempo' => $tanggalJatuhTempo->format('Y-m-d'),
+                    'jumlah_tagihan' => (int) ($po->total ?? 0),
+                    'jumlah_terbayar' => 0,
+                    'sisa_tagihan' => (int) ($po->total ?? 0),
+                    'status_pembayaran' => 'Belum Bayar',
+                    'status_approval' => 'Pending',
+                ]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('SJ Sync JatuhTempo gagal: ' . $e->getMessage());
+        }
 
         return redirect()->route('suratjalan.index')
             ->with('success', 'Surat jalan berhasil ditambahkan');
@@ -194,6 +227,41 @@ class SuratJalanController extends Controller
 
         $suratJalan->update($data);
 
+        // Sinkronisasi ke Jatuh Tempo (update): gunakan payment_terms_days dan pertahankan jumlah_terbayar jika ada
+        try {
+            $invoiceKey = $suratJalan->no_invoice ?: $suratJalan->no_surat_jalan;
+            $tanggalInvoice = Carbon::parse($suratJalan->tanggal_po);
+            // Cari terms customer berdasarkan nama pada PO
+            $customer = Customer::where('name', $suratJalan->customer)->first();
+            $termsDays = (int) (($customer->payment_terms_days ?? 0));
+            if ($termsDays > 0) {
+                $tanggalJatuhTempo = (clone $tanggalInvoice)->addDays($termsDays);
+            } else {
+                $tanggalJatuhTempo = (clone $tanggalInvoice)->addMonth();
+            }
+
+            $existingJT = JatuhTempo::where('no_invoice', $invoiceKey)->first();
+            $jumlahTerbayar = $existingJT ? (int) ($existingJT->jumlah_terbayar ?? 0) : 0;
+            $jumlahTagihan = (int) ($suratJalan->total ?? 0);
+
+            JatuhTempo::updateOrCreate(
+                ['no_invoice' => $invoiceKey],
+                [
+                    'no_po' => $suratJalan->no_po,
+                    'customer' => $suratJalan->customer,
+                    'tanggal_invoice' => $tanggalInvoice->format('Y-m-d'),
+                    'tanggal_jatuh_tempo' => $tanggalJatuhTempo->format('Y-m-d'),
+                    'jumlah_tagihan' => $jumlahTagihan,
+                    'jumlah_terbayar' => $jumlahTerbayar,
+                    'sisa_tagihan' => max(0, $jumlahTagihan - $jumlahTerbayar),
+                    'status_pembayaran' => $jumlahTerbayar >= $jumlahTagihan ? 'Lunas' : ($jumlahTerbayar > 0 ? 'Sebagian' : 'Belum Bayar'),
+                    'status_approval' => $existingJT->status_approval ?? 'Pending',
+                ]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('SJ Sync JatuhTempo (update) gagal: ' . $e->getMessage());
+        }
+
         return redirect()->route('suratjalan.index')
             ->with('success', 'Surat jalan berhasil diupdate');
     }
@@ -205,9 +273,20 @@ class SuratJalanController extends Controller
     {
         try {
             $suratJalan = PO::findOrFail($id);
+            
+            // Simpan bulan dan tahun dari data yang akan dihapus
+            $month = $suratJalan->tanggal_po ? date('n', strtotime($suratJalan->tanggal_po)) : null;
+            $year = $suratJalan->tanggal_po ? date('Y', strtotime($suratJalan->tanggal_po)) : null;
+            
             $suratJalan->delete();
 
-            return redirect()->route('suratjalan.index')
+            // Redirect dengan parameter bulan dan tahun yang sama
+            $redirectUrl = route('suratjalan.index');
+            if ($month && $year) {
+                $redirectUrl .= "?month={$month}&year={$year}";
+            }
+
+            return redirect($redirectUrl)
                 ->with('success', 'Surat jalan berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->route('suratjalan.index')

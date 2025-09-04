@@ -86,11 +86,22 @@
                                         data-invoice-nomor="{{ $invoiceNomor }}"
                                         data-invoice-pt="{{ $invoicePt }}"
                                         data-invoice-tahun="{{ $invoiceTahun }}"
+                                        data-payment-terms="{{ $c->payment_terms_days ?? 30 }}"
+                                        data-debug-terms="{{ $c->payment_terms_days }}"
                                         @selected(old('customer_id', $po->customer_id ?? '') == $c->id)>
                                     {{ $c->name }}
                                 </option>
                             @endforeach
                         </select>
+                        <div id="customer-payment-info" class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg hidden">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-info-circle text-blue-600 dark:text-blue-400"></i>
+                                <div class="text-sm">
+                                    <span class="font-medium text-blue-800 dark:text-blue-300">Payment Terms:</span>
+                                    <span id="payment-terms-text" class="text-blue-700 dark:text-blue-200"></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- No PO -->
@@ -481,6 +492,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCustomerAddresses() {
         const selected = customerSelect.options[customerSelect.selectedIndex];
+        const paymentInfo = document.getElementById('customer-payment-info');
+        const paymentTermsText = document.getElementById('payment-terms-text');
+        
         if (selected.value) {
             const address1 = selected.getAttribute('data-address1') || '';
             const address2 = selected.getAttribute('data-address2') || '';
@@ -492,6 +506,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const invoiceNomor = selected.getAttribute('data-invoice-nomor') || '';
             const invoicePt = selected.getAttribute('data-invoice-pt') || '';
             const invoiceTahun = selected.getAttribute('data-invoice-tahun') || '';
+            
+            const paymentTerms = selected.getAttribute('data-payment-terms') || '30';
+            const debugTerms = selected.getAttribute('data-debug-terms');
+            
+            // Debug log
+            console.log('Customer selected:', selected.textContent);
+            console.log('Payment terms from data-payment-terms:', paymentTerms);
+            console.log('Payment terms from data-debug-terms:', debugTerms);
+            console.log('Raw payment_terms_days value:', debugTerms);
+            
+            // Show payment terms notification
+            paymentTermsText.textContent = `${paymentTerms} hari setelah tanggal invoice (Debug: ${debugTerms})`;
+            paymentInfo.classList.remove('hidden');
+            paymentInfo.classList.add('fade-in');
             
             // Selalu isi ulang dari customer pilihan dan set readonly agar konsisten
             address1Input.readOnly = false;
@@ -523,6 +551,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 address1Input.classList.remove('border-yellow-400', 'bg-yellow-50');
             }
+        } else {
+            // Hide payment terms notification when no customer selected
+            paymentInfo.classList.add('hidden');
+            paymentInfo.classList.remove('fade-in');
         }
     }
 

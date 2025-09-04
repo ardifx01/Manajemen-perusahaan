@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
         (function(){
             try {
@@ -183,8 +184,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                 </svg>
             </button>
-
+            
             <div x-show="barangOpen" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
+                <a href="{{ route('customer.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('customer.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11c1.657 0 3-1.567 3-3.5S17.657 4 16 4s-3 1.567-3 3.5 1.343 3.5 3 3.5zM8 11c1.657 0 3-1.567 3-3.5S9.657 4 8 4 5 5.567 5 7.5 6.343 11 8 11zm0 2c-2.761 0-5 2.015-5 4.5V20h10v-2.5c0-2.485-2.239-4.5-5-4.5zm8 0c-.725 0-1.414.131-2.047.364 1.22.903 2.047 2.235 2.047 3.886V20h6v-2.75c0-2.351-2.239-4.25-6-4.25z"/></svg>
+                    <span>Data Customer</span>
+                </a>
                 <a href="{{ route('produk.index') }}"
                    class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('produk.*') ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V7a2 2 0 00-2-2h-3V3H9v2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"/></svg>
@@ -194,11 +200,6 @@
                    class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('kendaraan.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-2 3-3h6l3 3 2 2v6h-2a2 2 0 01-4 0H9a2 2 0 01-4 0H3v-6z"/></svg>
                     <span>Data Kendaraan</span>
-                </a>
-                <a href="{{ route('customer.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('customer.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11c1.657 0 3-1.567 3-3.5S17.657 4 16 4s-3 1.567-3 3.5 1.343 3.5 3 3.5zM8 11c1.657 0 3-1.567 3-3.5S9.657 4 8 4 5 5.567 5 7.5 6.343 11 8 11zm0 2c-2.761 0-5 2.015-5 4.5V20h10v-2.5c0-2.485-2.239-4.5-5-4.5zm8 0c-.725 0-1.414.131-2.047.364 1.22.903 2.047 2.235 2.047 3.886V20h6v-2.75c0-2.351-2.239-4.25-6-4.25z"/></svg>
-                    <span>Data Customer</span>
                 </a>
                 <a href="{{ route('pengirim.index') }}"
                    class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('pengirim.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
@@ -326,6 +327,91 @@
                 <h1 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-gray-100">@yield('title', 'Dashboard')</h1>
             </div>
             <div class="flex items-center gap-1 md:gap-2">
+                <!-- Notification Bell -->
+                <div x-data="notificationBell()" x-init="init()" class="relative">
+                    <button @click="toggleDropdown()" 
+                            class="relative flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+                            title="Notifikasi Jatuh Tempo">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span x-show="hasOverdue || hasToday || hasUpcoming" 
+                              class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full"
+                              x-text="totalNotifications"></span>
+                    </button>
+                    
+                    <!-- Dropdown -->
+                    <div x-show="dropdownOpen" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="dropdownOpen = false"
+                         class="absolute right-0 top-12 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                        
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Notifikasi Jatuh Tempo</h3>
+                        </div>
+                        
+                        <div class="max-h-80 overflow-y-auto">
+                            <!-- Overdue notifications -->
+                            <template x-for="item in overdueItems" :key="item.id">
+                                <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-red-50 dark:bg-red-900/20">
+                                    <div class="flex items-start gap-3">
+                                        <i class="fa-solid fa-exclamation-triangle text-red-500 mt-1"></i>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100" x-text="item.no_invoice"></p>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400" x-text="item.customer"></p>
+                                            <p class="text-xs text-red-600 dark:text-red-400 font-medium" x-text="'Terlambat ' + Math.abs(item.daysLeft) + ' hari'"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Today notifications -->
+                            <template x-for="item in todayItems" :key="item.id">
+                                <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-orange-50 dark:bg-orange-900/20">
+                                    <div class="flex items-start gap-3">
+                                        <i class="fa-solid fa-clock text-orange-500 mt-1"></i>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100" x-text="item.no_invoice"></p>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400" x-text="item.customer"></p>
+                                            <p class="text-xs text-orange-600 dark:text-orange-400 font-medium">Jatuh tempo hari ini</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Upcoming notifications -->
+                            <template x-for="item in upcomingItems" :key="item.id">
+                                <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-yellow-50 dark:bg-yellow-900/20">
+                                    <div class="flex items-start gap-3">
+                                        <i class="fa-solid fa-calendar-days text-yellow-500 mt-1"></i>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100" x-text="item.no_invoice"></p>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400" x-text="item.customer"></p>
+                                            <p class="text-xs text-yellow-600 dark:text-yellow-400 font-medium" x-text="item.daysLeft + ' hari lagi'"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- No notifications -->
+                            <div x-show="!hasOverdue && !hasToday && !hasUpcoming" class="p-4 text-center">
+                                <i class="fa-solid fa-check-circle text-green-500 text-2xl mb-2"></i>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Tidak ada jatuh tempo mendesak</p>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+                            <a href="{{ route('jatuh-tempo.index') }}" 
+                               class="block w-full text-center text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium">
+                                Lihat Semua Jatuh Tempo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
                 <button id="theme-toggle" title="Toggle Tema" class="relative flex items-center w-[3.75rem] h-8 rounded-full bg-gray-200 dark:bg-gray-700 p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <span class="absolute top-1 left-1 flex items-center justify-center h-6 w-6 rounded-full bg-white shadow-md transform transition-transform duration-300 dark:translate-x-7"></span>
                     <span class="relative z-10 w-6 h-6 flex items-center justify-center">
@@ -370,7 +456,51 @@
         })();
     </script>
 
-    
+    <script>
+        function notificationBell() {
+            return {
+                dropdownOpen: false,
+                overdueItems: [],
+                todayItems: [],
+                upcomingItems: [],
+                hasOverdue: false,
+                hasToday: false,
+                hasUpcoming: false,
+                totalNotifications: 0,
+
+                init() {
+                    this.fetchNotifications();
+                    // Refresh notifications every 5 minutes
+                    setInterval(() => {
+                        this.fetchNotifications();
+                    }, 300000);
+                },
+
+                toggleDropdown() {
+                    this.dropdownOpen = !this.dropdownOpen;
+                },
+
+                async fetchNotifications() {
+                    try {
+                        const response = await fetch('/api/jatuh-tempo/notifications');
+                        const data = await response.json();
+                        
+                        this.overdueItems = data.overdue || [];
+                        this.todayItems = data.today || [];
+                        this.upcomingItems = data.upcoming || [];
+                        
+                        this.hasOverdue = this.overdueItems.length > 0;
+                        this.hasToday = this.todayItems.length > 0;
+                        this.hasUpcoming = this.upcomingItems.length > 0;
+                        
+                        this.totalNotifications = this.overdueItems.length + this.todayItems.length + this.upcomingItems.length;
+                    } catch (error) {
+                        console.error('Error fetching notifications:', error);
+                    }
+                }
+            }
+        }
+    </script>
 
     @stack('modals')
     @stack('scripts')

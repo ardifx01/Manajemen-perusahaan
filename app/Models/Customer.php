@@ -20,6 +20,7 @@ class Customer extends Model
         'address_2',
         'delivery_note_number', // Using single field instead of 3 separate fields
         'invoice_number',
+        'payment_terms_days', // Default payment terms in days
     ];
 
     public function getDeliveryNoteNomorAttribute()

@@ -9,6 +9,7 @@ use App\Models\Kendaraan;
 use App\Models\Produk;
 use App\Models\Customer;
 use App\Models\Pengirim; // Tambahkan model Pengirim
+use App\Models\JatuhTempo; // Sinkronisasi Jatuh Tempo dari PO
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -200,6 +201,36 @@ class POController extends Controller
             IOFactory::createWriter($spreadsheet, 'Xls')->save($savePath);
         }
 
+        // === Sinkronisasi ke Jatuh Tempo ===
+        try {
+            $invoiceKey = $noInvoice ?: $noSuratJalan; // gunakan invoice jika ada, fallback ke no_surat_jalan (unik)
+            $tanggalInvoice = \Carbon\Carbon::parse($po->tanggal_po);
+            // Gunakan payment_terms_days dari customer jika tersedia, fallback +1 bulan
+            $termsDays = (int) (($customer->payment_terms_days ?? 0));
+            if ($termsDays > 0) {
+                $tanggalJatuhTempo = (clone $tanggalInvoice)->addDays($termsDays);
+            } else {
+                $tanggalJatuhTempo = (clone $tanggalInvoice)->addMonth();
+            }
+
+            JatuhTempo::updateOrCreate(
+                ['no_invoice' => $invoiceKey],
+                [
+                    'no_po' => $po->no_po,
+                    'customer' => $po->customer,
+                    'tanggal_invoice' => $tanggalInvoice->format('Y-m-d'),
+                    'tanggal_jatuh_tempo' => $tanggalJatuhTempo->format('Y-m-d'),
+                    'jumlah_tagihan' => (int) ($po->total ?? 0),
+                    'jumlah_terbayar' => 0,
+                    'sisa_tagihan' => (int) ($po->total ?? 0),
+                    'status_pembayaran' => 'Belum Bayar',
+                    'status_approval' => 'Pending',
+                ]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Sync JatuhTempo gagal: ' . $e->getMessage());
+        }
+
         return redirect()->route('po.index')->with('success', 'Data PO berhasil disimpan dan diekspor.');
     }
 
@@ -328,6 +359,41 @@ class POController extends Controller
                 ]);
             }
         });
+
+        // === Sinkronisasi ke Jatuh Tempo (update) ===
+        try {
+            $invoiceKey = $noInvoice ?: $noSuratJalan;
+            $tanggalInvoice = \Carbon\Carbon::parse($po->tanggal_po);
+            // Gunakan payment_terms_days dari customer jika tersedia, fallback +1 bulan
+            $termsDays = (int) (($customer->payment_terms_days ?? 0));
+            if ($termsDays > 0) {
+                $tanggalJatuhTempo = (clone $tanggalInvoice)->addDays($termsDays);
+            } else {
+                $tanggalJatuhTempo = (clone $tanggalInvoice)->addMonth();
+            }
+
+            // Pertahankan jumlah_terbayar jika sudah ada data sebelumnya
+            $existingJT = JatuhTempo::where('no_invoice', $invoiceKey)->first();
+            $jumlahTerbayar = $existingJT ? (int) ($existingJT->jumlah_terbayar ?? 0) : 0;
+            $jumlahTagihan = (int) ($po->total ?? 0);
+
+            JatuhTempo::updateOrCreate(
+                ['no_invoice' => $invoiceKey],
+                [
+                    'no_po' => $po->no_po,
+                    'customer' => $po->customer,
+                    'tanggal_invoice' => $tanggalInvoice->format('Y-m-d'),
+                    'tanggal_jatuh_tempo' => $tanggalJatuhTempo->format('Y-m-d'),
+                    'jumlah_tagihan' => $jumlahTagihan,
+                    'jumlah_terbayar' => $jumlahTerbayar,
+                    'sisa_tagihan' => max(0, $jumlahTagihan - $jumlahTerbayar),
+                    'status_pembayaran' => $jumlahTerbayar >= $jumlahTagihan ? 'Lunas' : ($jumlahTerbayar > 0 ? 'Sebagian' : 'Belum Bayar'),
+                    'status_approval' => $existingJT->status_approval ?? 'Pending',
+                ]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Sync JatuhTempo (update) gagal: ' . $e->getMessage());
+        }
 
         return redirect()->route('po.index')->with('success', 'Data PO berhasil diperbarui.');
     }
