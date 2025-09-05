@@ -22,13 +22,25 @@
                 <div id="exportControls" class="hidden bg-gray-100 text-gray-700 dark:bg-white/20 dark:text-white backdrop-blur-sm rounded-lg px-2 py-1 text-center sm:text-left">
                     <span id="selectedCount" class="font-medium text-xs">0 dipilih</span>
                 </div>
-                <button id="exportBtn" onclick="exportSelected()"
-                   class="w-full sm:w-auto h-9 px-4 rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 transition-colors text-sm inline-flex items-center justify-center leading-none">
+                <!-- Export Surat Jalan -->
+                <button id="exportBtn" onclick="exportSelected('surat_jalan')"
+                        class="w-full sm:w-auto h-9 px-4 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors text-sm inline-flex items-center justify-center leading-none shadow-sm">
+                    <span class="mr-2 inline-flex items-center px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-bold tracking-wide">SJ</span>
                     <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    Export Excel
+                    Export Surat Jalan
+                </button>
+                <!-- Export Tanda Terima -->
+                <button id="exportBtnTT" onclick="exportSelected('tanda_terima')"
+                        class="w-full sm:w-auto h-9 px-4 rounded-lg font-semibold text-emerald-700 dark:text-emerald-300 bg-transparent border border-emerald-600 hover:bg-emerald-50 dark:hover:bg-white/10 transition-colors text-sm inline-flex items-center justify-center leading-none shadow-sm">
+                    <span class="mr-2 inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-bold tracking-wide">TT</span>
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Export Tanda Terima
                 </button>
                 <button type="button" onclick="generateInvoice()" class="w-full sm:w-auto h-9 px-4 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors text-sm inline-flex items-center justify-center leading-none ml-0 sm:ml-0">
                     <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,6 +223,7 @@
 <form id="exportForm" action="{{ route('suratjalan.export') }}" method="POST" style="display: none;">
     @csrf
     <input type="hidden" name="selected_ids" id="selectedIds">
+    <input type="hidden" name="export_type" id="exportType" value="surat_jalan">
 </form>
 
 <!-- PDF Download Form (persistent to avoid double-click issue) -->
@@ -576,38 +589,57 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function exportSelected() {
+function exportSelected(type = 'surat_jalan') {
     const selected = document.querySelector('.row-radio:checked');
-    const selectedIds = selected ? [selected.value] : [];
-    console.log(selectedIds); // Pastikan ID yang dikirim benar
-
-    const exportBtn = document.getElementById('exportBtn');
+    // Wajib pilih satu data seperti tombol Invoice dan PDF
+    if (!selected) {
+        alert(type === 'tanda_terima' ? 'Pilih satu data untuk export Tanda Terima' : 'Pilih satu data untuk export Surat Jalan');
+        return;
+    }
+    const selectedIds = [selected.value];
     const exportForm = document.getElementById('exportForm');
     const selectedIdsInput = document.getElementById('selectedIds');
+    const exportTypeInput = document.getElementById('exportType');
 
-    // Show loading state
-    exportBtn.innerHTML = `
-        <svg class="animate-spin -ml-1 mr-1 h-3 w-3 text-yellow-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Mengekspor...
-    `;
-    exportBtn.disabled = true;
+    // Tentukan tombol yang digunakan untuk loading state
+    const btn = type === 'tanda_terima' ? document.getElementById('exportBtnTT') : document.getElementById('exportBtn');
 
-    // Set selected IDs (or empty) and submit form (empty => export all)
-    selectedIdsInput.value = selectedIds.length > 0 ? JSON.stringify(selectedIds) : '';
+    // Show loading state pada tombol terkait
+    if (btn) {
+        btn.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-1 h-3 w-3 text-yellow-100" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Mengekspor...
+        `;
+        btn.disabled = true;
+    }
+
+    // Set tipe export & selected IDs
+    if (exportTypeInput) exportTypeInput.value = type;
+    selectedIdsInput.value = JSON.stringify(selectedIds);
     exportForm.submit();
 
-    // Reset button after a delay
+    // Reset tombol setelah beberapa detik (fallback bila browser tidak auto reset)
     setTimeout(() => {
-        exportBtn.innerHTML = `
-            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            Export Excel
-        `;
-        exportBtn.disabled = false;
+        if (!btn) return;
+        if (type === 'tanda_terima') {
+            btn.innerHTML = `
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export Tanda Terima
+            `;
+        } else {
+            btn.innerHTML = `
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export Surat Jalan
+            `;
+        }
+        btn.disabled = false;
     }, 3000);
 }
 

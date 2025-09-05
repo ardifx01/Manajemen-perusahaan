@@ -106,8 +106,13 @@
             </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
-            <div class="px-5 py-4">
+            <div class="px-5 py-4 flex justify-between items-center">
                 <h3 class="text-base font-semibold text-gray-800 dark:text-gray-100">Rekap Pengeluaran Lain per Bulan ({{ $tahunNow }})</h3>
+                <button @click="openAddExpenseModal()" 
+                        class="group relative inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-600 dark:hover:to-indigo-600 hover:scale-105"
+                        title="Tambah Pengeluaran">
+                    <i class="fa-solid fa-plus text-sm group-hover:rotate-90 transition-all duration-300"></i>
+                </button>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
@@ -234,6 +239,125 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Tambah Pengeluaran -->
+    <div x-show="addExpenseModalOpen" x-cloak 
+         x-transition:enter="transition ease-out duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100" 
+         x-transition:leave="transition ease-in duration-200" 
+         x-transition:leave-start="opacity-100" 
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm dark:bg-black/80" @click="closeAddExpenseModal()"></div>
+        <div x-show="addExpenseModalOpen" 
+             x-transition:enter="transition ease-out duration-300 transform" 
+             x-transition:enter-start="opacity-0 scale-95 translate-y-4" 
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0" 
+             x-transition:leave="transition ease-in duration-200 transform" 
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0" 
+             x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+             class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
+            
+            <!-- Header dengan gradient -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-receipt text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Tambah Pengeluaran</h3>
+                            <p class="text-blue-100 text-sm">Catat pengeluaran baru</p>
+                        </div>
+                    </div>
+                    <button @click="closeAddExpenseModal()" 
+                            class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center">
+                        <i class="fa-solid fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Form Content -->
+            <div class="p-6 bg-gray-50 dark:bg-slate-800">
+                <form @submit.prevent="submitExpense()" class="space-y-5">
+                    <!-- Tanggal -->
+                    <div class="space-y-2">
+                        <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <i class="fa-solid fa-calendar-days text-blue-500 mr-2"></i>
+                            Tanggal Pengeluaran
+                        </label>
+                        <input type="date" x-model="expenseForm.tanggal" required 
+                               class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 transition-all duration-200">
+                    </div>
+                    
+                    <!-- Jenis -->
+                    <div class="space-y-2">
+                        <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <i class="fa-solid fa-tags text-indigo-500 mr-2"></i>
+                            Jenis Pengeluaran
+                        </label>
+                        <div class="relative">
+                            <select x-model="expenseForm.jenis" required 
+                                    class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 transition-all duration-200 appearance-none">
+                                <option value="">Pilih Jenis Pengeluaran</option>
+                                <option value="Operasional">🏢 Operasional</option>
+                                <option value="Pemeliharaan">🔧 Pemeliharaan</option>
+                                <option value="Transportasi">🚗 Transportasi</option>
+                                <option value="Konsumsi">🍽️ Konsumsi</option>
+                                <option value="Utilitas">⚡ Utilitas</option>
+                                <option value="Peralatan">🛠️ Peralatan</option>
+                                <option value="Lain-lain">📋 Lain-lain</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Deskripsi -->
+                    <div class="space-y-2">
+                        <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <i class="fa-solid fa-file-text text-green-500 mr-2"></i>
+                            Deskripsi
+                        </label>
+                        <textarea x-model="expenseForm.deskripsi" rows="3" required 
+                                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 transition-all duration-200 resize-none" 
+                                  placeholder="Masukkan deskripsi pengeluaran..."></textarea>
+                    </div>
+                    
+                    <!-- Jumlah -->
+                    <div class="space-y-2">
+                        <label class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <i class="fa-solid fa-money-bill-wave text-yellow-500 mr-2"></i>
+                            Jumlah (Rp)
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium">Rp</span>
+                            <input type="text" x-model="expenseForm.amount_display" @input="formatAmountInput($event)" required 
+                                   class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 transition-all duration-200" 
+                                   placeholder="0">
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-slate-600">
+                        <button type="button" @click="closeAddExpenseModal()" 
+                                class="px-6 py-3 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-600 transition-all duration-200 font-medium">
+                            <i class="fa-solid fa-times mr-2"></i>Batal
+                        </button>
+                        <button type="submit" :disabled="submitting" 
+                                class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl">
+                            <span x-show="!submitting" class="flex items-center">
+                                <i class="fa-solid fa-save mr-2"></i>Simpan
+                            </span>
+                            <span x-show="submitting" class="flex items-center">
+                                <i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -254,6 +378,16 @@ function expensePage(initialFilters, salaryRows, otherExpRows, salaryTotal, othe
         detailTitle: '',
         detailType: 'salary',
         detailRows: [],
+        // Add expense modal state
+        addExpenseModalOpen: false,
+        submitting: false,
+        expenseForm: {
+            tanggal: new Date().toISOString().split('T')[0],
+            jenis: '',
+            deskripsi: '',
+            amount: 0,
+            amount_display: ''
+        },
         init(){},
         formatCurrency(v){ try { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v||0); } catch(e){ return `Rp ${Number(v||0).toLocaleString('id-ID')}` } },
         filterUrl(){
@@ -282,6 +416,70 @@ function expensePage(initialFilters, salaryRows, otherExpRows, salaryTotal, othe
         selectYear(year){
             this.filters.year = String(year);
             this.closeYearModal();
+        },
+        // Add expense methods
+        openAddExpenseModal(){
+            this.addExpenseModalOpen = true;
+            this.resetExpenseForm();
+        },
+        closeAddExpenseModal(){
+            this.addExpenseModalOpen = false;
+            this.resetExpenseForm();
+        },
+        resetExpenseForm(){
+            this.expenseForm = {
+                tanggal: new Date().toISOString().split('T')[0],
+                jenis: '',
+                deskripsi: '',
+                amount: 0,
+                amount_display: ''
+            };
+        },
+        formatAmountInput(event){
+            let value = event.target.value.replace(/[^0-9]/g, '');
+            if (value) {
+                this.expenseForm.amount = parseInt(value);
+                this.expenseForm.amount_display = new Intl.NumberFormat('id-ID').format(parseInt(value));
+            } else {
+                this.expenseForm.amount = 0;
+                this.expenseForm.amount_display = '';
+            }
+        },
+        async submitExpense(){
+            if (this.submitting) return;
+            
+            try {
+                this.submitting = true;
+                
+                const formData = new FormData();
+                formData.append('tanggal', this.expenseForm.tanggal);
+                formData.append('jenis', this.expenseForm.jenis);
+                formData.append('deskripsi', this.expenseForm.deskripsi);
+                formData.append('amount', this.expenseForm.amount);
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                
+                const response = await fetch('{{ route("finance.expense.store") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    this.closeAddExpenseModal();
+                    // Refresh page to show new data
+                    window.location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert('Error: ' + (errorData.message || 'Gagal menyimpan pengeluaran'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan pengeluaran');
+            } finally {
+                this.submitting = false;
+            }
         }
     }
 }

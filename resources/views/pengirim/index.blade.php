@@ -184,23 +184,39 @@
 </div>
 
 <!-- Add Modal -->
-<div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-slate-100">Tambah Pengirim</h2>
-            <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors duration-200">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+<div id="addModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm dark:bg-black/80 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-700 transform scale-95 translate-y-4 transition-all duration-300">
+        <!-- Header dengan gradient -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-user text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Tambah Pengirim</h3>
+                        <p class="text-blue-100 text-sm">Lengkapi informasi pengirim baru</p>
+                    </div>
+                </div>
+                <button onclick="closeAddModal()" 
+                        class="w-10 h-10 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center">
+                    <i class="fa-solid fa-times text-lg"></i>
+                </button>
+            </div>
         </div>
-        <form action="{{ route('pengirim.store') }}" method="POST" id="addForm">
+        <!-- Form Content -->
+        <form action="{{ route('pengirim.store') }}" method="POST" id="addForm" class="p-6">
             @csrf
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Nama Pengirim <span class="text-red-500">*</span></label>
-                    <input type="text" name="nama" required 
-                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 @error('nama') border-red-500 @enderror"
+            <div class="space-y-6">
+                <!-- Nama Pengirim -->
+                <div class="space-y-2">
+                    <label for="add_nama" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-user text-blue-500"></i>
+                        <span>Nama Pengirim</span>
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="add_nama" name="nama" required 
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200 @error('nama') border-red-500 @enderror"
                            placeholder="Masukkan nama pengirim"
                            value="{{ old('nama') }}">
                     @error('nama')
@@ -208,17 +224,21 @@
                     @enderror
                 </div>
             </div>
-            <div class="flex justify-end space-x-3 mt-6">
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200 dark:border-slate-700">
                 <button type="button" onclick="closeAddModal()" 
-                        class="px-6 py-3 text-gray-600 dark:text-slate-200 bg-gray-100 dark:bg-slate-700 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-slate-400 focus:ring-opacity-50">
+                        class="px-6 py-3 text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 font-medium">
+                    <i class="fa-solid fa-times mr-2"></i>
                     Batal
                 </button>
                 <button type="submit" id="addSubmitBtn"
-                        class="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 flex items-center">
-                    <span id="addBtnText">Simpan</span>
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center">
+                    <i class="fa-solid fa-save mr-2"></i>
+                    <span id="addBtnText">Simpan Pengirim</span>
                     <svg id="addLoading" class="animate-spin ml-2 h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </button>
             </div>
@@ -307,18 +327,46 @@ window.addEventListener('DOMContentLoaded', function() {
     applyFilter();
 });
 function openAddModal() {
-    document.getElementById('addModal').classList.remove('hidden');
-    document.getElementById('addModal').classList.add('flex');
+    const modal = document.getElementById('addModal');
+    const modalContent = modal.querySelector('div');
+    
+    // Tampilkan modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    
+    // Animasi masuk
     setTimeout(() => {
-        document.querySelector('#addModal input[name="nama"]').focus();
-    }, 100);
+        modal.classList.remove('opacity-0');
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('scale-95', 'translate-y-4');
+        modalContent.classList.add('scale-100', 'translate-y-0');
+    }, 10);
+    
+    // Focus ke input pertama
+    setTimeout(() => {
+        document.getElementById('add_nama').focus();
+    }, 300);
 }
 
 function closeAddModal() {
-    document.getElementById('addModal').classList.add('hidden');
-    document.getElementById('addModal').classList.remove('flex');
-    document.getElementById('addForm').reset();
-    resetAddButton();
+    const modal = document.getElementById('addModal');
+    const modalContent = modal.querySelector('div');
+    
+    // Animasi keluar
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    modalContent.classList.remove('scale-100', 'translate-y-0');
+    modalContent.classList.add('scale-95', 'translate-y-4');
+    
+    // Sembunyikan modal setelah animasi selesai
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+        document.getElementById('addForm').reset();
+        resetAddButton();
+    }, 300);
 }
 
 function openEditModal(id, nama) {

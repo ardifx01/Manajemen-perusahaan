@@ -12,7 +12,6 @@ use App\Http\Controllers\{
     PengirimController, // Added PengirimController import
     SuratJalanController,
     InvoiceController,
-    TandaTerimaController,
     JatuhTempoController,
     EmployeeController,
     SalaryController,
@@ -65,7 +64,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::view('/invoice', 'dashboard.invoice')->name('invoice');
-    Route::view('/tanda-terima', 'dashboard.tanda-terima')->name('tanda-terima');
+    // Route halaman Tanda Terima dihapus: fitur dipusatkan pada halaman Surat Jalan
     // Route static berikut dinonaktifkan agar tidak menimpa controller JatuhTempoController@index
     // Route::view('/jatuh-tempo', 'dashboard.jatuh-tempo')->name('jatuh-tempo');
     // Finance dashboard (Pendapatan & Pengeluaran)
@@ -75,6 +74,7 @@ Route::middleware(['auth'])->group(function () {
     // Finance detail (JSON)
     Route::get('/finance/pendapatan/detail', [FinanceController::class, 'incomeDetail'])->name('finance.income.detail');
     Route::get('/finance/pengeluaran/detail', [FinanceController::class, 'expenseDetail'])->name('finance.expense.detail');
+    Route::post('/finance/pengeluaran/store', [FinanceController::class, 'storeExpense'])->name('finance.expense.store');
 
     /*
     |--------------------------------------------------------------------------
@@ -176,20 +176,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('update-status');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Tanda Terima (CRUD)
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('tanda-terima')->name('tanda-terima.')->group(function () {
-        Route::get('/', [TandaTerimaController::class, 'index'])->name('index');
-        Route::get('/create', [TandaTerimaController::class, 'create'])->name('create');
-        Route::post('/', [TandaTerimaController::class, 'store'])->name('store');
-        Route::get('/{tandaTerima}/edit', [TandaTerimaController::class, 'edit'])->name('edit');
-        Route::put('/{tandaTerima}', [TandaTerimaController::class, 'update'])->name('update');
-        Route::delete('/{tandaTerima}', [TandaTerimaController::class, 'destroy'])->name('destroy');
-        Route::patch('/{tandaTerima}/status', [TandaTerimaController::class, 'updateStatus'])->name('update-status');
-    });
+    // Seluruh route CRUD Tanda Terima dinonaktifkan (dipusatkan ke Surat Jalan)
 
     /*
     |--------------------------------------------------------------------------

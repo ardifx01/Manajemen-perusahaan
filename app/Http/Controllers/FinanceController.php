@@ -260,4 +260,28 @@ class FinanceController extends Controller
             'data' => $mapped,
         ]);
     }
+
+    // Store new expense
+    public function storeExpense(Request $request)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'jenis' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        Expense::create([
+            'tanggal' => $request->tanggal,
+            'jenis' => $request->jenis,
+            'deskripsi' => $request->deskripsi,
+            'amount' => $request->amount,
+            'user_id' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengeluaran berhasil ditambahkan'
+        ]);
+    }
 }

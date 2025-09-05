@@ -262,21 +262,25 @@
 
 
 <!-- Add Customer Modal - Responsive -->
-<div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <!-- Made modal responsive with better mobile sizing -->
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md sm:max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
-            <h3 class="text-base md:text-lg font-semibold text-gray-900 dark:text-slate-100 flex items-center space-x-2">
-                <svg class="w-4 h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
-                </svg>
-                <span>Tambah Customer</span>
-            </h3>
-            <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors duration-200">
-                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+<div id="addModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm dark:bg-black/80 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-700 transform scale-95 translate-y-4 transition-all duration-300">
+        <!-- Header dengan gradient -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-user-plus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Tambah Customer</h3>
+                        <p class="text-blue-100 text-sm">Lengkapi informasi customer baru</p>
+                    </div>
+                </div>
+                <button onclick="closeAddModal()" 
+                        class="w-10 h-10 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center">
+                    <i class="fa-solid fa-times text-lg"></i>
+                </button>
+            </div>
         </div>
         
         <form id="addCustomerForm" action="{{ route('customer.store') }}" method="POST" class="p-4">
@@ -378,66 +382,30 @@
             </h3>
             <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors duration-200">
                 <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
         </div>
         
-        <form id="editCustomerForm" method="POST" class="p-4">
+        <form id="editCustomerForm" method="POST" class="p-6">
             @csrf
             @method('PUT')
-            <div class="space-y-3">
-                <div>
-                    <label for="edit_name" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Customer</label>
+            <div class="space-y-6">
+                <div class="space-y-2">
+                    <label for="edit_name" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-user text-blue-500"></i>
+                        <span>Nama Customer</span>
+                    </label>
                     <input type="text" id="edit_name" name="name" required
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan nama customer">
                 </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Surat Jalan</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
-                        <input type="text" id="edit_delivery_note_pt" name="delivery_note_pt"
-                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="PT">
-                        <input type="text" id="edit_delivery_note_tahun" name="delivery_note_tahun"
-                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Tahun">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Invoice</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
-                        <input type="text" id="edit_invoice_pt" name="invoice_pt"
-                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="PT">
-                        <input type="text" id="edit_invoice_tahun" name="invoice_tahun"
-                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Tahun">
-                    </div>
-                </div>
-
-                <div>
-                    <label for="edit_payment_terms_days" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Terms Pembayaran (Hari)</label>
-                    <div class="relative">
-                        <input type="number" id="edit_payment_terms_days" name="payment_terms_days" min="1" max="365" value="30"
-                               class="w-full px-3 py-2 pr-12 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="30">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <span class="text-gray-500 dark:text-slate-400 text-sm">hari</span>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Default jangka waktu pembayaran untuk customer ini</p>
-                </div>
-
+                
                 <div class="space-y-2">
-                    <div>
-                        <label for="edit_address_1" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alamat 1</label>
-                        <input type="text" id="edit_address_1" name="address_1"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Masukkan alamat 1">
-                    </div>
+                    <label for="edit_no_surat_jalan" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-file-text text-blue-500"></i>
+                        <span>No Surat Jalan</span>
+                    </label>
+                    <input type="text" id="edit_no_surat_jalan" name="no_surat_jalan" required
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
+                           placeholder="Masukkan no surat jalan">
 
                     <div>
                         <label for="edit_address_2" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alamat 2</label>
@@ -469,17 +437,47 @@
 </div>
 
 <script>
-// Modal functions
+// Modal functions dengan animasi
 function openAddModal() {
-    document.getElementById('addModal').classList.remove('hidden');
-    document.getElementById('addModal').classList.add('flex');
-    document.getElementById('add_name').focus();
+    const modal = document.getElementById('addModal');
+    const modalContent = modal.querySelector('div');
+    
+    // Tampilkan modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    
+    // Animasi masuk
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('scale-95', 'translate-y-4');
+        modalContent.classList.add('scale-100', 'translate-y-0');
+    }, 10);
+    
+    // Focus ke input pertama
+    setTimeout(() => {
+        document.getElementById('add_name').focus();
+    }, 300);
 }
 
 function closeAddModal() {
-    document.getElementById('addModal').classList.add('hidden');
-    document.getElementById('addModal').classList.remove('flex');
-    document.getElementById('addCustomerForm').reset();
+    const modal = document.getElementById('addModal');
+    const modalContent = modal.querySelector('div');
+    
+    // Animasi keluar
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    modalContent.classList.remove('scale-100', 'translate-y-0');
+    modalContent.classList.add('scale-95', 'translate-y-4');
+    
+    // Sembunyikan modal setelah animasi selesai
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+        document.getElementById('addCustomerForm').reset();
+    }, 300);
 }
 
 function openEditModal(id, name, address1, address2, deliveryNotePt, deliveryNoteTahun, invoicePt, invoiceTahun, paymentTermsDays) {

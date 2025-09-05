@@ -47,21 +47,24 @@ class JatuhTempoController extends Controller
             ];
         }
 
-        // Statistik dari data terfilter
-        $totalTagihan = $jatuhTempos->sum('jumlah_tagihan');
-        $totalTerbayar = $jatuhTempos->sum('jumlah_terbayar');
-        $today = Carbon::today();
-        $overdues = $jatuhTempos->filter(function ($jt) use ($today) {
-            return $jt->status_pembayaran !== 'Lunas' && Carbon::parse($jt->tanggal_jatuh_tempo)->lt($today);
-        });
-        $totalOverdue = $overdues->sum('sisa_tagihan');
-        $countOverdue = $overdues->count();
+        // Statistik sesuai kebutuhan user
+        // Total Tagihan Pending (hanya yang status Belum Bayar/Sebagian)
+        $totalTagihanPending = $jatuhTempos->where('status_pembayaran', '!=', 'Lunas')->sum('jumlah_tagihan');
+        
+        // Total Terbayar (hanya yang status Lunas/Accept)
+        $totalTerbayar = $jatuhTempos->where('status_pembayaran', 'Lunas')->sum('jumlah_tagihan');
+        
+        // Total Customer Pending (unique customer dengan status pending)
+        $totalCustomerPending = $jatuhTempos->where('status_pembayaran', '!=', 'Lunas')->unique('customer')->count();
+        
+        // Total Customer Accept (unique customer dengan status accept)
+        $totalCustomerAccept = $jatuhTempos->where('status_pembayaran', 'Lunas')->unique('customer')->count();
 
         // Get customers for dropdown
         $customers = Customer::orderBy('name')->get();
 
         return view('dashboard.jatuh_tempo_index', compact(
-            'jatuhTempos', 'totalTagihan', 'totalTerbayar', 'totalOverdue', 'countOverdue',
+            'jatuhTempos', 'totalTagihanPending', 'totalTerbayar', 'totalCustomerPending', 'totalCustomerAccept',
             'bulan', 'tahun', 'statusPembayaran', 'monthlyStats', 'customers'
         ));
     }

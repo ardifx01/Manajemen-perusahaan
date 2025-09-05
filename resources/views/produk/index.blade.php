@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Data Produk')
+@section('title', 'Data Barang')
 
 @section('content')
 <div class="w-full px-2 sm:px-4 lg:px-8 py-4 sm:py-6">
@@ -15,8 +15,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">Data Produk</h1>
-                    <p class="text-gray-500 dark:text-slate-400 mt-1 text-sm sm:text-base">Kelola data produk perusahaan</p>
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">Data Barang</h1>
+                    <p class="text-gray-500 dark:text-slate-400 mt-1 text-sm sm:text-base">Kelola data Barang perusahaan</p>
                 </div>
             </div>
             <!-- Primary blue button to match Customer -->
@@ -24,7 +24,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                <span>Tambah Produk</span>
+                <span>Tambah Barang</span>
             </button>
         </div>
     </div>
@@ -44,7 +44,7 @@
     <!-- Toolbar: Search only (no dropdown) -->
     <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
         <div class="relative">
-            <input id="searchInputProduk" type="text" placeholder="Cari produk... (nama)" class="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-red-500" />
+            <input id="searchInputProduk" type="text" placeholder="Cari Barang... (nama)" class="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-red-500" />
             <span class="absolute left-3 top-2.5 text-gray-400">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"></path>
@@ -163,7 +163,7 @@
                                             <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-slate-200 mb-2">Belum ada produk</h3>
                                             <p class="text-gray-500 dark:text-slate-400 mb-3 sm:mb-4 text-sm sm:text-base">Mulai dengan menambahkan produk pertama Anda.</p>
                                             <button onclick="openAddModal()" class="bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-400 text-white px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base">
-                                                Tambah Produk
+                                                Tambah Barang
                                             </button>
                                         </div>
                                     </div>
@@ -178,63 +178,76 @@
 </div>
 
 <!-- Add Produk Modal -->
-<div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <!-- Made modal responsive with proper sizing -->
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md mx-auto max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-slate-700">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-slate-100 flex items-center space-x-2">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                <span>Tambah Produk</span>
-            </h3>
-            <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors duration-200 p-1">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+<div id="addModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm dark:bg-black/80 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-700 transform scale-95 translate-y-4 transition-all duration-300">
+        <!-- Header dengan gradient -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-box text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Tambah Barang</h3>
+                        <p class="text-blue-100 text-sm">Lengkapi informasi Barang baru</p>
+                    </div>
+                </div>
+                <button onclick="closeAddModal()" 
+                        class="w-10 h-10 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center">
+                    <i class="fa-solid fa-times text-lg"></i>
+                </button>
+            </div>
         </div>
         
-        <form id="addProdukForm" action="{{ route('produk.store') }}" method="POST" class="p-4 sm:p-6">
+        <!-- Form Content -->
+        <form id="addProdukForm" action="{{ route('produk.store') }}" method="POST" class="p-6">
             @csrf
-            <div class="space-y-4">
-                <div>
-                    <label for="add_nama_produk" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Nama Produk</label>
+            <div class="space-y-6">
+                <!-- Nama Produk -->
+                <div class="space-y-2">
+                    <label for="add_nama_produk" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-box text-blue-500"></i>
+                        <span>Nama Barang</span>
+                    </label>
                     <input type="text" id="add_nama_produk" name="nama_produk" required
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-red-500 transition-colors duration-200 text-sm sm:text-base"
-                           placeholder="Masukkan nama produk">
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
+                           placeholder="Masukkan nama Barang">
                 </div>
                 
-                <div>
-                    <label for="add_harga_pcs" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Harga PCS</label>
+                <!-- Harga PCS -->
+                <div class="space-y-2">
+                    <label for="add_harga_pcs" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-tag text-blue-500"></i>
+                        <span>Harga PCS</span>
+                    </label>
                     <input type="number" id="add_harga_pcs" name="harga_pcs" required
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-red-500 transition-colors duration-200 text-sm sm:text-base"
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan harga per PCS" min="0">
                 </div>
                 
-                <div>
-                    <label for="add_harga_set" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Harga SET</label>
+                <!-- Harga SET -->
+                <div class="space-y-2">
+                    <label for="add_harga_set" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-tags text-blue-500"></i>
+                        <span>Harga SET</span>
+                    </label>
                     <input type="number" id="add_harga_set" name="harga_set" required
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-red-500 transition-colors duration-200 text-sm sm:text-base"
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan harga per SET" min="0">
                 </div>
             </div>
             
-            <!-- Made modal buttons responsive -->
-            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200 dark:border-slate-700">
                 <button type="button" onclick="closeAddModal()" 
-                        class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-slate-200 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base">
+                        class="px-6 py-3 text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 font-medium">
+                    <i class="fa-solid fa-times mr-2"></i>
                     Batal
                 </button>
                 <button type="submit" id="addSubmitBtn"
-                        class="w-full sm:w-auto px-6 py-2 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-400 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400">
-                    <span>Simpan</span>
-                    <div id="addLoading" class="hidden">
-                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </div>
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl">
+                    <i class="fa-solid fa-save mr-2"></i>
+                    Simpan Barang
                 </button>
             </div>
         </form>
@@ -263,10 +276,10 @@
             @method('PUT')
             <div class="space-y-4">
                 <div>
-                    <label for="edit_nama_produk" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Nama Produk</label>
+                    <label for="edit_nama_produk" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Nama Barang</label>
                     <input type="text" id="edit_nama_produk" name="nama_produk" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-red-500 transition-colors duration-200 text-sm sm:text-base"
-                           placeholder="Masukkan nama produk">
+                           placeholder="Masukkan nama Barang">
                 </div>
                 
                 <div>
@@ -305,23 +318,47 @@
 </div>
 
 <script>
-// Modal functions with responsive enhancements
+// Modal functions dengan animasi
 function openAddModal() {
     const modal = document.getElementById('addModal');
+    const modalContent = modal.querySelector('div');
+    
+    // Tampilkan modal
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    document.getElementById('add_nama_produk').focus();
-    // Prevent body scroll on mobile
     document.body.style.overflow = 'hidden';
+    
+    // Animasi masuk
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('scale-95', 'translate-y-4');
+        modalContent.classList.add('scale-100', 'translate-y-0');
+    }, 10);
+    
+    // Focus ke input pertama
+    setTimeout(() => {
+        document.getElementById('add_nama_produk').focus();
+    }, 300);
 }
 
 function closeAddModal() {
     const modal = document.getElementById('addModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    document.getElementById('addProdukForm').reset();
-    // Restore body scroll
-    document.body.style.overflow = '';
+    const modalContent = modal.querySelector('div');
+    
+    // Animasi keluar
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    modalContent.classList.remove('scale-100', 'translate-y-0');
+    modalContent.classList.add('scale-95', 'translate-y-4');
+    
+    // Sembunyikan modal setelah animasi selesai
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+        document.getElementById('addProdukForm').reset();
+    }, 300);
 }
 
 function openEditModal(id, nama, hargaPcs, hargaSet) {

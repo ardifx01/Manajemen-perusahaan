@@ -164,55 +164,65 @@
 </div>
 
 <!-- Add Kendaraan Modal -->
-<!-- Made modal fully responsive with better mobile layout -->
-<div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-2 sm:p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-slate-700">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-slate-100 flex items-center space-x-2">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                <span>Tambah Kendaraan</span>
-            </h3>
-            <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors duration-200 p-1">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+<div id="addModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm dark:bg-black/80 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-700 transform scale-95 translate-y-4 transition-all duration-300">
+        <!-- Header dengan gradient -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-car text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Tambah Kendaraan</h3>
+                        <p class="text-blue-100 text-sm">Lengkapi informasi kendaraan baru</p>
+                    </div>
+                </div>
+                <button onclick="closeAddModal()" 
+                        class="w-10 h-10 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center">
+                    <i class="fa-solid fa-times text-lg"></i>
+                </button>
+            </div>
         </div>
         
-        <form id="addKendaraanForm" action="{{ route('kendaraan.store') }}" method="POST" class="p-4 sm:p-6">
+        <!-- Form Content -->
+        <form id="addKendaraanForm" action="{{ route('kendaraan.store') }}" method="POST" class="p-6">
             @csrf
-            <div class="space-y-3 sm:space-y-4">
-                <div>
-                    <label for="add_nama" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 sm:mb-2">Nama Kendaraan</label>
+            <div class="space-y-6">
+                <!-- Nama Kendaraan -->
+                <div class="space-y-2">
+                    <label for="add_nama" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-car text-blue-500"></i>
+                        <span>Nama Kendaraan</span>
+                    </label>
                     <input type="text" id="add_nama" name="nama" required
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-colors duration-200 text-sm sm:text-base"
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan nama kendaraan">
                 </div>
                 
-                <div>
-                    <label for="add_no_polisi" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 sm:mb-2">No Polisi</label>
+                <!-- No Polisi -->
+                <div class="space-y-2">
+                    <label for="add_no_polisi" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-id-card text-blue-500"></i>
+                        <span>No Polisi</span>
+                    </label>
                     <input type="text" id="add_no_polisi" name="no_polisi"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-colors duration-200 text-sm sm:text-base"
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan nomor polisi">
                 </div>
             </div>
             
-            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-slate-700">
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200 dark:border-slate-700">
                 <button type="button" onclick="closeAddModal()" 
-                        class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-slate-200 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base">
+                        class="px-6 py-3 text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 font-medium">
+                    <i class="fa-solid fa-times mr-2"></i>
                     Batal
                 </button>
                 <button type="submit" id="addSubmitBtn"
-                        class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
-                    <span>Simpan</span>
-                    <div id="addLoading" class="hidden">
-                        <svg class="animate-spin h-3 h-3 sm:h-4 sm:w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </div>
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl">
+                    <i class="fa-solid fa-save mr-2"></i>
+                    Simpan Kendaraan
                 </button>
             </div>
         </form>
@@ -277,21 +287,47 @@
 </div>
 
 <script>
-// Modal functions
+// Modal functions dengan animasi
 function openAddModal() {
-    document.getElementById('addModal').classList.remove('hidden');
-    document.getElementById('addModal').classList.add('flex');
-    document.getElementById('add_nama').focus();
-    // Prevent body scroll when modal is open
+    const modal = document.getElementById('addModal');
+    const modalContent = modal.querySelector('div');
+    
+    // Tampilkan modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    
+    // Animasi masuk
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('scale-95', 'translate-y-4');
+        modalContent.classList.add('scale-100', 'translate-y-0');
+    }, 10);
+    
+    // Focus ke input pertama
+    setTimeout(() => {
+        document.getElementById('add_nama').focus();
+    }, 300);
 }
 
 function closeAddModal() {
-    document.getElementById('addModal').classList.add('hidden');
-    document.getElementById('addModal').classList.remove('flex');
-    document.getElementById('addKendaraanForm').reset();
-    // Restore body scroll
-    document.body.style.overflow = 'auto';
+    const modal = document.getElementById('addModal');
+    const modalContent = modal.querySelector('div');
+    
+    // Animasi keluar
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    modalContent.classList.remove('scale-100', 'translate-y-0');
+    modalContent.classList.add('scale-95', 'translate-y-4');
+    
+    // Sembunyikan modal setelah animasi selesai
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+        document.getElementById('addKendaraanForm').reset();
+    }, 300);
 }
 
 function openEditModal(id, nama, noPolisi) {

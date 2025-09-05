@@ -18,6 +18,8 @@ class POExportController extends Controller
             // 1) selected_ids (JSON array dari view Surat Jalan) -> gunakan ID pertama
             // 2) no_surat_jalan (string)
             $po = null;
+            // Tipe export: 'surat_jalan' (default) atau 'tanda_terima'
+            $exportType = $request->input('export_type', 'surat_jalan');
             $selectedRaw = $request->input('selected_ids');
             if (!empty($selectedRaw)) {
                 $selected = is_array($selectedRaw) ? $selectedRaw : json_decode($selectedRaw, true);
@@ -40,12 +42,19 @@ class POExportController extends Controller
                 ], 404);
             }
 
-            // Path template Excel (fallback .xlsm -> .xlsx)
+            // Path template Excel (fallback .xlsm -> .xlsx), bedakan berdasarkan tipe export
             $templateDir = storage_path('app/template');
-            $candidates = [
-                $templateDir . DIRECTORY_SEPARATOR . 'Surat_Jalan_Template.xlsm',
-                $templateDir . DIRECTORY_SEPARATOR . 'Surat_Jalan_Template.xlsx',
-            ];
+            if ($exportType === 'tanda_terima') {
+                $candidates = [
+                    $templateDir . DIRECTORY_SEPARATOR . 'Tanda_Terima_Template.xlsm',
+                    $templateDir . DIRECTORY_SEPARATOR . 'Tanda_Terima_Template.xlsx',
+                ];
+            } else {
+                $candidates = [
+                    $templateDir . DIRECTORY_SEPARATOR . 'Surat_Jalan_Template.xlsm',
+                    $templateDir . DIRECTORY_SEPARATOR . 'Surat_Jalan_Template.xlsx',
+                ];
+            }
             $templatePath = null;
             foreach ($candidates as $candidate) {
                 if (file_exists($candidate)) {
@@ -56,6 +65,7 @@ class POExportController extends Controller
             if (!$templatePath) {
                 return response()->json([
                     'error' => 'Template Excel tidak ditemukan.',
+                    'export_type' => $exportType,
                     'checked_paths' => $candidates,
                 ], 404);
             }

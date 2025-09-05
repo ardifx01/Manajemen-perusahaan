@@ -172,7 +172,7 @@
         </tfoot>
     </table>
 
-    <div class="row between no-break" style="margin-top: {{ max(10, $mb4) }}px; align-items:flex-start; gap: 6mm; flex-wrap: nowrap;">
+    <div class="row between no-break" style="margin-top: 2px; align-items:flex-start; gap: 6mm; flex-wrap: nowrap;">
         <div style="flex: 0 0 58%;">
             <p style="margin:0; font-size:{{ $tdRightFs }}px; line-height:1.25;">
                 <strong>Pembayaran Mohon Di Transfer Ke rekening</strong><br>
@@ -182,10 +182,12 @@
             </p>
         </div>
         <div style="flex: 0 0 38%; margin-left:auto;">
-            <p style="margin:0; margin-bottom:8px; text-align:right;"><strong>Bekasi, {{ $invoiceDetails['date_location'] ?? ($invoiceDetails['invoice_date'] ?? '') }}</strong></p>
+            <!-- Tanggal menempel ke tabel (tanpa jarak) -->
+            <p style="margin:0; margin-bottom:0; text-align:right;"><strong>Bekasi, {{ $invoiceDetails['date_location'] ?? ($invoiceDetails['invoice_date'] ?? '') }}</strong></p>
             {{-- Logo perusahaan di area tanda tangan disembunyikan sesuai permintaan --}}
             {{-- Stamp dihapus agar tidak tercetak di PDF --}}
-            <div style="text-align:center; margin-left:auto; width:170px;">
+            <!-- Jarak tanda tangan diperkecil lagi -->
+            <div style="text-align:center; margin-left:auto; width:170px; margin-top:36px;">
                 <p style="margin:0; font-size:9.5px;">
                     <strong><u>NANIK PURNAMI</u></strong><br>
                     <span style="font-size:8px;">DIREKTUR UTAMA</span>

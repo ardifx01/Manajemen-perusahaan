@@ -66,35 +66,36 @@
     <!-- Header dan Tombol Aksi -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0 mb-4">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Data Gaji Karyawan</h1>
-        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-            <input type="text" id="searchKaryawan" placeholder="Cari nama karyawan..." class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800/60 dark:border-white/10 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-500/40" oninput="filterKaryawanTable()">
-            <!-- Filter Bulan -->
-            <select id="filterBulan" class="appearance-none no-arrow px-3 py-2 border border-gray-300 rounded-md dark:bg-slate-800/60 dark:border-white/10 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/40" onchange="filterKaryawanTable()">
-                <option value="">Semua Bulan</option>
-                @for($i = 1; $i <= 12; $i++)
-                    <option value="{{ $i }}">{{ DateTime::createFromFormat('!m', $i)->format('F') }}</option>
-                @endfor
-            </select>
-            <!-- Filter Tahun (hidden untuk filtering, tapi tetap ada) -->
-            <select id="filterTahun" class="hidden" onchange="filterKaryawanTable()">
-                <option value="">Semua Tahun</option>
-                @for($i = 2020; $i <= 2035; $i++)
-                    <option value="{{ $i }}" {{ $i == now()->format('Y') ? 'selected' : '' }}>{{ $i }}</option>
-                @endfor
-            </select>
-            <!-- Link Pilih Tahun -->
-            <button type="button" onclick="openYearModal()" 
-                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <span id="yearButtonText">Pilih Tahun ({{ now()->format('Y') }})</span>
-            </button>
-            <button onclick="openModal('tambahModal')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                <span>Tambah Gaji</span>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                <input type="text" id="searchKaryawan" placeholder="Cari nama karyawan..." class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800/60 dark:border-white/10 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-500/40" oninput="filterKaryawanTable()">
+                <!-- Filter Bulan -->
+                <select id="filterBulan" class="appearance-none no-arrow px-3 py-2 border border-gray-300 rounded-md dark:bg-slate-800/60 dark:border-white/10 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/40" onchange="filterKaryawanTable()">
+                    <option value="">Semua Bulan</option>
+                    @for($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}">{{ DateTime::createFromFormat('!m', $i)->format('F') }}</option>
+                    @endfor
+                </select>
+                <!-- Filter Tahun (hidden untuk filtering, tapi tetap ada) -->
+                <select id="filterTahun" class="hidden" onchange="filterKaryawanTable()">
+                    <option value="">Semua Tahun</option>
+                    @for($i = 2020; $i <= 2035; $i++)
+                        <option value="{{ $i }}" {{ $i == now()->format('Y') ? 'selected' : '' }}>{{ $i }}</option>
+                    @endfor
+                </select>
+                <!-- Link Pilih Tahun -->
+                <button type="button" onclick="openYearModal()" 
+                        class="inline-flex items-center px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span id="yearButtonText">Pilih Tahun ({{ now()->format('Y') }})</span>
+                </button>
+            </div>
+            <button onclick="openModal('tambahModal')" 
+                    class="group relative inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-600 dark:hover:to-indigo-600 hover:scale-105"
+                    title="Tambah Gaji">
+                <i class="fa-solid fa-plus text-lg group-hover:rotate-90 transition-all duration-300"></i>
             </button>
         </div>
     </div>
@@ -255,22 +256,34 @@
 </div>
 
 <!-- Modal Tambah Gaji -->
-<div id="tambahModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-    <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Tambah Data Gaji</h3>
-            <button onclick="closeModal('tambahModal')" class="text-gray-400 hover:text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
+<div id="tambahModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm dark:bg-black/80 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-700 transform scale-95 translate-y-4 transition-all duration-300">
+        <!-- Header dengan gradient -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-money-bill-wave text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Tambah Data Gaji</h3>
+                        <p class="text-blue-100 text-sm">Lengkapi informasi gaji karyawan</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('tambahModal')" 
+                        class="w-10 h-10 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center">
+                    <i class="fa-solid fa-times text-lg"></i>
+                </button>
+            </div>
         </div>
-        <form method="POST" action="{{ route('salary.store') }}" class="space-y-4" onsubmit="return prepareFormSubmission(this)">
+        <!-- Form Content -->
+        <div class="p-8 bg-gray-50 dark:bg-slate-800">
+        <form method="POST" action="{{ route('salary.store') }}" class="space-y-6" onsubmit="return prepareFormSubmission(this)">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                    <select name="employee_id" id="employee_select" required onchange="autoFillEmployeeData()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Karyawan</label>
+                    <select name="employee_id" id="employee_select" required onchange="autoFillEmployeeData()" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                         <option value="">Pilih Karyawan</option>
                         @foreach($employees ?? [] as $employee)
                         <option value="{{ $employee->id }}" data-gaji-pokok="{{ $employee->gaji_pokok ?? 0 }}" data-nama="{{ $employee->nama_karyawan }}" data-posisi="{{ $employee->posisi }}">
@@ -280,8 +293,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bulan</label>
-                    <select name="bulan" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bulan</label>
+                    <select name="bulan" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                         @for($i = 1; $i <= 12; $i++)
                         <option value="{{ $i }}" {{ $i == date('n') ? 'selected' : '' }}>
                             {{ DateTime::createFromFormat('!m', $i)->format('F') }}
@@ -290,94 +303,99 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
-                    <select name="tahun" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun</label>
+                    <select name="tahun" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                         @for($i = 2020; $i <= 2030; $i++)
                         <option value="{{ $i }}" {{ $i == date('Y') ? 'selected' : '' }}>{{ $i }}</option>
                         @endfor
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Gaji Pokok</label>
-                    <input type="text" id="gaji_pokok_display" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-100 text-gray-600 cursor-not-allowed">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gaji Pokok</label>
+                    <input type="text" id="gaji_pokok_display" readonly class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-300 cursor-not-allowed">
                     <input type="hidden" name="gaji_pokok" id="gaji_pokok_value">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tunjangan</label>
-                    <input type="text" id="tunjangan_display" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tunjangan</label>
+                    <input type="text" id="tunjangan_display" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                     <input type="hidden" name="tunjangan" id="tunjangan_value">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bonus</label>
-                    <input type="text" id="bonus_display" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bonus</label>
+                    <input type="text" id="bonus_display" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                     <input type="hidden" name="bonus" id="bonus_value">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Lembur</label>
-                    <input type="text" id="lembur_display" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lembur</label>
+                    <input type="text" id="lembur_display" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                     <input type="hidden" name="lembur" id="lembur_value">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Potongan Pajak</label>
-                    <input type="text" id="potongan_pajak_display" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Potongan Pajak</label>
+                    <input type="text" id="potongan_pajak_display" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                     <input type="hidden" name="potongan_pajak" id="potongan_pajak_value">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Potongan BPJS</label>
-                    <input type="text" id="potongan_bpjs_display" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Potongan BPJS</label>
+                    <input type="text" id="potongan_bpjs_display" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                     <input type="hidden" name="potongan_bpjs" id="potongan_bpjs_value">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Potongan Lain</label>
-                    <input type="text" id="potongan_lain_display" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Potongan Lain</label>
+                    <input type="text" id="potongan_lain_display" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                     <input type="hidden" name="potongan_lain" id="potongan_lain_value">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran</label>
-                    <select name="status_pembayaran" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status Pembayaran</label>
+                    <select name="status_pembayaran" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                         <option value="belum_dibayar">Belum Dibayar</option>
                         <option value="dibayar">Dibayar</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Bayar</label>
-                    <input type="date" name="tanggal_bayar" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal Bayar</label>
+                    <input type="date" name="tanggal_bayar" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                <textarea name="keterangan" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Keterangan</label>
+                <textarea name="keterangan" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"></textarea>
             </div>
-            <div class="flex justify-end space-x-3 pt-4">
-                <button type="button" onclick="closeModal('tambahModal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
-                    Batal
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-slate-600">
+                <button type="button" onclick="closeModal('tambahModal')" 
+                        class="px-6 py-3 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-600 transition-all duration-200 font-medium">
+                    <i class="fa-solid fa-times mr-2"></i>Batal
                 </button>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                    Simpan
+                <button type="submit" 
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl">
+                    <i class="fa-solid fa-save mr-2"></i>Simpan Gaji
                 </button>
             </div>
         </form>
+        </div>
     </div>
 </div>
 
 <!-- Modal Edit Gaji -->
-<div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-    <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Edit Data Gaji</h3>
-            <button onclick="closeModal('editModal')" class="text-gray-400 hover:text-gray-600">
+<div id="editModal" class="fixed inset-0 bg-black/50 dark:bg-black/70 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white dark:bg-slate-800 p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Edit Data Gaji</h3>
+            <button onclick="closeModal('editModal')" class="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
+        <div class="p-6">
         <form method="POST" id="editForm" class="space-y-4">
             @csrf
             @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                    <select name="employee_id" id="edit_employee_select" required disabled class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-600 cursor-not-allowed">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Karyawan</label>
+                    <select name="employee_id" id="edit_employee_select" required disabled class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-300 cursor-not-allowed">
                         <option value="">Pilih Karyawan</option>
                         @foreach($employees ?? [] as $employee)
                         <option value="{{ $employee->id }}" data-gaji-pokok="{{ $employee->gaji_pokok ?? 0 }}" data-nama="{{ $employee->nama_karyawan }}" data-posisi="{{ $employee->posisi }}">
@@ -388,8 +406,8 @@
                     <input type="hidden" name="employee_id" id="edit_employee_id_hidden">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bulan</label>
-                    <select name="bulan" id="edit_bulan" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bulan</label>
+                    <select name="bulan" id="edit_bulan" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                         @for($i = 1; $i <= 12; $i++)
                         <option value="{{ $i }}">
                             {{ DateTime::createFromFormat('!m', $i)->format('F') }}
@@ -398,59 +416,59 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
-                    <select name="tahun" id="edit_tahun" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun</label>
+                    <select name="tahun" id="edit_tahun" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                         @for($i = 2020; $i <= 2030; $i++)
                         <option value="{{ $i }}">{{ $i }}</option>
                         @endfor
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Gaji Pokok</label>
-                    <input type="text" name="gaji_pokok" id="edit_gaji_pokok" required min="0" disabled class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-600 cursor-not-allowed">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gaji Pokok</label>
+                    <input type="text" name="gaji_pokok" id="edit_gaji_pokok" required min="0" disabled class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-300 cursor-not-allowed">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tunjangan</label>
-                    <input type="text" name="tunjangan" id="edit_tunjangan" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tunjangan</label>
+                    <input type="text" name="tunjangan" id="edit_tunjangan" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bonus</label>
-                    <input type="text" name="bonus" id="edit_bonus" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bonus</label>
+                    <input type="text" name="bonus" id="edit_bonus" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Lembur</label>
-                    <input type="text" name="lembur" id="edit_lembur" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lembur</label>
+                    <input type="text" name="lembur" id="edit_lembur" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Potongan Pajak</label>
-                    <input type="text" name="potongan_pajak" id="edit_potongan_pajak" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Potongan Pajak</label>
+                    <input type="text" name="potongan_pajak" id="edit_potongan_pajak" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Potongan BPJS</label>
-                    <input type="text" name="potongan_bpjs" id="edit_potongan_bpjs" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Potongan BPJS</label>
+                    <input type="text" name="potongan_bpjs" id="edit_potongan_bpjs" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Potongan Lain</label>
-                    <input type="text" name="potongan_lain" id="edit_potongan_lain" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Potongan Lain</label>
+                    <input type="text" name="potongan_lain" id="edit_potongan_lain" min="0" class="currency-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" oninput="formatCurrencyInput(this)" onblur="formatCurrencyInput(this)">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran</label>
-                    <select name="status_pembayaran" id="edit_status_pembayaran" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status Pembayaran</label>
+                    <select name="status_pembayaran" id="edit_status_pembayaran" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                         <option value="belum_dibayar">Belum Dibayar</option>
                         <option value="dibayar">Dibayar</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Bayar</label>
-                    <input type="date" name="tanggal_bayar" id="edit_tanggal_bayar" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal Bayar</label>
+                    <input type="date" name="tanggal_bayar" id="edit_tanggal_bayar" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100">
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                <textarea name="keterangan" id="edit_keterangan" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Keterangan</label>
+                <textarea name="keterangan" id="edit_keterangan" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"></textarea>
             </div>
             <div class="flex justify-end space-x-3 pt-4">
-                <button type="button" onclick="closeModal('editModal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                <button type="button" onclick="closeModal('editModal')" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">
                     Batal
                 </button>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
@@ -458,6 +476,7 @@
                 </button>
             </div>
         </form>
+        </div>
     </div>
 </div>
 
@@ -795,6 +814,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 // Modal functions
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    const modalContent = modal.querySelector('.bg-white, .dark\\:bg-slate-900');
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Trigger animation
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('scale-95', 'translate-y-4');
+        modalContent.classList.add('scale-100', 'translate-y-0');
+    }, 10);
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    const modalContent = modal.querySelector('.bg-white, .dark\\:bg-slate-900');
+    
+    // Trigger exit animation
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    modalContent.classList.remove('scale-100', 'translate-y-0');
+    modalContent.classList.add('scale-95', 'translate-y-4');
+    
+    // Hide modal after animation
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }, 300);
+}
+
 function openYearModal() {
     document.getElementById('yearModal').classList.remove('hidden');
 }

@@ -75,11 +75,44 @@
 
         <nav class="flex-1 overflow-y-auto p-6 space-y-2 text-lg font-medium" @click="$event.target.closest('a') && (mobileSidebarOpen=false)"
             x-data="{ 
-                open: {{ request()->routeIs('po') || request()->routeIs('po.*') || request()->routeIs('suratjalan.*') ? 'true' : 'false' }}, 
-                employeeOpen: {{ request()->routeIs('employee.*') || request()->routeIs('salary.*') ? 'true' : 'false' }}, 
-                barangOpen: {{ request()->routeIs('barang.*') || request()->routeIs('produk.*') ? 'true' : 'false' }}, 
-                userOpen: {{ request()->routeIs('users.*') ? 'true' : 'false' }},
-                financeOpen: {{ request()->routeIs('finance.*') ? 'true' : 'false' }}
+                // Initialize state from localStorage or route-based defaults
+                open: localStorage.getItem('sidebar_po_open') !== null ? 
+                    localStorage.getItem('sidebar_po_open') === 'true' : 
+                    {{ request()->routeIs('po') || request()->routeIs('po.*') || request()->routeIs('suratjalan.*') ? 'true' : 'false' }}, 
+                employeeOpen: localStorage.getItem('sidebar_employee_open') !== null ? 
+                    localStorage.getItem('sidebar_employee_open') === 'true' : 
+                    {{ request()->routeIs('employee.*') || request()->routeIs('salary.*') ? 'true' : 'false' }}, 
+                barangOpen: localStorage.getItem('sidebar_barang_open') !== null ? 
+                    localStorage.getItem('sidebar_barang_open') === 'true' : 
+                    {{ request()->routeIs('barang.*') || request()->routeIs('produk.*') ? 'true' : 'false' }}, 
+                userOpen: localStorage.getItem('sidebar_user_open') !== null ? 
+                    localStorage.getItem('sidebar_user_open') === 'true' : 
+                    {{ request()->routeIs('users.*') ? 'true' : 'false' }},
+                financeOpen: localStorage.getItem('sidebar_finance_open') !== null ? 
+                    localStorage.getItem('sidebar_finance_open') === 'true' : 
+                    {{ request()->routeIs('finance.*') ? 'true' : 'false' }},
+                
+                // Methods to toggle and persist state
+                togglePO() {
+                    this.open = !this.open;
+                    localStorage.setItem('sidebar_po_open', this.open);
+                },
+                toggleEmployee() {
+                    this.employeeOpen = !this.employeeOpen;
+                    localStorage.setItem('sidebar_employee_open', this.employeeOpen);
+                },
+                toggleBarang() {
+                    this.barangOpen = !this.barangOpen;
+                    localStorage.setItem('sidebar_barang_open', this.barangOpen);
+                },
+                toggleUser() {
+                    this.userOpen = !this.userOpen;
+                    localStorage.setItem('sidebar_user_open', this.userOpen);
+                },
+                toggleFinance() {
+                    this.financeOpen = !this.financeOpen;
+                    localStorage.setItem('sidebar_finance_open', this.financeOpen);
+                }
             }">
 
             <a href="{{ route('dashboard') }}"
@@ -90,7 +123,7 @@
                 <span>Dashboard</span>
             </a>
 
-            <button @click="open = !open"
+            <button @click="togglePO()"
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('po') || request()->routeIs('po.*') || request()->routeIs('suratjalan.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
                     <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18"/></svg>
@@ -118,7 +151,7 @@
                 </a>
             </div>
             
-            <button @click="financeOpen = !financeOpen"
+            <button @click="toggleFinance()"
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('finance.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
                     <svg class="w-5 h-5 text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -144,7 +177,7 @@
                 </a>
             </div>
 
-            <button @click="employeeOpen = !employeeOpen"
+            <button @click="toggleEmployee()"
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('employee.*') || request()->routeIs('salary.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
                     <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -173,7 +206,7 @@
             </div>
 
             <!-- Menu Barang -->
-            <button @click="barangOpen = !barangOpen"
+            <button @click="toggleBarang()"
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('barang.*') || request()->routeIs('produk.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
                     <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -211,7 +244,7 @@
             <!-- Parent Menu with Toggle -->
             
             <!-- Manajemen Pengguna -->
-            <button @click="userOpen = !userOpen"
+            <button @click="toggleUser()"
                     class="w-full text-left px-4 py-2 rounded-lg transition-all duration-200 flex justify-between items-center {{ request()->routeIs('users.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <span class="inline-flex items-center gap-3">
                     <svg class="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -251,11 +284,7 @@
 
             
 
-            <a href="{{ route('tanda-terima.index') }}"
-               class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('tanda-terima.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                <span>Tanda Terima</span>
-            </a>
+            
 
             <a href="{{ route('jatuh-tempo.index') }}"
                class="group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('jatuh-tempo.*') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
