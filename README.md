@@ -298,6 +298,18 @@ graph TB
 
 </div>
 
+### 🎬 Demo Video
+
+<div align="center">
+
+<video src="docs/media/mrsidi.mp4" controls width="900" poster="docs/screenshot/dashboard.png" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); border: 1px solid #e2e8f0;">
+  Browser Anda tidak mendukung video HTML5.
+  <a href="docs/media/mrsidi.mp4">Tonton video</a> secara langsung.
+  
+</video>
+
+</div>
+
 ### 🎭 **UI/UX Design Philosophy**
 
 <div align="center">
