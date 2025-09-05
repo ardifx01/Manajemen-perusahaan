@@ -19,7 +19,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-✅%20Production%20Ready-success?style=flat-square" alt="Status">
-  <img src="https://img.shields.io/badge/Version-2.1.0-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.2.0-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square" alt="Build">
 </p>
@@ -487,6 +487,7 @@ GET   /finance/pendapatan                # Income (query: inc_month, inc_year)
 GET   /finance/pengeluaran               # Expense (query: month, year)
 GET   /finance/pendapatan/detail         # Income detail (JSON)
 GET   /finance/pengeluaran/detail        # Expense detail (JSON)
+POST  /finance/pengeluaran/store         # Store expense (JSON/Form)
 ```
 
 ### 👤 **Users**
@@ -554,16 +555,8 @@ DELETE /invoice/{id}                      # Destroy
 PATCH /invoice/{id}/status                # Update status
 ```
 
-### 📑 **Tanda Terima**
-```php
-GET   /tanda-terima                       # Index
-GET   /tanda-terima/create                # Create
-POST  /tanda-terima                       # Store
-GET   /tanda-terima/{id}/edit             # Edit
-PUT   /tanda-terima/{id}                  # Update
-DELETE /tanda-terima/{id}                 # Destroy
-PATCH /tanda-terima/{id}/status           # Update status
-```
+### 📑 **Tanda Terima (Dinonaktifkan)**
+Fitur rute CRUD Tanda Terima telah dinonaktifkan dan kini dipusatkan pada modul **Surat Jalan**.
 
 ### ⏰ **Jatuh Tempo**
 ```php
@@ -574,6 +567,9 @@ GET   /jatuh-tempo/{id}/edit              # Edit
 PUT   /jatuh-tempo/{id}                   # Update
 DELETE /jatuh-tempo/{id}                  # Destroy
 PATCH /jatuh-tempo/{id}/payment           # Mark as paid
+GET   /jatuh-tempo/{id}/send-reminder     # Kirim pengingat
+POST  /jatuh-tempo/{id}/update-status     # Update status
+PUT   /jatuh-tempo/{id}/update-deadline   # Update deadline
 ```
 
 ### 📦➡️ **Barang Masuk & Keluar**
@@ -602,6 +598,11 @@ RESOURCE /pengirim                         # Pengirim (CRUD)
 ```
 
 </details>
+
+### 🔔 **Notifications API**
+```php
+GET   /api/jatuh-tempo/notifications      # Notifikasi Jatuh Tempo (API)
+```
 
 ## 🔧 Troubleshooting
 
@@ -668,6 +669,15 @@ gantt
 - [ ] 🧪 **Testing Suite** - Comprehensive testing dengan Pest/PHPUnit
 - [ ] 📱 **Mobile App** - React Native companion app
 - [ ] 🤖 **API Integration** - RESTful API untuk third-party integration
+
+## 📝 Changelog
+
+### 2025-09-05 (v2.2.0)
+- Konsolidasi modul **Tanda Terima** ke dalam **Surat Jalan**; rute Tanda Terima dinonaktifkan.
+- Jatuh Tempo: tambah rute `send-reminder`, `update-status`, dan `update-deadline`.
+- Finance: tambah endpoint `POST /finance/pengeluaran/store` untuk menyimpan pengeluaran.
+- Tambah Notifications API: `GET /api/jatuh-tempo/notifications`.
+- Sinkronisasi daftar rute di README dengan `routes/web.php`.
 
 ## 🤝 Contributing
 
