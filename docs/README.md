@@ -3,4 +3,4 @@
 Folder ini berisi dokumentasi untuk aplikasi Manajemen Perusahaan.
 
 ## Screenshot
-- `screenshot/dashboard.jpg` - Screenshot dashboard aplikasi
+- `screenshot/dashboard.png` - Screenshot dashboard aplikasi
