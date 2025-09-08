@@ -6,6 +6,7 @@ use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ProdukController extends Controller
 {
@@ -58,6 +59,11 @@ class ProdukController extends Controller
             $validated['harga_set'] = $validated['harga_set'] ?? 0;
             $validated['deskripsi'] = $validated['deskripsi'] ?? '';
 
+            // Jaga kompatibilitas: jika kolom 'name' di DB wajib isi, mirror dari nama_produk
+            if (empty($validated['name']) && !empty($validated['nama_produk'])) {
+                $validated['name'] = $validated['nama_produk'];
+            }
+
             // Log untuk debugging
             Log::info('Creating produk with data:', $validated);
 
@@ -75,6 +81,15 @@ class ProdukController extends Controller
             return redirect()->route('produk.index')
                              ->with('success', 'Data produk berhasil ditambahkan.');
 
+        } catch (ValidationException $e) {
+            // Kembalikan error validasi agar ditampilkan oleh blade ($errors)
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Error creating produk: ' . $e->getMessage());
             

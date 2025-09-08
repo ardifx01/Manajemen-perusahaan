@@ -425,7 +425,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gaji Pokok</label>
-                    <input type="text" name="gaji_pokok" id="edit_gaji_pokok" required min="0" disabled class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-300 cursor-not-allowed">
+                    <!-- readonly (bukan disabled) agar ikut terkirim saat submit -->
+                    <input type="text" name="gaji_pokok" id="edit_gaji_pokok" required min="0" readonly class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-gray-200">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tunjangan</label>
@@ -520,6 +521,30 @@ function editSalary(salaryData) {
     // Open modal
     openModal('editModal');
 }
+
+// Normalisasi nilai numerik sebelum submit form edit
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.getElementById('editForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function() {
+            const numericIds = [
+                'edit_gaji_pokok',
+                'edit_tunjangan',
+                'edit_bonus',
+                'edit_lembur',
+                'edit_potongan_pajak',
+                'edit_potongan_bpjs',
+                'edit_potongan_lain'
+            ];
+            numericIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && typeof el.value === 'string') {
+                    el.value = (el.value || '').toString().replace(/[^\d]/g, '');
+                }
+            });
+        });
+    }
+});
 
 function autoFillEmployeeData() {
     const employeeSelect = document.getElementById('employee_select');

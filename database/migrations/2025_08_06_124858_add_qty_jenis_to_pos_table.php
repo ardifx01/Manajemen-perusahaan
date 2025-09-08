@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pos', function (Blueprint $table) {
-            $table->string('qty_jenis', 10)->nullable()->after('qty');
+            if (!Schema::hasColumn('pos', 'qty_jenis')) {
+                // Jika kolom qty ada, letakkan setelah qty; jika tidak, tambahkan tanpa after()
+                if (Schema::hasColumn('pos', 'qty')) {
+                    $table->string('qty_jenis', 10)->nullable()->after('qty');
+                } else {
+                    $table->string('qty_jenis', 10)->nullable();
+                }
+            }
         });
     }
 
@@ -22,7 +29,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pos', function (Blueprint $table) {
-            $table->dropColumn('qty_jenis');
+            if (Schema::hasColumn('pos', 'qty_jenis')) {
+                $table->dropColumn('qty_jenis');
+            }
         });
     }
 };

@@ -62,6 +62,9 @@ class CustomerController extends Controller
         }
         unset($validated['invoice_nomor'], $validated['invoice_pt'], $validated['invoice_tahun']);
 
+        // Add nama_customer field with same value as name
+        $validated['nama_customer'] = $validated['name'];
+        
         Customer::create($validated);
 
         if ($request->ajax()) {
@@ -129,6 +132,9 @@ class CustomerController extends Controller
         }
         unset($validated['invoice_nomor'], $validated['invoice_pt'], $validated['invoice_tahun']);
 
+        // Add nama_customer field with same value as name for update too
+        $validated['nama_customer'] = $validated['name'];
+        
         $customer->update($validated);
 
         if ($request->ajax()) {

@@ -41,6 +41,36 @@
         </div>
     @endif
 
+    <!-- Error Alert -->
+    @if(session('error'))
+        <div class="bg-red-50 border-l-4 border-red-500 dark:bg-red-900/30 dark:border-red-700 p-3 sm:p-4 mb-4 sm:mb-6 rounded-r-lg">
+            <div class="flex items-center">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500 dark:text-red-300 mr-2 sm:mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-red-700 dark:text-red-300 font-medium text-sm sm:text-base">{{ session('error') }}</span>
+            </div>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-500 dark:bg-red-900/30 dark:border-red-700 p-3 sm:p-4 mb-4 sm:mb-6 rounded-r-lg">
+            <div class="flex items-start space-x-2">
+                <svg class="w-5 h-5 text-red-600 dark:text-red-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <p class="text-red-700 dark:text-red-300 font-semibold mb-1">Terjadi kesalahan pada input:</p>
+                    <ul class="list-disc ml-5 text-red-700 dark:text-red-300 text-sm sm:text-base space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Toolbar: Search only (no dropdown) -->
     <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
         <div class="relative">
@@ -143,7 +173,7 @@
                                     <!-- Gunakan komponen aksi seragam -->
                                     <div class="flex justify-center">
                                         <x-table.action-buttons 
-                                            onEdit="openEditModal({{ $produk->id }}, '{{ $produk->nama_produk }}', {{ $produk->harga_pcs ?? 0 }}, {{ $produk->harga_set ?? 0 }})"
+                                            onEdit="openEditModal({{ $produk->id }}, {!! json_encode($produk->nama_produk) !!}, {{ $produk->harga_pcs ?? 0 }}, {{ $produk->harga_set ?? 0 }})"
                                             deleteAction="{{ route('produk.destroy', $produk->id) }}"
                                             confirmText="Yakin ingin menghapus produk ini?" />
                                     </div>
@@ -209,7 +239,7 @@
                         <i class="fa-solid fa-box text-blue-500"></i>
                         <span>Nama Barang</span>
                     </label>
-                    <input type="text" id="add_nama_produk" name="nama_produk" required
+                    <input type="text" id="add_nama_produk" name="nama_produk" required value="{{ old('nama_produk') }}"
                            class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan nama Barang">
                 </div>
@@ -220,7 +250,7 @@
                         <i class="fa-solid fa-tag text-blue-500"></i>
                         <span>Harga PCS</span>
                     </label>
-                    <input type="number" id="add_harga_pcs" name="harga_pcs" required
+                    <input type="number" id="add_harga_pcs" name="harga_pcs" required value="{{ old('harga_pcs') }}"
                            class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan harga per PCS" min="0">
                 </div>
@@ -231,7 +261,7 @@
                         <i class="fa-solid fa-tags text-blue-500"></i>
                         <span>Harga SET</span>
                     </label>
-                    <input type="number" id="add_harga_set" name="harga_set" required
+                    <input type="number" id="add_harga_set" name="harga_set" required value="{{ old('harga_set') }}"
                            class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan harga per SET" min="0">
                 </div>
@@ -245,9 +275,15 @@
                     Batal
                 </button>
                 <button type="submit" id="addSubmitBtn"
-                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl">
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center">
                     <i class="fa-solid fa-save mr-2"></i>
-                    Simpan Barang
+                    <span>Simpan Barang</span>
+                    <span id="addLoading" class="hidden ml-3">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
                 </button>
             </div>
         </form>
@@ -361,17 +397,29 @@ function closeAddModal() {
     }, 300);
 }
 
-function openEditModal(id, nama, hargaPcs, hargaSet) {
-    const modal = document.getElementById('editModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    document.getElementById('editProdukForm').action = `/produk/${id}`;
-    document.getElementById('edit_nama_produk').value = nama;
-    document.getElementById('edit_harga_pcs').value = hargaPcs || '';
-    document.getElementById('edit_harga_set').value = hargaSet || '';
-    document.getElementById('edit_nama_produk').focus();
-    // Prevent body scroll on mobile
-    document.body.style.overflow = 'hidden';
+window.openEditModal = function(id, nama, hargaPcs, hargaSet) {
+    try {
+        const modal = document.getElementById('editModal');
+        const form = document.getElementById('editProdukForm');
+        if (!modal || !form) {
+            console.error('[Produk] Modal/Form edit tidak ditemukan');
+            return;
+        }
+        form.action = `{{ url('produk') }}/${id}`;
+        const namaInput = document.getElementById('edit_nama_produk');
+        const hargaPcsInput = document.getElementById('edit_harga_pcs');
+        const hargaSetInput = document.getElementById('edit_harga_set');
+        if (namaInput) namaInput.value = nama ?? '';
+        if (hargaPcsInput) hargaPcsInput.value = (hargaPcs ?? '') === 0 ? '' : (hargaPcs ?? '');
+        if (hargaSetInput) hargaSetInput.value = (hargaSet ?? '') === 0 ? '' : (hargaSet ?? '');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => namaInput?.focus(), 100);
+    } catch (e) {
+        console.error('[Produk] Gagal membuka modal edit:', e);
+        alert('Terjadi masalah saat membuka form edit produk. Muat ulang halaman lalu coba lagi.');
+    }
 }
 
 function closeEditModal() {
@@ -387,8 +435,8 @@ function closeEditModal() {
 document.getElementById('addProdukForm').addEventListener('submit', function() {
     const submitBtn = document.getElementById('addSubmitBtn');
     const loading = document.getElementById('addLoading');
-    submitBtn.disabled = true;
-    loading.classList.remove('hidden');
+    if (submitBtn) submitBtn.disabled = true;
+    if (loading) loading.classList.remove('hidden');
 });
 
 document.getElementById('editProdukForm').addEventListener('submit', function() {
@@ -444,6 +492,13 @@ document.addEventListener('DOMContentLoaded', function () {
             tr.style.display = show ? '' : 'none';
         });
     });
+
+    // Auto-open Add Modal jika ada error validasi atau session error
+    const hasErrors = {{ $errors->any() ? 'true' : 'false' }};
+    const hasSessionError = {{ session('error') ? 'true' : 'false' }};
+    if (hasErrors || hasSessionError) {
+        openAddModal();
+    }
 });
 </script>
 @endsection

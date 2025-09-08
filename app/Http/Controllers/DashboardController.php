@@ -35,9 +35,10 @@ class DashboardController extends Controller
 
         // Total Invoice (diambil dari Surat Jalan/PO) sesuai bulan & tahun terpilih
         // Menggunakan field tanggal_po pada tabel PO
-        $invoiceCount = (int) PO::whereYear('tanggal_po', $tahunNow)
-            ->whereMonth('tanggal_po', $bulanNow)
-            ->count();
+        $invoiceCount = (int) PO::where(function($q) use ($tahunNow, $bulanNow) {
+                $q->whereRaw('YEAR(tanggal_po) = ?', [$tahunNow])
+                  ->whereRaw('MONTH(tanggal_po) = ?', [$bulanNow]);
+            })->count();
 
         $totalGajiKaryawan = Employee::where('status', 'aktif')->sum('gaji_pokok');
         $rataRataGaji = $karyawanAktif > 0 ? $totalGajiKaryawan / $karyawanAktif : 0;
@@ -67,7 +68,7 @@ class DashboardController extends Controller
 
         // Pendapatan Tahunan (Net per bulan untuk incYear berjalan)
         $revenueNetByMonthRaw = POItem::join('pos', 'po_items.po_id', '=', 'pos.id')
-            ->whereYear('pos.tanggal_po', $incYear)
+            ->whereRaw('YEAR(pos.tanggal_po) = ?', [$incYear])
             ->selectRaw('MONTH(pos.tanggal_po) as bulan, SUM(po_items.total) as subtotal')
             ->groupBy('bulan')
             ->pluck('subtotal', 'bulan');
@@ -78,7 +79,7 @@ class DashboardController extends Controller
 
         // Detail pendapatan per perusahaan per bulan (untuk incYear)
         $revenueByCustomerByMonthRows = POItem::join('pos', 'po_items.po_id', '=', 'pos.id')
-            ->whereYear('pos.tanggal_po', $incYear)
+            ->whereRaw('YEAR(pos.tanggal_po) = ?', [$incYear])
             ->selectRaw('MONTH(pos.tanggal_po) as bulan, pos.customer as customer, SUM(po_items.total) as subtotal')
             ->groupBy('bulan', 'pos.customer')
             ->orderBy('bulan')
@@ -117,13 +118,16 @@ class DashboardController extends Controller
         // Hilangkan fallback: jika tidak ada Salary bulan ini, biarkan 0 dan daftar karyawan kosong
 
         // Pengeluaran Lain (Custom Expenses)
-        $otherExpensesMonthly = Expense::whereMonth('tanggal', $bulanNow)
-            ->whereYear('tanggal', $tahunNow)
+        $otherExpensesMonthly = Expense::where(function($q) use ($bulanNow, $tahunNow) {
+                $q->whereMonth('tanggal', $bulanNow)
+                  ->whereYear('tanggal', $tahunNow);
+            })
             ->orderByDesc('tanggal')
             ->get();
-        $monthlyOtherExpenseTotal = (int) Expense::whereMonth('tanggal', $bulanNow)
-            ->whereYear('tanggal', $tahunNow)
-            ->sum('amount');
+        $monthlyOtherExpenseTotal = (int) Expense::where(function($q) use ($bulanNow, $tahunNow) {
+                $q->whereMonth('tanggal', $bulanNow)
+                  ->whereYear('tanggal', $tahunNow);
+            })->sum('amount');
 
         $expensesByMonthRaw = Expense::whereYear('tanggal', $tahunNow)
             ->selectRaw('MONTH(tanggal) as bulan, SUM(amount) as total')
@@ -154,12 +158,14 @@ class DashboardController extends Controller
         $combinedYearlyExpenseTotal = (int) ($yearlySalaryTotal + $yearlyOtherExpenseTotal);
 
         // Barang Masuk & Barang Keluar - total unit bulan berjalan (berdasarkan field tanggal)
-        $barangMasukMonthlyQty = (int) BarangMasuk::whereMonth('tanggal', $bulanNow)
-            ->whereYear('tanggal', $tahunNow)
-            ->sum('qty');
-        $barangKeluarMonthlyQty = (int) BarangKeluar::whereMonth('tanggal', $bulanNow)
-            ->whereYear('tanggal', $tahunNow)
-            ->sum('qty');
+        $barangMasukMonthlyQty = (int) BarangMasuk::where(function($q) use ($bulanNow, $tahunNow) {
+                $q->whereMonth('tanggal', $bulanNow)
+                  ->whereYear('tanggal', $tahunNow);
+            })->sum('qty');
+        $barangKeluarMonthlyQty = (int) BarangKeluar::where(function($q) use ($bulanNow, $tahunNow) {
+                $q->whereMonth('tanggal', $bulanNow)
+                  ->whereYear('tanggal', $tahunNow);
+            })->sum('qty');
 
         // Daftar tahun untuk selector (2025-2030 sebagai default, plus tahun sekarang jika di luar range)
         $currentYear = (int) Carbon::now()->format('Y');

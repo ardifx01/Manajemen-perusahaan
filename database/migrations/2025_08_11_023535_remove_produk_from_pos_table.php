@@ -8,14 +8,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pos', function (Blueprint $table) {
-            $table->dropColumn('produk'); // Hapus kolom produk
+            // Hanya drop jika kolom memang ada
+            if (Schema::hasColumn('pos', 'produk')) {
+                $table->dropColumn('produk'); // Hapus kolom produk
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('pos', function (Blueprint $table) {
-            $table->string('produk'); // Kalau rollback, kolom produk dibuat lagi
+            // Tambahkan kembali hanya jika belum ada
+            if (!Schema::hasColumn('pos', 'produk')) {
+                $table->string('produk'); // Kalau rollback, kolom produk dibuat lagi
+            }
         });
     }
 };

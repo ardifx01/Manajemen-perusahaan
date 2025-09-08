@@ -15,6 +15,9 @@ class Kendaraan extends Model
     // Kolom yang bisa diisi massal
     protected $fillable = [
         'nama',
+        'nama_kendaraan',
         'no_polisi',
+        'jenis_kendaraan',
+        'status',
     ];
 }

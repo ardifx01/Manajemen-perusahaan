@@ -18,6 +18,7 @@ class PO extends Model
         'pengirim',       // kolom penghubung ke tabel pengirim
         'no_surat_jalan',
         'no_po',
+        'po_number',
         'no_invoice',
         'no_polisi',
         'kendaraan',      // ID kendaraan

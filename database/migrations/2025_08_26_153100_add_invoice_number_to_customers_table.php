@@ -10,7 +10,12 @@ return new class extends Migration
     {
         Schema::table('customers', function (Blueprint $table) {
             if (!Schema::hasColumn('customers', 'invoice_number')) {
-                $table->string('invoice_number')->nullable()->after('delivery_note_number');
+                // Jika kolom delivery_note_number ada, letakkan setelahnya; jika tidak, tambahkan tanpa after()
+                if (Schema::hasColumn('customers', 'delivery_note_number')) {
+                    $table->string('invoice_number')->nullable()->after('delivery_note_number');
+                } else {
+                    $table->string('invoice_number')->nullable();
+                }
             }
         });
     }

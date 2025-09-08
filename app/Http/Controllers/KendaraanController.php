@@ -34,6 +34,9 @@ class KendaraanController extends Controller
             'no_polisi' => 'nullable|string|max:50',
         ]);
 
+        // Add nama_kendaraan field with same value as nama
+        $validated['nama_kendaraan'] = $validated['nama'];
+        
         $kendaraan = Kendaraan::create($validated);
 
         // Cek apakah request ini dari AJAX (fetch/axios)
@@ -68,6 +71,9 @@ class KendaraanController extends Controller
             'no_polisi' => 'nullable|string|max:50',
         ]);
 
+        // Add nama_kendaraan field with same value as nama for update too
+        $validated['nama_kendaraan'] = $validated['nama'];
+        
         $kendaraan->update($validated);
 
         // Cek AJAX

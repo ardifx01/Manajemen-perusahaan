@@ -249,7 +249,7 @@
          x-transition:leave-start="opacity-100" 
          x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm dark:bg-black/80" @click="closeAddExpenseModal()"></div>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm dark:bg-black/80 z-0" @click="closeAddExpenseModal()"></div>
         <div x-show="addExpenseModalOpen" 
              x-transition:enter="transition ease-out duration-300 transform" 
              x-transition:enter-start="opacity-0 scale-95 translate-y-4" 
@@ -257,7 +257,7 @@
              x-transition:leave="transition ease-in duration-200 transform" 
              x-transition:leave-start="opacity-100 scale-100 translate-y-0" 
              x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-             class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
+             class="relative z-10 pointer-events-auto bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
             
             <!-- Header dengan gradient -->
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-6">
@@ -331,7 +331,7 @@
                             Jumlah (Rp)
                         </label>
                         <div class="relative">
-                            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium">Rp</span>
+                            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium pointer-events-none">Rp</span>
                             <input type="text" x-model="expenseForm.amount_display" @input="formatAmountInput($event)" required 
                                    class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 transition-all duration-200" 
                                    placeholder="0">

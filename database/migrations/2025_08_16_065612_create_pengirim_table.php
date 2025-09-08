@@ -8,11 +8,14 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('pengirim', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama');
-            $table->timestamps();
-        });
+        // Hanya buat tabel jika belum ada (idempotent)
+        if (!Schema::hasTable('pengirim')) {
+            Schema::create('pengirim', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama');
+                $table->timestamps();
+            });
+        }
     }
 
     public function down()

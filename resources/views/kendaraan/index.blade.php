@@ -130,7 +130,7 @@
                                 <!-- Gunakan komponen aksi seragam -->
                                 <div class="flex justify-center">
                                     <x-table.action-buttons 
-                                        onEdit="openEditModal({{ $kendaraan->id }}, '{{ $kendaraan->nama }}', '{{ $kendaraan->no_polisi }}')"
+                                        onEdit="openEditModal({{ $kendaraan->id }}, {!! json_encode($kendaraan->nama) !!}, {!! json_encode($kendaraan->no_polisi) !!})"
                                         deleteAction="{{ route('kendaraan.destroy', $kendaraan->id) }}"
                                         confirmText="Yakin ingin menghapus kendaraan ini?" />
                                 </div>
@@ -330,15 +330,27 @@ function closeAddModal() {
     }, 300);
 }
 
-function openEditModal(id, nama, noPolisi) {
-    document.getElementById('editModal').classList.remove('hidden');
-    document.getElementById('editModal').classList.add('flex');
-    document.getElementById('editKendaraanForm').action = `/kendaraan/${id}`;
-    document.getElementById('edit_nama').value = nama;
-    document.getElementById('edit_no_polisi').value = noPolisi || '';
-    document.getElementById('edit_nama').focus();
-    // Prevent body scroll when modal is open
-    document.body.style.overflow = 'hidden';
+window.openEditModal = function(id, nama, noPolisi) {
+    try {
+        const modal = document.getElementById('editModal');
+        const form = document.getElementById('editKendaraanForm');
+        if (!modal || !form) {
+            console.error('[Kendaraan] Modal/Form edit tidak ditemukan');
+            return;
+        }
+        form.action = `{{ url('kendaraan') }}/${id}`;
+        const namaInput = document.getElementById('edit_nama');
+        const noPolisiInput = document.getElementById('edit_no_polisi');
+        if (namaInput) namaInput.value = nama ?? '';
+        if (noPolisiInput) noPolisiInput.value = noPolisi ?? '';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => namaInput?.focus(), 100);
+    } catch (e) {
+        console.error('[Kendaraan] Gagal membuka modal edit:', e);
+        alert('Terjadi masalah saat membuka form edit kendaraan. Muat ulang halaman lalu coba lagi.');
+    }
 }
 
 function closeEditModal() {

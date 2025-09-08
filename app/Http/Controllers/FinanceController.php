@@ -44,7 +44,7 @@ class FinanceController extends Controller
 
         // Net per bulan sepanjang tahun (untuk tabel per bulan)
         $revenueNetByMonthRaw = POItem::join('pos', 'po_items.po_id', '=', 'pos.id')
-            ->whereYear('pos.tanggal_po', $incYear)
+            ->whereRaw('YEAR(pos.tanggal_po) = ?', [$incYear])
             ->selectRaw('MONTH(pos.tanggal_po) as bulan, SUM(po_items.total) as subtotal')
             ->groupBy('bulan')
             ->pluck('subtotal', 'bulan');
@@ -55,7 +55,7 @@ class FinanceController extends Controller
 
         // Detail per customer per bulan sepanjang tahun
         $revenueByCustomerByMonthRows = POItem::join('pos', 'po_items.po_id', '=', 'pos.id')
-            ->whereYear('pos.tanggal_po', $incYear)
+            ->whereRaw('YEAR(pos.tanggal_po) = ?', [$incYear])
             ->selectRaw('MONTH(pos.tanggal_po) as bulan, pos.customer as customer, SUM(po_items.total) as subtotal')
             ->groupBy('bulan', 'pos.customer')
             ->orderBy('bulan')
@@ -106,16 +106,19 @@ class FinanceController extends Controller
             ->sum('total_gaji');
 
         // Pengeluaran lain bulan/tahun dipilih
-        $otherExpensesMonthly = Expense::whereMonth('tanggal', $bulanNow)
-            ->whereYear('tanggal', $tahunNow)
+        $otherExpensesMonthly = Expense::where(function($q) use ($bulanNow, $tahunNow) {
+                $q->whereRaw('MONTH(tanggal) = ?', [$bulanNow])
+                  ->whereRaw('YEAR(tanggal) = ?', [$tahunNow]);
+            })
             ->orderByDesc('tanggal')
             ->get();
-        $monthlyOtherExpenseTotal = (int) Expense::whereMonth('tanggal', $bulanNow)
-            ->whereYear('tanggal', $tahunNow)
-            ->sum('amount');
+        $monthlyOtherExpenseTotal = (int) Expense::where(function($q) use ($bulanNow, $tahunNow) {
+                $q->whereRaw('MONTH(tanggal) = ?', [$bulanNow])
+                  ->whereRaw('YEAR(tanggal) = ?', [$tahunNow]);
+            })->sum('amount');
 
         // Rekap tahunan pengeluaran lain
-        $expensesByMonthRaw = Expense::whereYear('tanggal', $tahunNow)
+        $expensesByMonthRaw = Expense::whereRaw('YEAR(tanggal) = ?', [$tahunNow])
             ->selectRaw('MONTH(tanggal) as bulan, SUM(amount) as total')
             ->groupBy('bulan')
             ->pluck('total', 'bulan');
@@ -226,8 +229,10 @@ class FinanceController extends Controller
         $type  = $request->get('type', 'salary');
 
         if ($type === 'other') {
-            $rows = Expense::whereMonth('tanggal', $month)
-                ->whereYear('tanggal', $year)
+            $rows = Expense::where(function($q) use ($month, $year) {
+                    $q->whereRaw('MONTH(tanggal) = ?', [$month])
+                      ->whereRaw('YEAR(tanggal) = ?', [$year]);
+                })
                 ->orderByDesc('tanggal')
                 ->get(['id','tanggal','jenis','deskripsi','amount']);
             return response()->json([
@@ -275,6 +280,8 @@ class FinanceController extends Controller
             'tanggal' => $request->tanggal,
             'jenis' => $request->jenis,
             'deskripsi' => $request->deskripsi,
+            // Mirror ke kolom legacy 'description' jika ada di DB
+            'description' => $request->deskripsi,
             'amount' => $request->amount,
             'user_id' => auth()->id(),
         ]);

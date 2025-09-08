@@ -44,6 +44,9 @@ class EmployeeController extends Controller
         'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
     ]);
 
+    // Mirror legacy kolom 'name' untuk kompatibilitas schema lama (NOT NULL)
+    $data['name'] = $data['nama_karyawan'];
+
     if ($request->hasFile('foto')) {
         $data['foto'] = $request->file('foto')->store('employees', 'public');
     }
@@ -82,6 +85,9 @@ class EmployeeController extends Controller
             }
             $data['foto'] = $request->file('foto')->store('employees', 'public');
         }
+
+        // Mirror legacy kolom 'name' untuk kompatibilitas schema lama (NOT NULL)
+        $data['name'] = $data['nama_karyawan'];
 
         $employee->update($data);
 
