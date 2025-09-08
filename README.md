@@ -19,7 +19,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-✅%20Production%20Ready-success?style=flat-square" alt="Status">
-  <img src="https://img.shields.io/badge/Version-2.2.0-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.3.0-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square" alt="Build">
 </p>
@@ -70,6 +70,11 @@ Sistem manajemen operasional **end-to-end** untuk perusahaan distribusi, logisti
 | Modular Laravel | Modern TailwindCSS | Vite Build System | Role-based Access |
 | RESTful API | Alpine.js Reactive | Optimized Queries | Session Management |
 | Clean Code | Mobile Responsive | Lazy Loading | CSRF Protection |
+
+> Update Terbaru (2025-09-08)
+> - UI halaman `Forgot Password` diperbarui: tampilan lebih profesional, ada tombol "Kembali", dan flow OTP lebih jelas.
+> - Migrasi ke MySQL selesai dan stabil. Aplikasi sekarang menggunakan database `manajemen_perusahaan` (host 127.0.0.1, user `root`, password kosong).
+> - Perbaikan kolom hilang pada beberapa tabel (employees, pos) dan kompatibilitas query MySQL.
 
 ## 📋 Daftar Isi
 
@@ -449,6 +454,13 @@ npm run dev  # Development
 php artisan serve
 ```
 
+### 🔑 Demo Akun (Untuk Pengujian Cepat)
+
+```
+Email: perle@gmail.com    | Password: password123
+Email: admin@gmail.com    | Password: admin123
+```
+
 ### ⚙️ Environment Configuration
 
 ```ini
@@ -460,9 +472,9 @@ APP_URL=http://localhost:8000
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=cam_db
+DB_DATABASE=manajemen_perusahaan
 DB_USERNAME=root
-DB_PASSWORD=your_password
+DB_PASSWORD=
 ```
 
 ## 🎨 UI/UX Highlights
@@ -683,6 +695,11 @@ gantt
 - [ ] 🤖 **API Integration** - RESTful API untuk third-party integration
 
 ## 📝 Changelog
+
+### 2025-09-08 (v2.3.0)
+- Auth: UI halaman `Forgot Password` diperindah, tombol "Kembali" ditambahkan, dan alur OTP dipermudah.
+- Database: Konfigurasi final MySQL digunakan (`manajemen_perusahaan` @ 127.0.0.1), perbaikan kolom hilang di beberapa tabel.
+- Stabilitas: Penyesuaian query untuk kompatibilitas MySQL sepenuhnya.
 
 ### 2025-09-05 (v2.2.0)
 - Konsolidasi modul **Tanda Terima** ke dalam **Surat Jalan**; rute Tanda Terima dinonaktifkan.
