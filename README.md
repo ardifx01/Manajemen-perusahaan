@@ -19,7 +19,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-✅%20Production%20Ready-success?style=flat-square" alt="Status">
-  <img src="https://img.shields.io/badge/Version-2.3.0-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.4.0-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square" alt="Build">
 </p>
@@ -71,10 +71,13 @@ Sistem manajemen operasional **end-to-end** untuk perusahaan distribusi, logisti
 | RESTful API | Alpine.js Reactive | Optimized Queries | Session Management |
 | Clean Code | Mobile Responsive | Lazy Loading | CSRF Protection |
 
-> Update Terbaru (2025-09-08)
-> - UI halaman `Forgot Password` diperbarui: tampilan lebih profesional, ada tombol "Kembali", dan flow OTP lebih jelas.
-> - Migrasi ke MySQL selesai dan stabil. Aplikasi sekarang menggunakan database `manajemen_perusahaan` (host 127.0.0.1, user `root`, password kosong).
-> - Perbaikan kolom hilang pada beberapa tabel (employees, pos) dan kompatibilitas query MySQL.
+> Update Terbaru (2025-09-09)
+> - Excel Tanda Terima: F21 diisi tanggal PO dari tabel Surat Jalan dengan format `d/mmm/yyyy` (contoh: 9/Sep/2025).
+> - Excel Tanda Terima: E24 diisi deadline (tanggal_jatuh_tempo) dari modul Jatuh Tempo.
+> - PDF Invoice: tanggal memakai `tanggal_po` sehingga konsisten dengan tabel Surat Jalan.
+> - Form PO: saat memilih Tanggal PO, otomatis mengisi bulan/tahun No Invoice serta tahun No Surat Jalan.
+> - Jatuh Tempo: input "No PO" diubah menjadi tanggal (selaras tampilan di Surat Jalan).
+> - Polishing UI minor untuk konsistensi light/dark mode & responsif.
 
 ## 📋 Daftar Isi
 
@@ -695,6 +698,15 @@ gantt
 - [ ] 🤖 **API Integration** - RESTful API untuk third-party integration
 
 ## 📝 Changelog
+
+### 2025-09-09 (v2.4.0)
+- Export Tanda Terima (Excel):
+  - Kolom F21: tanggal dari `tanggal_po` diformat `d/mmm/yyyy` (misal 9/Sep/2025).
+  - Kolom E24: deadline dari `tanggal_jatuh_tempo` (Jatuh Tempo).
+- PDF Invoice: tanggal kini menggunakan `tanggal_po` sehingga cocok dengan tabel Surat Jalan.
+- Form PO: auto-fill bulan/tahun No Invoice dan tahun No Surat Jalan ketika Tanggal PO dipilih.
+- Jatuh Tempo: "No PO" menjadi input tanggal untuk konsistensi.
+- Perbaikan kecil UI/UX (konsistensi, aksesibilitas, dan responsif).
 
 ### 2025-09-08 (v2.3.0)
 - Auth: UI halaman `Forgot Password` diperindah, tombol "Kembali" ditambahkan, dan alur OTP dipermudah.
