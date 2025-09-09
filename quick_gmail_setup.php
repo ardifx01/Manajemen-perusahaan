@@ -14,7 +14,6 @@ $appPassword = "euaxacukexkffyek"; // 16 characters
 // Email Gmail yang sudah diberikan
 $gmailEmail = "dilaninf6@gmail.com";
 echo "Using Gmail: {$gmailEmail}\n";
-SQLSTATE[HY000]: General error: 1 table po_items has no column named produk_id (Connection: sqlite, SQL: insert into "po_items" ("po_id", "produk_id", "qty", "qty_jenis", "harga", "total", "updated_at", "created_at") values (1, 4, 3, PCS, 300000, 900000, 2025-09-08 04:26:47, 2025-09-08 04:26:47))
 echo "\n🔧 Updating .env file...\n";
 
 // Check if .env file exists

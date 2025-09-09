@@ -295,27 +295,21 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Surat Jalan</label>
-                    <!-- Hanya PT dan Tahun -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+                    <!-- Hanya Kode PT -->
+                    <div class="grid grid-cols-1 gap-2 items-center">
                         <input type="text" id="add_delivery_note_pt" name="delivery_note_pt"
                                class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="PT">
-                        <input type="text" id="add_delivery_note_tahun" name="delivery_note_tahun"
-                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Tahun">
+                               placeholder="Kode PT">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Invoice</label>
-                    <!-- Hanya PT dan Tahun -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+                    <!-- Hanya Kode PT -->
+                    <div class="grid grid-cols-1 gap-2 items-center">
                         <input type="text" id="add_invoice_pt" name="invoice_pt"
                                class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="PT">
-                        <input type="text" id="add_invoice_tahun" name="invoice_tahun"
-                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Tahun">
+                               placeholder="Kode PT">
                     </div>
                 </div>
 

@@ -73,7 +73,7 @@
             </button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto p-6 space-y-2 text-lg font-medium" @click="$event.target.closest('a') && (mobileSidebarOpen=false)"
+        <nav class="flex-1 overflow-y-auto p-6 space-y-2 text-lg font-medium sidebar-scroll" @click="$event.target.closest('a') && (mobileSidebarOpen=false)"
             x-data="{ 
                 // Initialize state from localStorage or route-based defaults
                 open: localStorage.getItem('sidebar_po_open') !== null ? 

@@ -63,6 +63,7 @@ class POController extends Controller
             'no_po'                => 'required|string',
             'no_invoice_nomor'     => 'nullable|string|max:255',
             'no_invoice_pt'        => 'nullable|string|max:255',
+            'no_invoice_tanggal'   => 'nullable|integer|min:1|max:12',
             'no_invoice_tahun'     => 'nullable|integer',
             'customer_id'          => 'required|exists:customers,id',
             'tanggal_po'           => 'required|date',
@@ -93,13 +94,15 @@ class POController extends Controller
             $data['address_2'] = $customer->address_2 ?? '';
         }
 
-        // Bentuk no_invoice jika ada inputnya
+        // Bentuk no_invoice jika ada inputnya: NOMOR/PT/BULAN/TAHUN (bulan di kiri tahun)
         $noInvoice = null;
-        if (!empty($data['no_invoice_nomor']) || !empty($data['no_invoice_pt']) || !empty($data['no_invoice_tahun'])) {
+        if (!empty($data['no_invoice_nomor']) || !empty($data['no_invoice_pt']) || !empty($data['no_invoice_tanggal']) || !empty($data['no_invoice_tahun'])) {
             $nom = $data['no_invoice_nomor'] ?? '';
             $pt  = $data['no_invoice_pt'] ?? '';
+            $bln = $data['no_invoice_tanggal'] ?? '';
             $thn = $data['no_invoice_tahun'] ?? '';
-            $noInvoice = trim($nom) . '/' . trim($pt) . '/' . trim((string) $thn);
+            $parts = array_filter([trim($nom), trim($pt), trim((string)$bln), trim((string)$thn)], fn($v) => $v !== '');
+            $noInvoice = implode('/', $parts);
         }
 
         // Simpan ke database PO (header) + items dalam transaksi

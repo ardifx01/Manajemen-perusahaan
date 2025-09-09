@@ -5,21 +5,26 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use App\Models\PO;
 use App\Models\Kendaraan;
 use Carbon\Carbon;
+use App\Models\JatuhTempo;
 
 class POExportController extends Controller
 {
     public function exportToExcel(Request $request)
     {
         try {
+            // Tipe export: 'surat_jalan' (default) atau 'tanda_terima'
+            $exportType = $request->input('export_type', 'surat_jalan');
+
+            // Selalu coba cari PO jika ada input; untuk tanda_terima kita tidak akan 404 jika tidak ada
+            $po = null;
             // Dukung dua cara input:
             // 1) selected_ids (JSON array dari view Surat Jalan) -> gunakan ID pertama
             // 2) no_surat_jalan (string)
-            $po = null;
-            // Tipe export: 'surat_jalan' (default) atau 'tanda_terima'
-            $exportType = $request->input('export_type', 'surat_jalan');
             $selectedRaw = $request->input('selected_ids');
             if (!empty($selectedRaw)) {
                 $selected = is_array($selectedRaw) ? $selectedRaw : json_decode($selectedRaw, true);
@@ -35,17 +40,20 @@ class POExportController extends Controller
                 }
             }
 
-            if (!$po) {
+            if (!$po && $exportType !== 'tanda_terima') {
                 return response()->json([
                     'error' => 'Data PO tidak ditemukan.',
                     'hint' => 'Pilih minimal satu baris di tabel sehingga selected_ids terisi, atau kirim no_surat_jalan secara langsung.',
                 ], 404);
             }
 
-            // Path template Excel (fallback .xlsm -> .xlsx), bedakan berdasarkan tipe export
+            // Path template Excel (prioritaskan file khusus jika tipe tanda_terima)
             $templateDir = storage_path('app/template');
             if ($exportType === 'tanda_terima') {
                 $candidates = [
+                    // Prioritas sesuai permintaan user
+                    $templateDir . DIRECTORY_SEPARATOR . 'PAYMENT 2024.xls',
+                    $templateDir . DIRECTORY_SEPARATOR . 'PAYMENT 2024.xlsx',
                     $templateDir . DIRECTORY_SEPARATOR . 'Tanda_Terima_Template.xlsm',
                     $templateDir . DIRECTORY_SEPARATOR . 'Tanda_Terima_Template.xlsx',
                 ];
@@ -70,10 +78,107 @@ class POExportController extends Controller
                 ], 404);
             }
 
-            // Load template Excel
-            $spreadsheet = IOFactory::load($templatePath);
-            $sheet = $spreadsheet->getActiveSheet();
+            // Optimasi: tambahkan batas waktu dan memory untuk proses export
+            @set_time_limit(90);
+            @ini_set('memory_limit', '512M');
 
+            $t0 = microtime(true);
+            // Load template Excel - optimized: jika tanda_terima, muat hanya sheet "TANDA TERIMA"
+            if ($exportType === 'tanda_terima') {
+                $reader = IOFactory::createReaderForFile($templatePath);
+                // PENTING: JANGAN readDataOnly agar semua styling/format template tetap utuh
+                if (method_exists($reader, 'setReadDataOnly')) {
+                    $reader->setReadDataOnly(false);
+                }
+                // Muat hanya sheet tertentu bila didukung (tetap mempertahankan styling sheet tsb)
+                if (method_exists($reader, 'setLoadSheetsOnly')) {
+                    $reader->setLoadSheetsOnly(['TANDA TERIMA']);
+                }
+                $spreadsheet = $reader->load($templatePath);
+            } else {
+                $spreadsheet = IOFactory::load($templatePath);
+            }
+            $sheet = $spreadsheet->getActiveSheet();
+            \Log::info('[export-timing] load_template_ms=' . number_format((microtime(true) - $t0) * 1000, 2));
+
+                                                                                                                                                                                                // Jika export Tanda Terima: jika ada PO, isi customer di J14 lalu stream; jika tidak, stream template apa adanya
+            if ($exportType === 'tanda_terima') {
+                if ($po) {
+                    // Pastikan aktif di sheet TANDA TERIMA dan tulis customer ke J14
+                    try {
+                        $active = $spreadsheet->getActiveSheet();
+                        $active->setCellValue('J14', $po->customer ?? '');
+                        // Isi J15 dengan nomor depan dari no_invoice (sebelum '/')
+                        $nomorInv = '';
+                        $sisaInv = ''; // Untuk K15: isi setelah '/' pertama
+                        if (!empty($po->no_invoice)) {
+                            $parts = explode('/', $po->no_invoice);
+                            $nomorInv = trim((string)($parts[0] ?? '')); // Tanpa spasi
+                            $sisaParts = array_slice($parts, 1);
+                            $sisaInv = '/ ' . implode(' / ', $sisaParts); // Format: '/ dg / 8 / 2025'
+                        }
+                        $active->setCellValue('J15', $nomorInv);
+                        $active->setCellValue('K15', $sisaInv);
+                        
+                        // Hitung dan isi sub total di J17
+                        $subTotal = $po->items->sum('total');
+                        $active->setCellValue('J17', $subTotal);
+
+                        // F21: isi dengan tanggal dari tabel Surat Jalan (tanggal_po) dengan format  d/mmm/yyyy
+                        try {
+                            if (!empty($po->tanggal_po)) {
+                                $dt = Carbon::parse($po->tanggal_po);
+                                $active->setCellValue('F21', ExcelDate::PHPToExcel($dt));
+                                $active->getStyle('F21')->getNumberFormat()->setFormatCode('d/mmm/yyyy');
+                            }
+                        } catch (\Throwable $e) {
+                            \Log::warning('Set F21 tanggal_po gagal: ' . $e->getMessage());
+                        }
+
+                        // E24: isi dengan deadline (tanggal_jatuh_tempo) dari form Jatuh Tempo
+                        try {
+                            $invoiceKey = $po->no_invoice ?: $po->no_surat_jalan; // konsisten dengan sinkronisasi
+                            $jt = $invoiceKey ? JatuhTempo::where('no_invoice', $invoiceKey)->first() : null;
+                            if ($jt && !empty($jt->tanggal_jatuh_tempo)) {
+                                $deadline = Carbon::parse($jt->tanggal_jatuh_tempo)->format('d F Y');
+                                $active->setCellValue('E24', $deadline);
+                            } else {
+                                // Fallback opsional: estimasi dari tanggal PO + terms 30 hari jika JatuhTempo belum ada
+                                if ($po->tanggal_po) {
+                                    $fallback = Carbon::parse($po->tanggal_po)->addDays(30)->format('d F Y');
+                                    $active->setCellValue('E24', $fallback);
+                                }
+                            }
+                        } catch (\Throwable $e) {
+                            \Log::warning('Set E24 deadline gagal: ' . $e->getMessage());
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('Set J14/J15/K15 gagal: ' . $e->getMessage());
+                    }
+                }
+
+                // Nama file download
+                $fileName = 'Tanda-Terima-' . now()->format('Ymd-His') . '.xlsx';
+
+                // Set headers yang benar
+                $headers = [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                    'Cache-Control' => 'max-age=0',
+                ];
+
+                \Log::info('[export-timing] ready_to_stream_template_only_ms=' . number_format((microtime(true) - $t0) * 1000, 2));
+                return response()->streamDownload(function () use ($spreadsheet) {
+                    if (ob_get_length()) { @ob_end_clean(); }
+                    $writer = new Xlsx($spreadsheet);
+                    if (method_exists($writer, 'setPreCalculateFormulas')) {
+                        $writer->setPreCalculateFormulas(false);
+                    }
+                    $writer->save('php://output');
+                }, $fileName, $headers);
+            }
+
+            $tFill0 = microtime(true);
             // Isi data ke sel yang sesuai
             // Bagi no_surat_jalan menjadi dua bagian untuk D10 dan F10
             $noSj = trim((string) ($po->no_surat_jalan ?? ''));
@@ -163,6 +268,7 @@ class POExportController extends Controller
             $sheet->setCellValue('J8', $po->alamat_2);
             // Pengirim di H26 (fallback ke relasi jika kolom kosong)
             $sheet->setCellValue('H26', $po->pengirim ?? ($po->pengirimRel->nama ?? ''));
+            \Log::info('[export-timing] fill_cells_ms=' . number_format((microtime(true) - $tFill0) * 1000, 2));
 
             // Nama file download
             $fileName = 'PO-' . now()->format('Ymd-His') . '.xlsx';
@@ -175,8 +281,15 @@ class POExportController extends Controller
             ];
 
             // Download langsung ke browser
+            \Log::info('[export-timing] ready_to_stream_ms=' . number_format((microtime(true) - $t0) * 1000, 2));
             return response()->streamDownload(function () use ($spreadsheet) {
+                // Bersihkan output buffer agar header tidak tertabrak
+                if (ob_get_length()) { @ob_end_clean(); }
                 $writer = new Xlsx($spreadsheet);
+                // Matikan pre-calculate formula untuk mempercepat
+                if (method_exists($writer, 'setPreCalculateFormulas')) {
+                    $writer->setPreCalculateFormulas(false);
+                }
                 $writer->save('php://output');
             }, $fileName, $headers);
 

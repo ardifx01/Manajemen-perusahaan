@@ -142,6 +142,8 @@
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
                                 <input type="text" id="invoice_pt" name="no_invoice_pt" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[2] basis-1/2 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="PT" value="{{ old('no_invoice_pt', $noInvoiceParts[1] ?? '') }}">
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
+                                <input type="number" id="invoice_tanggal" name="no_invoice_tanggal" inputmode="numeric" pattern="[0-9]*" min="1" max="12" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Bulan" value="{{ old('no_invoice_tanggal') }}">
+                                <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
                                 <input type="number" id="invoice_tahun" name="no_invoice_tahun" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Tahun" value="{{ old('no_invoice_tahun', $noInvoiceParts[2] ?? '') }}">
                             </div>
                         </div>
@@ -359,6 +361,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const invoiceNomorInput = document.getElementById('invoice_nomor');
     const invoicePtInput = document.getElementById('invoice_pt');
     const invoiceTahunInput = document.getElementById('invoice_tahun');
+    const invoiceBulanInput = document.getElementById('invoice_tanggal');
+    const tanggalPOInput = document.querySelector('input[name="tanggal_po"]');
 
     // Batasi input hanya angka untuk field Nomor (invoice & surat jalan)
     function enforceDigitOnly(el) {
@@ -378,6 +382,28 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 element.classList.remove('bg-green-50', 'border-green-300');
             }, 2000);
+        }
+    }
+
+    // Auto-fill Bulan/Tahun dari Tanggal PO
+    function fillMonthYearFromTanggalPO() {
+        if (!tanggalPOInput || !tanggalPOInput.value) return;
+        const d = new Date(tanggalPOInput.value);
+        if (isNaN(d.getTime())) return;
+        const month = d.getMonth() + 1; // 1-12
+        const year = d.getFullYear();
+
+        if (invoiceBulanInput && (!invoiceBulanInput.value || invoiceBulanInput.value === '')) {
+            invoiceBulanInput.value = month;
+            addAutoFillEffect(invoiceBulanInput);
+        }
+        if (invoiceTahunInput && (!invoiceTahunInput.value || invoiceTahunInput.value === '')) {
+            invoiceTahunInput.value = year;
+            addAutoFillEffect(invoiceTahunInput);
+        }
+        if (deliveryTahunInput && (!deliveryTahunInput.value || deliveryTahunInput.value === '')) {
+            deliveryTahunInput.value = year;
+            addAutoFillEffect(deliveryTahunInput);
         }
     }
 
@@ -521,27 +547,45 @@ document.addEventListener('DOMContentLoaded', () => {
             paymentInfo.classList.remove('hidden');
             paymentInfo.classList.add('fade-in');
             
-            // Selalu isi ulang dari customer pilihan dan set readonly agar konsisten
-            address1Input.readOnly = false;
-            address2Input.readOnly = false;
-            deliveryNomorInput.readOnly = false;
-            deliveryPtInput.readOnly = false;
-            deliveryTahunInput.readOnly = false;
-            if (invoiceNomorInput) invoiceNomorInput.readOnly = false;
-            if (invoicePtInput) invoicePtInput.readOnly = false;
-            if (invoiceTahunInput) invoiceTahunInput.readOnly = false;
+            // Auto-fill address
+            address1Input.value = address1;
+            address2Input.value = address2;
+            addAutoFillEffect(address1Input);
+            addAutoFillEffect(address2Input);
+
+            // Auto-fill delivery & invoice parts (jangan override jika user sudah isi)
+            if (deliveryNomorInput && !deliveryNomorInput.value) deliveryNomorInput.value = deliveryNomor;
+            if (deliveryPtInput && !deliveryPtInput.value) deliveryPtInput.value = deliveryPt;
+            if (deliveryTahunInput && !deliveryTahunInput.value) deliveryTahunInput.value = deliveryTahun;
+            if (invoiceNomorInput && !invoiceNomorInput.value) invoiceNomorInput.value = invoiceNomor;
+            if (invoicePtInput && !invoicePtInput.value) invoicePtInput.value = invoicePt;
+            if (invoiceTahunInput && !invoiceTahunInput.value) invoiceTahunInput.value = invoiceTahun;
 
             if (address1Input) { address1Input.value = address1; if (address1) addAutoFillEffect(address1Input); address1Input.readOnly = true; }
             if (address2Input) { address2Input.value = address2; if (address2) addAutoFillEffect(address2Input); address2Input.readOnly = true; }
             // Biarkan NOMOR diisi manual oleh pengguna -> kosongkan dan jangan readonly
             if (deliveryNomorInput) { deliveryNomorInput.value = ''; deliveryNomorInput.placeholder = 'Nomor'; deliveryNomorInput.readOnly = false; }
-            if (deliveryPtInput) { deliveryPtInput.value = deliveryPt; if (deliveryPt) addAutoFillEffect(deliveryPtInput); deliveryPtInput.readOnly = true; }
-            if (deliveryTahunInput) { deliveryTahunInput.value = deliveryTahun; if (deliveryTahun) addAutoFillEffect(deliveryTahunInput); deliveryTahunInput.readOnly = true; }
+            if (deliveryPtInput) { deliveryPtInput.readOnly = false; }
+            // Tahun (Surat Jalan) bisa diisi manual: hanya prefill jika kosong, dan tetap editable
+            if (deliveryTahunInput) {
+                if (!deliveryTahunInput.value && deliveryTahun) {
+                    deliveryTahunInput.value = deliveryTahun;
+                    addAutoFillEffect(deliveryTahunInput);
+                }
+                deliveryTahunInput.readOnly = false;
+            }
 
             // Biarkan NOMOR INVOICE diisi manual -> kosongkan dan jangan readonly
             if (invoiceNomorInput) { invoiceNomorInput.value = ''; invoiceNomorInput.placeholder = 'Nomor'; invoiceNomorInput.readOnly = false; }
             if (invoicePtInput) { invoicePtInput.value = invoicePt; if (invoicePt) addAutoFillEffect(invoicePtInput); invoicePtInput.readOnly = true; }
-            if (invoiceTahunInput) { invoiceTahunInput.value = invoiceTahun; if (invoiceTahun) addAutoFillEffect(invoiceTahunInput); invoiceTahunInput.readOnly = true; }
+            // Tahun (Invoice) bisa diisi manual: hanya prefill jika kosong, dan tetap editable
+            if (invoiceTahunInput) {
+                if (!invoiceTahunInput.value && invoiceTahun) {
+                    invoiceTahunInput.value = invoiceTahun;
+                    addAutoFillEffect(invoiceTahunInput);
+                }
+                invoiceTahunInput.readOnly = false;
+            }
 
             // Jika customer tidak punya alamat, tetap bisa edit
             if (!address1 && !address1Input.value) {
@@ -574,6 +618,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGrandTotal();
     updateNoPolisi();
     updateCustomerAddresses();
+
+    // Hook: saat tanggal PO berubah, isi Bulan/Tahun otomatis
+    if (tanggalPOInput) {
+        tanggalPOInput.addEventListener('change', fillMonthYearFromTanggalPO);
+        // Prefill sekali di awal jika ada nilai
+        fillMonthYearFromTanggalPO();
+    }
 });
 </script>
 @endsection

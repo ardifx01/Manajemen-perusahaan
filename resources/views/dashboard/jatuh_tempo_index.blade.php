@@ -176,7 +176,7 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                 <thead class="bg-gray-50 dark:bg-slate-700">
                     <tr>
-                        <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 dark:text-slate-200 uppercase tracking-wider">No Invoice</th>
+                        <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 dark:text-slate-200 uppercase tracking-wider">No PO</th>
                         <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 dark:text-slate-200 uppercase tracking-wider">Customer</th>
                         <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 dark:text-slate-200 uppercase tracking-wider">Tgl Invoice</th>
                         <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 dark:text-slate-200 uppercase tracking-wider">Deadline</th>
@@ -189,7 +189,7 @@
                     @forelse($jatuhTempos as $jt)
                         @php($overdue = ($jt->status_pembayaran !== 'Lunas') && (\Carbon\Carbon::parse($jt->tanggal_jatuh_tempo)->lt(\Carbon\Carbon::today())))
                         <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 {{ $overdue ? 'bg-red-50 dark:bg-red-900/20' : '' }}">
-                            <td class="py-1 px-1.5 text-xs text-gray-900 dark:text-slate-200">{{ $jt->no_invoice }}</td>
+                            <td class="py-1 px-1.5 text-xs text-gray-900 dark:text-slate-200">{{ $jt->no_po ?? $jt->no_invoice }}</td>
                             <td class="py-1 px-1.5 text-xs text-gray-900 dark:text-slate-200">{{ Str::limit($jt->customer, 15) }}</td>
                             <td class="py-1 px-1.5 text-xs text-gray-900 dark:text-slate-200">{{ $jt->tanggal_invoice->format('d/m/Y') }}</td>
                             <td class="py-1 px-1.5 text-xs">
@@ -355,11 +355,13 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">No Invoice</label>
-                            <input type="text" name="no_invoice" id="no_invoice" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
+                            <!-- Hidden full value: akan diisi otomatis mengikuti tanggal (No PO) -->
+                            <input type="hidden" name="no_invoice" id="no_invoice">
+                            <div class="mt-1 text-xs text-gray-600">No Invoice akan mengikuti nilai <span class="font-medium">Tanggal (Surat Jalan)</span>.</div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">No PO</label>
-                            <input type="text" name="no_po" id="no_po" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
+                            <label class="block text-sm font-medium text-gray-700">Tanggal (Surat Jalan)</label>
+                            <input type="date" name="no_po" id="no_po" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500" placeholder="Pilih tanggal">
                         </div>
                     </div>
 
@@ -450,6 +452,37 @@
                         </button>
                     </div>
                 </form>
+
+                <script>
+                (function(){
+                    const form = document.getElementById('jatuhTempoForm');
+                    if (!form) return;
+                    const full = document.getElementById('no_invoice');
+                    const noPo = document.getElementById('no_po');
+                    function toShortDdMMyy(iso) {
+                        if (!iso) return '';
+                        const d = new Date(iso);
+                        if (isNaN(d.getTime())) return iso; // fallback raw
+                        const dd = String(d.getDate()).padStart(2,'0');
+                        const mm = String(d.getMonth()+1).padStart(2,'0');
+                        const yy = String(d.getFullYear()).slice(-2);
+                        return `${dd}/${mm}/${yy}`;
+                    }
+                    function syncNoInvoice() {
+                        if (full && noPo) {
+                            const iso = (noPo.value || '').trim();
+                            full.value = toShortDdMMyy(iso);
+                        }
+                    }
+                    if (noPo) {
+                        noPo.addEventListener('input', syncNoInvoice);
+                        noPo.addEventListener('change', syncNoInvoice);
+                    }
+                    form.addEventListener('submit', syncNoInvoice);
+                    // initial sync
+                    syncNoInvoice();
+                })();
+                </script>
 
                 <!-- Form untuk Edit Deadline (hanya deadline) -->
                 <form id="editDeadlineForm" method="POST" class="space-y-4" style="display: none;">
