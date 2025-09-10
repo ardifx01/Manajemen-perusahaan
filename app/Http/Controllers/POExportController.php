@@ -20,23 +20,27 @@ class POExportController extends Controller
             // Tipe export: 'surat_jalan' (default) atau 'tanda_terima'
             $exportType = $request->input('export_type', 'surat_jalan');
 
-            // Selalu coba cari PO jika ada input; untuk tanda_terima kita tidak akan 404 jika tidak ada
-            $po = null;
-            // Dukung dua cara input:
-            // 1) selected_ids (JSON array dari view Surat Jalan) -> gunakan ID pertama
-            // 2) no_surat_jalan (string)
+            // Selalu coba cari PO jika ada input; dukung multi-select melalui selected_ids
+            $po = null; // PO pertama untuk header
+            $posList = collect(); // Kumpulan PO untuk flattened items
+            // 1) selected_ids (JSON array dari view Surat Jalan)
             $selectedRaw = $request->input('selected_ids');
             if (!empty($selectedRaw)) {
                 $selected = is_array($selectedRaw) ? $selectedRaw : json_decode($selectedRaw, true);
                 if (is_array($selected) && !empty($selected)) {
-                    $firstId = (int) $selected[0];
-                    $po = \App\Models\PO::with(['produkRel', 'kendaraanRel', 'pengirimRel', 'items.produk'])->find($firstId);
+                    $posList = \App\Models\PO::with(['produkRel', 'kendaraanRel', 'pengirimRel', 'items.produk'])
+                        ->whereIn('id', $selected)
+                        ->orderBy('tanggal_po', 'asc')
+                        ->get();
+                    $po = $posList->first();
                 }
             }
+            // 2) no_surat_jalan (string) fallback single
             if (!$po) {
                 $noSuratJalan = $request->input('no_surat_jalan');
                 if ($noSuratJalan) {
                     $po = \App\Models\PO::with(['produkRel', 'kendaraanRel', 'pengirimRel', 'items.produk'])->where('no_surat_jalan', $noSuratJalan)->first();
+                    if ($po) { $posList = collect([$po]); }
                 }
             }
 
@@ -101,13 +105,15 @@ class POExportController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             \Log::info('[export-timing] load_template_ms=' . number_format((microtime(true) - $t0) * 1000, 2));
 
-                                                                                                                                                                                                // Jika export Tanda Terima: jika ada PO, isi customer di J14 lalu stream; jika tidak, stream template apa adanya
+                                                                                                                                                                                                // Jika export Tanda Terima: ambil data dari semua PO terpilih seperti Invoice
             if ($exportType === 'tanda_terima') {
-                if ($po) {
-                    // Pastikan aktif di sheet TANDA TERIMA dan tulis customer ke J14
+                if ($po && $posList->isNotEmpty()) {
                     try {
                         $active = $spreadsheet->getActiveSheet();
+                        
+                        // Customer dari PO pertama
                         $active->setCellValue('J14', $po->customer ?? '');
+                        
                         // Isi J15 dengan nomor depan dari no_invoice (sebelum '/')
                         $nomorInv = '';
                         $sisaInv = ''; // Untuk K15: isi setelah '/' pertama
@@ -120,11 +126,15 @@ class POExportController extends Controller
                         $active->setCellValue('J15', $nomorInv);
                         $active->setCellValue('K15', $sisaInv);
                         
-                        // Hitung dan isi sub total di J17
-                        $subTotal = $po->items->sum('total');
+                        // Hitung sub total dari semua PO terpilih (seperti Invoice)
+                        $subTotal = 0;
+                        foreach ($posList as $poItem) {
+                            if (!$poItem->relationLoaded('items')) { $poItem->load('items'); }
+                            $subTotal += $poItem->items->sum('total');
+                        }
                         $active->setCellValue('J17', $subTotal);
 
-                        // F21: isi dengan tanggal dari tabel Surat Jalan (tanggal_po) dengan format  d/mmm/yyyy
+                        // F21: isi dengan tanggal dari tabel Surat Jalan (tanggal_po) dengan format d/mmm/yyyy
                         try {
                             if (!empty($po->tanggal_po)) {
                                 $dt = Carbon::parse($po->tanggal_po);
@@ -218,7 +228,11 @@ class POExportController extends Controller
             // Tampilkan bagian pertama di D10 dengan akhiran ' /' sebagai pemisah
             $sheet->setCellValue('D10', $part1 !== '' ? ($part1 . ' /') : '');
             $sheet->setCellValue('F10', $part2);
-            $sheet->setCellValue('E12', $po->no_po);
+            // Multi-PO detection: kosongkan E12 (No PO) jika lebih dari satu PO dipilih
+            $uniquePO = [];
+            foreach ($posList as $poCheck) { if (!empty($poCheck->no_po)) { $uniquePO[$poCheck->no_po] = true; } }
+            $isMultiPO = count($uniquePO) > 1;
+            $sheet->setCellValue('E12', $isMultiPO ? '' : ($po->no_po ?? ''));
             $sheet->setCellValue('J6', $po->customer);
             // tanggal_po sekarang diletakkan pada range merge K1:N2, cukup tulis ke K1
             $sheet->setCellValue('K1', $po->tanggal_po ? Carbon::parse($po->tanggal_po)->format('d F Y') : '');
@@ -231,13 +245,19 @@ class POExportController extends Controller
                 $sheet->setCellValue("C{$r}", '');
                 $sheet->setCellValue("D{$r}", '');
             }
-            if ($po->relationLoaded('items')) {
-                $row = $startRow;
-                foreach ($po->items as $item) {
-                    if ($row > $endRow) { break; }
-                    $sheet->setCellValue("A{$row}", $item->qty);
-                    $sheet->setCellValue("C{$row}", $item->qty_jenis);
-                    $sheet->setCellValue("D{$row}", $item->produk?->nama_produk ?? '');
+            // Flatten semua item dari semua PO terpilih
+            $row = $startRow;
+            foreach ($posList as $poIt) {
+                if (!$poIt->relationLoaded('items')) { $poIt->load('items.produk'); }
+                foreach ($poIt->items as $item) {
+                    if ($row > $endRow) { break 2; }
+                    $sheet->setCellValue("A{$row}", (int)($item->qty ?? 0));
+                    $sheet->setCellValue("C{$row}", strtoupper($item->qty_jenis ?? 'PCS'));
+                    $produkBase = $item->produk?->nama_produk ?? '';
+                    $produkOut = $isMultiPO && !empty($poIt->no_po)
+                        ? (trim($produkBase) . ' (' . trim($poIt->no_po) . ')')
+                        : $produkBase;
+                    $sheet->setCellValue("D{$row}", $produkOut);
                     // Jarakkan 1 baris kosong antar item
                     $row += 2;
                 }

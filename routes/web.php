@@ -177,7 +177,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Seluruh route CRUD Tanda Terima dinonaktifkan (dipusatkan ke Surat Jalan)
-
+    
     /*
     |--------------------------------------------------------------------------
     | Jatuh Tempo (CRUD)

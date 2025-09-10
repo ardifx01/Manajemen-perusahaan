@@ -8,29 +8,33 @@
     @php
         $items = $invoiceDetails['items'] ?? [];
         $itemCount = is_countable($items) ? count($items) : 0;
-        // Tentukan mode skala berdasarkan jumlah item
-        if ($itemCount <= 12) {
+        // Banyak baris yang akan dirender (minimal 20 sesuai keinginan)
+        $renderCount = max($itemCount, 20);
+        // Mode skala berdasarkan renderCount agar 20 baris tetap muat 1 halaman
+        if ($renderCount <= 14) {
             $mode = 'normal';
-        } elseif ($itemCount <= 22) {
+        } elseif ($renderCount <= 20) {
             $mode = 'compact';
         } else {
             $mode = 'ultra';
         }
 
-        $fsBase = $mode === 'normal' ? 11.5 : ($mode === 'compact' ? 10.2 : 9.2);
-        $padCell = $mode === 'normal' ? 6 : ($mode === 'compact' ? 4 : 3);
-        $padBox  = $mode === 'normal' ? 8 : ($mode === 'compact' ? 6 : 4);
-        $mb8     = $mode === 'normal' ? 14 : ($mode === 'compact' ? 10 : 8);
-        $mb4     = $mode === 'normal' ? 10 : ($mode === 'compact' ? 8 : 6);
-        $hLogo   = $mode === 'normal' ? 70 : ($mode === 'compact' ? 60 : 50);
-        $hStamp  = $mode === 'normal' ? 74 : ($mode === 'compact' ? 64 : 54);
-        $titleFs = $mode === 'normal' ? 32 : ($mode === 'compact' ? 26 : 22);
-        $addrFs  = $mode === 'normal' ? 9.5 : ($mode === 'compact' ? 9 : 8.5);
-        $pageTop = $mode === 'normal' ? 12 : ($mode === 'compact' ? 10 : 8); // @page top margin (mm)
+        // Skala visual per mode (lebih kecil untuk compact/ultra)
+        if ($mode === 'normal') {
+            $fsBase = 11.2; $padCell = 6;   $padBox = 8;  $mb8 = 12; $mb4 = 8;
+            $hLogo = 64;    $hStamp = 68;  $titleFs = 30; $addrFs = 9.2;
+            $pageTop = 12;  $pageBottom = 10; $tdRightFs = 10.2; $lineHeight = 1.22;
+        } elseif ($mode === 'compact') {
+            // Dipakai untuk renderCount <= 20 (target 1 halaman dengan 20 baris)
+            $fsBase = 8.8;  $padCell = 2.4; $padBox = 4;  $mb8 = 6;  $mb4 = 4;
+            $hLogo = 52;    $hStamp = 56;  $titleFs = 22; $addrFs = 8.4;
+            $pageTop = 7;   $pageBottom = 6;  $tdRightFs = 9.0;  $lineHeight = 1.05;
+        } else { // ultra (>=21 baris)
+            $fsBase = 8.2;  $padCell = 2.2; $padBox = 4;  $mb8 = 6;  $mb4 = 3;
+            $hLogo = 46;    $hStamp = 52;  $titleFs = 19; $addrFs = 8.0;
+            $pageTop = 6;   $pageBottom = 6;  $tdRightFs = 8.8;  $lineHeight = 1.04;
+        }
         $pageSide = 10; // left/right margin constant (mm)
-        $pageBottom = $mode === 'normal' ? 10 : ($mode === 'compact' ? 9 : 8);
-        $tdRightFs = $mode === 'normal' ? 10.5 : ($mode === 'compact' ? 9.8 : 9.2);
-        $lineHeight = $mode === 'normal' ? 1.25 : ($mode === 'compact' ? 1.2 : 1.1);
         // Lebar kolom dinamis (sisanya otomatis untuk DESCRIPTION)
         $wQty = $mode === 'normal' ? '15%' : ($mode === 'compact' ? '13%' : '12%');
         $wUnit = $mode === 'normal' ? '20%' : ($mode === 'compact' ? '18%' : '16%');
@@ -109,13 +113,42 @@
         <h1 style="font-size: {{ $titleFs }}px; font-weight: bold; letter-spacing: 3px; margin: 0; color:#333;">INVOICE</h1>
     </div>
 
+    @php
+        // Deteksi multi-PO untuk mengosongkan No. PO di baris info jika lebih dari satu
+        $uniquePOsInfo = [];
+        foreach(($items ?? []) as $itx){
+            $p = $itx->no_po ?? ($itx->po->no_po ?? null);
+            if($p){ $uniquePOsInfo[$p] = true; }
+        }
+        $multiPOInfo = count($uniquePOsInfo) > 1;
+
+        // Tentukan No Invoice terbaru dari items
+        $latestInvoiceNo = $invoiceDetails['invoice_no'] ?? '-';
+        $bestNum = -1; $bestTime = null; $bestStr = null;
+        foreach(($items ?? []) as $invIt){
+            $invStr = $invIt->invoice_no ?? ($invIt->no_invoice ?? ($invIt->po->no_invoice ?? null));
+            if ($invStr) {
+                $parts = explode('/', (string)$invStr);
+                $num = intval($parts[0] ?? -1);
+            } else { $num = -1; }
+            $tgl = $invIt->tanggal_po ?? ($invIt->po->tanggal_po ?? null);
+            $ts = $tgl ? @strtotime($tgl) : null;
+            if ($num >= 0) {
+                if ($num > $bestNum) { $bestNum = $num; $bestStr = $invStr; $bestTime = $ts; }
+                elseif ($num === $bestNum && $ts && (!$bestTime || $ts > $bestTime)) { $bestStr = $invStr; $bestTime = $ts; }
+            } elseif ($ts) {
+                if (!$bestTime || $ts > $bestTime) { $bestStr = $invStr; $bestTime = $ts; }
+            }
+        }
+        if ($bestStr) { $latestInvoiceNo = $bestStr; }
+    @endphp
     <table class="no-break" style="width:100%; border-collapse:collapse; margin:0;">
         <tr>
             <td style="width:33.33%; text-align:left; vertical-align:bottom; padding:0;">
-                <span style="font-weight:bold;">No. PO : {{ $invoiceDetails['no_po'] ?? '-' }}</span>
+                <span style="font-weight:bold;">No. PO : {{ $multiPOInfo ? '' : ($invoiceDetails['no_po'] ?? '-') }}</span>
             </td>
             <td style="width:33.33%; text-align:center; vertical-align:bottom; padding:0;">
-                <span style="font-weight:bold;">No : {{ $invoiceDetails['invoice_no'] ?? '-' }}</span>
+                <span style="font-weight:bold;">No : {{ $latestInvoiceNo }}</span>
             </td>
             <td style="width:33.33%; text-align:right; vertical-align:bottom; padding:0;">
                 <span style="font-weight:bold;">Date : {{ $invoiceDetails['invoice_date'] ?? '-' }}</span>
@@ -123,7 +156,16 @@
         </tr>
     </table>
 
-    <table class="mb-4" style="margin-top: 8px;">
+    @php
+        // Deteksi apakah ada lebih dari satu PO pada daftar item
+        $uniquePOs = [];
+        foreach (($items ?? []) as $iit) {
+            $poNoTmp = $iit->no_po ?? ($iit->po->no_po ?? null);
+            if ($poNoTmp) { $uniquePOs[$poNoTmp] = true; }
+        }
+        $multiPO = count($uniquePOs) > 1;
+    @endphp
+    <table class="no-break" style="margin-top: 4px; margin-bottom: 0;">
         <thead>
             <tr>
                 <th>DESCRIPTION</th>
@@ -140,15 +182,29 @@
                     $unit = $qty > 0 ? round($total / max(1,$qty)) : 0;
                     $jenis = ($it->qty_jenis ?? '') !== '' && ($it->qty_jenis ?? '0') !== '0' ? $it->qty_jenis : 'PCS';
                     $namaProduk = $it->produk->nama_produk ?? $it->produk->nama ?? $it->produk->name ?? '-';
+                    $noPoItem = $it->no_po ?? ($it->po->no_po ?? ($invoiceDetails['no_po'] ?? null));
+                    $namaProdukDenganNoPo = ($multiPO && $noPoItem) ? (trim($namaProduk).' ('.trim($noPoItem).')') : $namaProduk;
                 @endphp
                 <tr>
-                    <td class="bold col-desc">{{ $namaProduk }}</td>
+                    <td class="bold col-desc">{{ $namaProdukDenganNoPo }}</td>
                     <td class="bold" style="text-align:center;">{{ number_format($qty, 0, ',', '.') }} {{ $jenis }}</td>
                     <td class="bold" style="text-align:right;">Rp. {{ number_format($unit, 0, ',', '.') }}</td>
                     <td class="bold" style="text-align:right;">Rp. {{ number_format($total, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
-            {{-- Removed filler empty rows to avoid pushing totals to the next page --}}
+            @php
+                // Tambahkan baris kosong agar minimal 20 baris
+                $minRows = 20;
+                $fill = max(0, $minRows - $itemCount);
+            @endphp
+            @for($i = 0; $i < $fill; $i++)
+                <tr>
+                    <td class="col-desc">&nbsp;</td>
+                    <td style="text-align:center;">&nbsp;</td>
+                    <td style="text-align:right;">&nbsp;</td>
+                    <td style="text-align:right;">&nbsp;</td>
+                </tr>
+            @endfor
         </tbody>
         <tfoot>
             <tr>
@@ -182,16 +238,17 @@
             </p>
         </div>
         <div style="flex: 0 0 38%; margin-left:auto;">
-            <!-- Tanggal menempel ke tabel (tanpa jarak) -->
-            <p style="margin:0; margin-bottom:0; text-align:right;"><strong>Bekasi, {{ $invoiceDetails['date_location'] ?? ($invoiceDetails['invoice_date'] ?? '') }}</strong></p>
-            {{-- Logo perusahaan di area tanda tangan disembunyikan sesuai permintaan --}}
-            {{-- Stamp dihapus agar tidak tercetak di PDF --}}
-            <!-- Jarak tanda tangan diperkecil lagi -->
-            <div style="text-align:center; margin-left:auto; width:170px; margin-top:36px;">
-                <p style="margin:0; font-size:9.5px;">
-                    <strong><u>NANIK PURNAMI</u></strong><br>
-                    <span style="font-size:8px;">DIREKTUR UTAMA</span>
-                </p>
+            <!-- Kontainer 170px agar nama center tepat di bawah teks Bekasi -->
+            <div style="width:170px; margin-left:auto; text-align:center;">
+                <!-- Tanggal dekat ke tabel dan center -->
+                <p style="margin: -55px 0 0 0; text-align:center; font-size:10px; font-family: DejaVu Sans, Arial, sans-serif;"><strong>Bekasi, {{ $invoiceDetails['date_location'] ?? ($invoiceDetails['invoice_date'] ?? '') }}</strong></p>
+                <!-- Nama center di bawah tanggal dalam lebar yang sama (diturunkan sedikit) -->
+                <div style="text-align:center; width:170px; margin:55px 0 0 0;">
+                    <p style="margin:0; font-size:9.5px;">
+                        <strong><u>NANIK PURWATI</u></strong><br>
+                        <span style="font-size:8px;">DIREKTUR UTAMA</span>
+                    </p>
+                </div>
             </div>
         </div>
     </div>

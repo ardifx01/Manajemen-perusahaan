@@ -16,9 +16,10 @@
                     <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-200">Kelola Data PO dengan mudah</p>
                 </div>
             </div>
+            </div>
             
             <!-- Export Controls -->
-            <div class="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
+            <div class="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-end sm:space-y-0 sm:space-x-2 w-full">
                 <div id="exportControls" class="hidden bg-gray-100 text-gray-700 dark:bg-white/20 dark:text-white backdrop-blur-sm rounded-lg px-2 py-1 text-center sm:text-left">
                     <span id="selectedCount" class="font-medium text-xs">0 dipilih</span>
                 </div>
@@ -164,7 +165,7 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                         <!-- Made all table cells much more compact with minimal padding -->
                         <td class="py-1 px-1.5 whitespace-nowrap text-xs border-r border-gray-200 dark:border-slate-700">
-                            <input type="radio" name="selected_id" value="{{ $pos->id }}" class="row-radio border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-200 focus:ring-gray-500 dark:focus:ring-slate-500 w-3 h-3 bg-white dark:bg-slate-800">
+                            <input type="checkbox" name="selected_ids[]" value="{{ $pos->id }}" class="row-radio border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-200 focus:ring-gray-500 dark:focus:ring-slate-500 w-3 h-3 bg-white dark:bg-slate-800">
                         </td>
                         <td class="py-1 px-1.5 whitespace-nowrap text-xs text-gray-900 dark:text-slate-200 border-r border-gray-200 dark:border-slate-700">
                             <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-slate-600 dark:text-slate-200">
@@ -373,6 +374,48 @@
         color: #111827 !important;
     }
 </style>
+<!-- Print-only rules: pastikan Ctrl+P hanya mencetak invoice frame A4 -->
+<style>
+@media print {
+  /* Sembunyikan semua elemen halaman kecuali frame A4 invoice */
+  body * { visibility: hidden !important; }
+  .a4-page, .a4-page * { visibility: visible !important; }
+
+  /* Posisikan frame A4 di pojok kiri-atas halaman cetak */
+  .a4-page {
+    position: absolute !important;
+    left: 0; top: 0;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 6mm !important; /* ruang konten lebih besar */
+    box-shadow: 0 0 0 1px #9ca3af !important; /* outline tipis sebagai penanda area cetak */
+    background: #fff !important;
+    overflow: visible !important;
+  }
+
+  /* Konten invoice tetap 190mm dan ditengah */
+  #invoiceContent {
+    width: 180mm !important; /* sangat aman dari cut-off kanan/kiri */
+    margin-left: 0 !important;  /* lebih condong ke kiri sesuai permintaan */
+    margin-right: auto !important;
+    padding: 0 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hindari kepotong di tengah halaman untuk baris dan sel tabel */
+  table { page-break-inside: auto !important; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid !important; }
+
+  /* Atur ukuran halaman dan margin lebih lega, khususnya kanan */
+  /* Margin cetak: kurangi bottom agar tidak ada ruang kosong berlebih */
+  @page { size: A4 portrait; margin: 16mm 20mm 10mm 10mm; }
+}
+</style>
 <div id="invoiceModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-5 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white">
         <div class="mt-3">
@@ -392,24 +435,35 @@
                     </button>
                 </div>
             </div>
-            <div id="invoiceContent" style="width: 210mm; min-height: 297mm; margin: 0 auto; padding: 20mm; background: white; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; border: 1px solid #ddd;">
+            <!-- FRAME A4 untuk preview (selalu ukuran A4, konten 190mm di dalamnya) -->
+            <div class="a4-page" style="width:210mm; min-height:297mm; margin:0 auto; padding:10mm; background:#fff; box-shadow: 0 0 0 1px #d0d0d0;">
+            <div id="invoiceContent" style="width: 190mm; min-height: auto; margin: 0 auto; padding: 0; background: #fff; font-family: DejaVu Sans, Arial, sans-serif; font-size: 12px; line-height: 1.22; color:#000;">
+                <style>
+                    /* Selaraskan tampilan dengan PDF */
+                    #invoiceContent table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+                    #invoiceContent thead th { border: 1px solid #000; padding: 4px !important; text-align: center; font-size: 10px; font-weight: 600; line-height: 1.05; }
+                    #invoiceContent tbody td { border: 1px solid #000; padding: 4px !important; font-size: 10px; line-height: 1.05; }
+                    #invoiceContent tfoot td { border: 1px solid #000; padding: 4px 6px !important; font-size: 10px; line-height: 1.05; }
+                    #invoiceContent .info-row td { padding: 0 !important; border: 0; }
+                    #invoiceContent .sign-box { width: 170px; margin: 36px auto 0 auto; text-align: center; }
+                </style>
                 <!-- Header -->
-                <div style="display: flex; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px;">
-                    <img src="{{ asset('image/LOGO.png') }}" alt="PT. CAM JAYA ABADI Logo" style="width:80px; height:80px; object-fit:contain; margin-right:20px; background:transparent; border-radius:8px;">
+                <div style="display: flex; align-items: flex-start; margin-bottom: 12px; border-bottom: 2px solid #000; padding-bottom: 6px;">
+                    <img src="{{ asset('image/LOGO.png') }}" alt="PT. CAM JAYA ABADI Logo" style="height:64px; width:auto; object-fit:contain; margin-right:16px;">
                     <div style="flex: 1;">
-                        <h2 style="margin: 0; font-size: 18px; font-weight: bold; color: #d32f2f;">PT. CAM JAYA ABADI</h2>
-                        <p style="margin: 2px 0; font-size: 10px; line-height: 1.2; color: rgb(38, 73, 186)">
+                        <h2 style="margin:0; font-size:16px; font-weight:bold; color:#d32f2f;">PT. CAM JAYA ABADI</h2>
+                        <p style="margin:2px 0; font-size:9px; line-height:1.2; color: rgb(38,73,186);">
                             <strong>MANUFACTURING PROFESSIONAL WOODEN PALLET</strong><br>
                             <strong>KILN DRYING WOOD WORKING INDUSTRY</strong><br>
-                            Factory & Office : Jl. Wahana Bakti No.28, Mangunjaya, Kec. Tambun Sel. Bekasi Jawa Barat 17510<br>
-                            
+                            Factory & Office : Jl. Wahana Bakti No.28, Mangunjaya, Kec. Tambun Sel. Bekasi Jawa Barat<br>
+                            17510<br>
                             Telp: (021) 6617 1626 - Fax: (021) 6617 3986
                         </p>
                     </div>
                 </div>
                 <!-- Customer Info -->
-                <div style="margin-bottom: 20px;">
-                    <div style="border: 1px solid #000; padding: 10px;">
+                <div style="margin-bottom: 10px;">
+                    <div style="border: 1px solid #000; padding: 6px;">
                         <strong>Kepada Yth.</strong><br>
                         <span id="invoiceCustomer" style="font-weight: bold;"></span>
                         <br>
@@ -419,74 +473,74 @@
                     </div>
                 </div>
                 <!-- Invoice Title -->
-                <div style="text-align: center; margin: 30px 0;">
-                    <h1 style="font-size: 48px; font-weight: bold; letter-spacing: 8px; margin: 0; color: #333;">INVOICE</h1>
+                <div style="text-align: center; margin: 10px 0;">
+                    <h1 style="font-size: 28px; font-weight: bold; letter-spacing: 3px; margin: 0;">INVOICE</h1>
                 </div>
-                <!-- Invoice Details -->
-                <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                    <div>
-                        <strong>No. PO : <span id="invoiceNoPO"></span></strong>
-                    </div>
-                    <div style="text-align: center;">
-                        <strong>No : <span id="invoiceNo"></span></strong>
-                    </div>
-                    <div style="text-align: right;">
-                        <strong>Date : <span id="invoiceDate"></span></strong>
-                    </div>
-                </div>
+                <!-- Info Row (sesuai PDF) -->
+                <table class="info-row" style="width:100%; border-collapse:collapse; margin:0;">
+                    <tr>
+                        <td style="width:33.33%; text-align:left; vertical-align:bottom; padding:0;"><span style="font-weight:bold;">No. PO : <span id="invoiceNoPO"></span></span></td>
+                        <td style="width:33.33%; text-align:center; vertical-align:bottom; padding:0;"><span style="font-weight:bold;">No : <span id="invoiceNo"></span></span></td>
+                        <td style="width:33.33%; text-align:right; vertical-align:bottom; padding:0;"><span style="font-weight:bold;">Date : <span id="invoiceDate"></span></span></td>
+                    </tr>
+                </table>
                 <!-- Invoice Table -->
-                <table id="invoiceTable" style="width:100%; border-collapse: collapse; margin-bottom: 20px; table-layout: auto;">
+                <table id="invoiceTable" style="width:100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 0; table-layout: fixed;">
                     <thead>
                         <tr>
-                            <th id="thDesc" style="border: 1px solid #000; padding: 8px; text-align: center;">DESCRIPTION</th>
-                            <th id="thQty" style="border: 1px solid #000; padding: 8px; text-align: center; width: 15%;">QTY</th>
-                            <th id="thUnit" style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">UNIT PRICE</th>
-                            <th id="thAmt" style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">AMMOUNT</th>
+                            <th id="thDesc">DESCRIPTION</th>
+                            <th id="thQty" style="width:13%;">QTY</th>
+                            <th id="thUnit" style="width:18%;">UNIT PRICE</th>
+                            <th id="thAmt" style="width:16%;">AMMOUNT</th>
                         </tr>
                     </thead>
                     <tbody id="invoiceItems"></tbody>
                     <tfoot>
                         <tr>
-                            <td style="border: 1px solid #000; padding: 8px; text-align:right; font-weight: bold;">SUB TOTAL :</td>
-                            <td id="invoiceSubtotalQty" style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;"></td>
-                            <td style="border: 1px solid #000; padding: 8px;"></td>
-                            <td id="invoiceSubtotal" style="border: 1px solid #000; padding: 8px; text-align:right;"></td>
+                            <td style="text-align:right; font-weight: bold;">SUB TOTAL :</td>
+                            <td id="invoiceSubtotalQty" style="text-align: center; font-weight: bold;"></td>
+                            <td></td>
+                            <td id="invoiceSubtotal" style="text-align:right;"></td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid #000; padding: 8px; text-align:right; font-weight: bold;">PPN 11% :</td>
-                            <td style="border: 1px solid #000; padding: 8px;"></td>
-                            <td style="border: 1px solid #000; padding: 8px;"></td>
-                            <td id="invoicePPN" style="border: 1px solid #000; padding: 8px; text-align:right;"></td>
+                            <td style="text-align:right; font-weight: bold;">PPN 11% :</td>
+                            <td></td>
+                            <td></td>
+                            <td id="invoicePPN" style="text-align:right;"></td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid #000; padding: 8px; text-align:right; font-weight: bold;">GRAND TOTAL :</td>
-                            <td style="border: 1px solid #000; padding: 8px;"></td>
-                            <td style="border: 1px solid #000; padding: 8px;"></td>
-                            <td id="invoiceGrandTotal" style="border: 1px solid #000; padding: 8px; text-align:right; font-weight: bold;"></td>
+                            <td style="text-align:right; font-weight: bold;">GRAND TOTAL :</td>
+                            <td></td>
+                            <td></td>
+                            <td id="invoiceGrandTotal" style="text-align:right; font-weight: bold;"></td>
                         </tr>
                     </tfoot>
                 </table>
-                <!-- Payment Info and Signature -->
-                <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                <!-- Payment Info and Signature (sesuai PDF) -->
+                <div style="display: flex; justify-content: space-between; margin-top: 0; align-items:flex-start; gap: 6mm;">
                     <div style="width: 60%;">
-                        <p style="margin: 0; font-size: 11px; line-height: 1.3;">
+                        <p style="margin: 8px 0 0 0; font-size: 10px; line-height: 1.25;">
                             <strong>Pembayaran Mohon Di Transfer Ke rekening</strong><br>
                             <strong>Bank BRI PEJATEN</strong><br>
                             <strong>NO REK : 1182-01-000039-30-3</strong><br>
                             <strong>ATAS NAMA : PT. CAM JAYA ABADI</strong>
                         </p>
                     </div>
-                    <div style="width: 35%; text-align: center;">
-                        <p style="margin: 0; margin-bottom: 105px;"><strong>Bekasi, <span id="invoiceDateLocation"></span></strong></p>
-                        <div class="signature-stamp" style="display:none; margin: 0 auto; width: 130px; margin-bottom: 20px;">
-                            <!-- Logo perusahaan di area tanda tangan disembunyikan sesuai permintaan -->
-                            <img src="{{ asset('image/LOGO.png') }}" alt="Company Stamp" style="width: 130px; height: 90px; object-fit: contain; opacity: 0.9;">
+                    <div style="width: 35%; margin-left:auto; display:flex; flex-direction:column; align-items:flex-end;">
+                        <!-- Wadah tetap agar signature center terhadap teks tanggal -->
+                        <div style="width:170px; align-self:flex-end;">
+                            <p style="margin: 8px 0 0 0; text-align:right;"><strong>Bekasi, <span id="invoiceDateLocation"></span></strong></p>
+                            <!-- Spacer tetap untuk area tanda tangan agar simetris -->
+                            <div style="height: 52px;"></div>
+                            <div class="signature-stamp" style="display:none; margin: 0 auto; width: 130px; margin-bottom: 20px;">
+                                <!-- Logo perusahaan di area tanda tangan disembunyikan sesuai permintaan -->
+                                <img src="{{ asset('image/LOGO.png') }}" alt="Company Stamp" style="width: 130px; height: 90px; object-fit: contain; opacity: 0.9;">
+                            </div>
+                            <p style="margin: 0; font-size: 10px; text-align:center;">
+                                <strong><u>NANIK PURWATI</u></strong><br>
+                                <span style="font-size: 8px;">DIREKTUR UTAMA</span>
+                            </p>
                         </div>
-
-                        <p style="margin: 0; font-size: 10px;">
-                            <strong><u>NANIK PURNAMI</u></strong><br>
-                            <span style="font-size: 8px;">DIREKTUR UTAMA</span>
-                        </p>
                     </div>
                 </div>
             </div>
@@ -568,7 +622,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportForm = document.getElementById('exportForm');
     const selectedIdsInput = document.getElementById('selectedIds');
 
-    // Handle individual row selection (radio)
+    // Handle individual row selection (checkbox)
     rowRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             updateExportControls();
@@ -576,8 +630,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function updateExportControls() {
-        const selected = document.querySelector('.row-radio:checked');
-        const count = selected ? 1 : 0;
+        const selected = document.querySelectorAll('.row-radio:checked');
+        const count = selected.length;
         if (count > 0) {
             exportControls.classList.remove('hidden');
             selectedCount.textContent = `${count} dipilih`;
@@ -686,12 +740,12 @@ document.getElementById('editModal').addEventListener('click', function(e) {
 
 // Generate Invoice dengan format PT. CAM JAYA ABADI
 function generateInvoice() {
-    const selected = document.querySelector('.row-radio:checked');
-    if (!selected) {
-        alert('Pilih satu data untuk membuat invoice');
+    const selectedChecks = Array.from(document.querySelectorAll('.row-radio:checked'));
+    if (selectedChecks.length === 0) {
+        alert('Pilih minimal 1 data untuk membuat invoice');
         return;
     }
-    const selectedIds = [selected.value];
+    const selectedIds = selectedChecks.map(el => el.value);
 
     fetch("{{ route('suratjalan.invoice.data') }}", {
         method: "POST",
@@ -715,6 +769,26 @@ function generateInvoice() {
 function populateInvoice(data) {
     // Data customer & alamat dari suratjalan pertama (PO header)
     const first = data[0];
+    // Tentukan No Invoice terbaru dari semua data terpilih
+    const latestPO = data.reduce((best, cur) => {
+        const getNum = (o) => {
+            const s = (o && o.no_invoice ? String(o.no_invoice) : '').split('/')[0];
+            const n = parseInt(s, 10);
+            return Number.isFinite(n) ? n : null;
+        };
+        const nb = getNum(best);
+        const nc = getNum(cur);
+        if (nb !== null && nc !== null) {
+            return nc > nb ? cur : best;
+        }
+        // Fallback ke tanggal_po jika nomor tidak bisa diparsing
+        if (best && best.tanggal_po && cur && cur.tanggal_po) {
+            return new Date(cur.tanggal_po) > new Date(best.tanggal_po) ? cur : best;
+        }
+        // Fallback terakhir: pilih yang memiliki no_invoice terisi
+        if (!best || !best.no_invoice) return cur;
+        return best;
+    }, first);
     document.getElementById('invoiceCustomer').textContent = first.customer;
     let addressText = '';
     if (first.alamat_1) addressText += first.alamat_1;
@@ -742,8 +816,8 @@ function populateInvoice(data) {
     
     // No PO dari database column no_po
     document.getElementById('invoiceNoPO').textContent = first.no_po || '-';
-    // No Invoice dari database column no_invoice
-    document.getElementById('invoiceNo').textContent = first.no_invoice || '-';
+    // No Invoice pilih yang terbaru (lihat latestPO)
+    document.getElementById('invoiceNo').textContent = (latestPO && latestPO.no_invoice) ? latestPO.no_invoice : (first.no_invoice || '-');
     document.getElementById('invoiceDate').textContent = invoiceDate;
     document.getElementById('invoiceDateLocation').textContent = invoiceDate;
 
@@ -753,20 +827,35 @@ function populateInvoice(data) {
     let subtotal = 0, totalQty = 0;
     let unitTypes = new Set(); // Track different unit types
 
-    // Flatten items from each selected PO
+    // Flatten items dari tiap PO sambil membawa No PO parent
     const allItems = [];
     data.forEach(po => {
         if (po.items && Array.isArray(po.items)) {
-            po.items.forEach(it => allItems.push(it));
+            po.items.forEach(it => {
+                const cloned = { ...it };
+                // simpan no_po parent agar bisa ditampilkan di DESCRIPTION
+                if (!cloned.no_po && po.no_po) cloned.no_po = po.no_po;
+                allItems.push(cloned);
+            });
         }
     });
 
-    // Tentukan mode tampilan berdasarkan jumlah item
+    // Deteksi apakah multi-PO (lebih dari satu No PO terpilih)
+    const uniquePO = new Set();
+    data.forEach(po => { if (po.no_po) uniquePO.add(String(po.no_po)); });
+    const multiPO = uniquePO.size > 1;
+    // Set header info No. PO sesuai aturan: kosong saat multi-PO
+    document.getElementById('invoiceNoPO').textContent = multiPO ? '' : (first.no_po || '-');
+
+    // Tentukan mode tampilan berdasarkan jumlah baris yang akan dirender (minimal 20)
     const count = allItems.length;
-    const mode = count <= 12 ? 'normal' : (count <= 22 ? 'compact' : 'ultra');
-    const fs = mode === 'normal' ? '12px' : (mode === 'compact' ? '11px' : '10px');
-    const pad = mode === 'normal' ? '8px' : (mode === 'compact' ? '6px' : '4px');
-    const lh = mode === 'normal' ? 1.3 : (mode === 'compact' ? 1.2 : 1.1);
+    const renderCount = Math.max(count, 20);
+    const mode = renderCount <= 14 ? 'normal' : (renderCount <= 20 ? 'compact' : 'ultra');
+
+    // Skala mengikuti pdf.blade.php agar tetap 1 halaman A4
+    const fs  = mode === 'normal' ? '11.2px' : (mode === 'compact' ? '8.8px' : '8.2px');
+    const pad = mode === 'normal' ? '6px'    : (mode === 'compact' ? '2.4px' : '2.2px');
+    const lh  = mode === 'normal' ? 1.22     : (mode === 'compact' ? 1.05   : 1.04);
     const wQty = mode === 'normal' ? '15%' : (mode === 'compact' ? '13%' : '12%');
     const wUnit = mode === 'normal' ? '20%' : (mode === 'compact' ? '18%' : '16%');
     const wAmt = mode === 'normal' ? '20%' : (mode === 'compact' ? '18%' : '16%');
@@ -789,10 +878,12 @@ function populateInvoice(data) {
         subtotal += isNaN(totalAmount) ? 0 : totalAmount;
         totalQty += isNaN(qty) ? 0 : qty;
 
-        // Product name from relation 'produk'
-        const produkName = it.produk && (it.produk.nama_produk || it.produk.nama || it.produk.name)
+        // Product name from relation 'produk' + No PO di kanan nama
+        const produkNameBase = it.produk && (it.produk.nama_produk || it.produk.nama || it.produk.name)
             ? (it.produk.nama_produk || it.produk.nama || it.produk.name)
             : '-';
+        const noPoItem = it.no_po || '';
+        const produkName = (multiPO && noPoItem) ? `${produkNameBase} (${noPoItem})` : produkNameBase;
 
         // Use exact database value for qty_jenis
         const jenis = (it.qty_jenis && String(it.qty_jenis).trim() !== '' && String(it.qty_jenis) !== '0') ? it.qty_jenis : 'PCS';
@@ -808,9 +899,9 @@ function populateInvoice(data) {
         itemsContainer.appendChild(row);
     });
     
-    // Tambah baris kosong hanya jika item sedikit agar tetap rapi (tanpa memaksa overflow)
-    const maxFiller = mode === 'normal' ? 10 : (mode === 'compact' ? 6 : 0);
-    const fillerCount = Math.max(0, maxFiller - count);
+    // Tambah baris kosong agar total minimal 20 baris (selaras PDF)
+    const minRows = 20;
+    const fillerCount = Math.max(0, minRows - count);
     for (let i = 0; i < fillerCount; i++) {
         const emptyRow = document.createElement('tr');
         emptyRow.innerHTML = `
@@ -847,26 +938,32 @@ function closeInvoiceModal() {
 }
 
 function printInvoice() {
-    const printContent = document.getElementById('invoiceContent').innerHTML;
+    const a4 = document.querySelector('.a4-page');
+    const outer = a4 ? a4.outerHTML : `<div class="a4-page"><div id=\"invoiceContent\">${document.getElementById('invoiceContent').innerHTML}</div></div>`;
     const html = `
         <html>
         <head>
             <meta charset="utf-8" />
             <title>Print Invoice</title>
             <style>
-                @page { size: A4 portrait; margin: 10mm; }
-                html, body { margin: 0; padding: 0; }
+                /* Samakan aturan dengan preview agar identik */
+                @page { size: A4 portrait; margin: 16mm 20mm 16mm 10mm; }
+                html, body { margin: 0; padding: 0; background:#fff; }
                 body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                .page { width: 210mm; min-height: 297mm; padding: 10mm; margin: 0 auto; background: #fff; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.3; }
-                table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-                th, td { border: 1px solid #000; word-break: break-word; }
-                /* Sembunyikan logo perusahaan pada area tanda tangan saat print */
-                .signature-stamp { display: none !important; }
+                .a4-page { width:210mm; min-height:297mm; margin:0 auto; padding:6mm; box-shadow: 0 0 0 1px #999; background:#fff; }
+                #invoiceContent { width: 180mm; margin-left:0; margin-right:auto; padding:0; font-family: DejaVu Sans, Arial, sans-serif; font-size:12px; line-height:1.22; color:#000; }
+                #invoiceContent table { width:100%; table-layout:fixed; border-collapse:collapse; }
+                #invoiceContent thead th { border:1px solid #000; padding:4px; text-align:center; font-size:10px; font-weight:600; line-height:1.05; }
+                #invoiceContent tbody td { border:1px solid #000; padding:4px; font-size:10px; line-height:1.05; }
+                #invoiceContent tfoot td { border:1px solid #000; padding:4px 6px; font-size:10px; line-height:1.05; }
+                #invoiceContent .info-row td { padding:0; border:0; }
+                /* Hindari kepotongan antar baris */
+                thead { display: table-header-group; }
+                tfoot { display: table-footer-group; }
+                tr, td, th { page-break-inside: avoid; }
             </style>
         </head>
-        <body onload="window.print(); window.onafterprint = function(){ window.close(); }">
-            <div class="page">${printContent}</div>
-        </body>
+        <body onload="window.print(); window.onafterprint = function(){ window.close(); }">${outer}</body>
         </html>`;
     const w = window.open('', '_blank');
     w.document.open();
@@ -876,12 +973,12 @@ function printInvoice() {
 
 // Trigger server-side PDF generation for selected Surat Jalan
 function downloadInvoicePDF() {
-    const selected = document.querySelector('.row-radio:checked');
-    if (!selected) {
-        alert('Pilih satu data untuk membuat invoice PDF');
+    const selectedChecks = Array.from(document.querySelectorAll('.row-radio:checked'));
+    if (selectedChecks.length === 0) {
+        alert('Pilih minimal 1 data untuk membuat invoice PDF');
         return;
     }
-    const selectedIds = [selected.value];
+    const selectedIds = selectedChecks.map(el => el.value);
     const pdfForm = document.getElementById('pdfForm');
     const pdfIds = document.getElementById('selectedIdsPdf');
     pdfIds.value = JSON.stringify(selectedIds);
@@ -890,10 +987,46 @@ function downloadInvoicePDF() {
 
 // Close modal when clicking outside
 document.getElementById('invoiceModal').addEventListener('click', function(e) {
-    if (e.target === this) {
+    if (e.target.id === 'invoiceModal') {
         closeInvoiceModal();
     }
 });
+
+// Intersep Ctrl+P agar sama dengan tombol Print (pakai konten invoice saja)
+window.addEventListener('keydown', function(e) {
+    const key = e.key ? e.key.toLowerCase() : '';
+    if ((e.ctrlKey || e.metaKey) && key === 'p') {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            const modal = document.getElementById('invoiceModal');
+            const isOpen = modal && !modal.classList.contains('hidden');
+            if (isOpen) {
+                // Jika modal sudah terbuka, langsung print kontennya
+                printInvoice();
+            } else {
+                // Jika belum terbuka, coba generate dulu (jika ada pilihan data)
+                const selected = document.querySelectorAll('.row-radio:checked');
+                if (typeof generateInvoice === 'function') {
+                    if (selected && selected.length > 0) {
+                        generateInvoice();
+                        // beri waktu render konten, lalu print
+                        setTimeout(() => { printInvoice(); }, 400);
+                    } else {
+                        // Tidak ada data terpilih, tetap coba print konten jika ada
+                        printInvoice();
+                    }
+                } else {
+                    printInvoice();
+                }
+            }
+        } catch (err) {
+            // fallback
+            printInvoice();
+        }
+    }
+});
+
 </script>
 
 <style>

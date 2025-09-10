@@ -29,22 +29,38 @@ class SuratJalanExport implements FromCollection, WithHeadings
         Log::info('[export] PO count: ' . $pos->count());
         Log::info('[export] Selected IDs: ' . json_encode($this->selectedIds));
 
+        // Deteksi multi-PO (lebih dari satu No PO di kumpulan data)
+        $uniquePOs = [];
+        foreach ($pos as $poCheck) {
+            if (!empty($poCheck->no_po)) {
+                $uniquePOs[$poCheck->no_po] = true;
+            }
+        }
+        $multiPO = count($uniquePOs) > 1;
+
         // Flatten to one row per item
         $rows = collect();
         $counter = 1;
         foreach ($pos as $po) {
             foreach ($po->items as $it) {
+                // Produk + No PO di kanan nama (hanya saat multi-PO)
+                $produkBase = $it->produk->nama_produk ?? 'N/A';
+                $produkOut = ($multiPO && !empty($po->no_po))
+                    ? trim($produkBase) . ' (' . trim($po->no_po) . ')'
+                    : $produkBase;
+
                 $rows->push([
                     'no' => $counter++,
                     'tanggal' => $this->formatDate($po->tanggal_po),
                     'customer' => $po->customer,
                     'no_surat_jalan' => $po->no_surat_jalan,
-                    'no_po' => $po->no_po,
+                    // Kolom No PO dikosongkan saat multi-PO agar konsisten dengan Invoice/PDF
+                    'no_po' => $multiPO ? '' : ($po->no_po ?? ''),
                     'kendaraan' => $po->kendaraan,
                     'no_polisi' => $po->no_polisi,
                     'qty' => (int) ($it->qty ?? 0),
                     'qty_jenis' => strtoupper($it->qty_jenis ?? 'PCS'),
-                    'produk' => $it->produk->nama_produk ?? 'N/A',
+                    'produk' => $produkOut,
                     'tanggal_po_detail' => $this->formatDate($po->tanggal_po),
                     'tanggal_surat_jalan' => $this->formatDate($po->tanggal_po),
                     'tanggal_kirim' => $this->formatDate($po->tanggal_po),
