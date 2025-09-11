@@ -37,7 +37,10 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->password, [
+                'rounds' => 12, // Default Bcrypt rounds
+            ]),
+            'is_admin' => false, // Default value for new users
         ]);
 
         event(new Registered($user));

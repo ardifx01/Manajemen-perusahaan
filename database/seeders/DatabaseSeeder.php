@@ -15,9 +15,26 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
+        // Buat user admin
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password', [
+                'rounds' => 12, // Gunakan Bcrypt dengan 12 rounds
+            ]),
+            'is_admin' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        // Buat user test biasa
+        User::create([
             'name' => 'Test User',
-            'email' => 'test@example.com',
+            'email' => 'user@example.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password', [
+                'rounds' => 12, // Gunakan Bcrypt dengan 12 rounds
+            ]),
+            'is_admin' => false,
+            'email_verified_at' => now(),
         ]);
     }
 }

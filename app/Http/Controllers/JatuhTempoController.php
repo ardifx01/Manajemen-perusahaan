@@ -32,18 +32,20 @@ class JatuhTempoController extends Controller
         if ($statusPembayaran) {
             $statsBuilder->where('status_pembayaran', $statusPembayaran);
         }
-        $rawStats = $statsBuilder
-            ->selectRaw('MONTH(tanggal_invoice) as m, COUNT(*) as total_count, COALESCE(SUM(jumlah_tagihan),0) as total_sum')
-            ->groupBy('m')
-            ->get()
-            ->keyBy('m');
-
-        // Normalize to 1..12
+        // Initialize empty array for all months
         $monthlyStats = [];
+        
+        // Get stats for each month
         for ($i = 1; $i <= 12; $i++) {
+            $monthQuery = clone $statsBuilder;
+            $monthData = $monthQuery
+                ->whereMonth('tanggal_invoice', $i)
+                ->selectRaw('COUNT(*) as total_count, COALESCE(SUM(jumlah_tagihan), 0) as total_sum')
+                ->first();
+                
             $monthlyStats[$i] = (object) [
-                'total_count' => (int) ($rawStats[$i]->total_count ?? 0),
-                'total_sum' => (float) ($rawStats[$i]->total_sum ?? 0),
+                'total_count' => (int) ($monthData->total_count ?? 0),
+                'total_sum' => (float) ($monthData->total_sum ?? 0),
             ];
         }
 

@@ -42,8 +42,7 @@
     })();
   " class="flex font-sans bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100">
 
-   
-    <aside id="sidebar" class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen flex flex-col transform transition-transform duration-300 fixed inset-y-0 left-0 z-40 -translate-x-full md:fixed md:inset-y-0 md:left-0 overflow-hidden"
+      <aside id="sidebar" class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen flex flex-col transform transition-transform duration-300 fixed inset-y-0 left-0 z-40 -translate-x-full md:fixed md:inset-y-0 md:left-0 overflow-hidden"
            x-bind:class="{
                 '-translate-x-full': !mobileSidebarOpen,
                 'translate-x-0': mobileSidebarOpen,
@@ -137,18 +136,14 @@
     
       
             <div x-show="open" x-transition.duration.300ms class="ml-6 pl-2 border-l border-gray-300 dark:border-gray-700 space-y-1 text-base overflow-hidden">
-                {{-- Input PO --}}
-                <a href="{{ route('po.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('po') || request()->routeIs('po.*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-                    <span>Input PO</span>
+                <a href="{{ route('po.invoice.index') }}"
+                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('po.invoice.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l2 2 4-4M7 7h10a2 2 0 012 2v8a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z"/></svg>
+                    <span>Data Invoice</span>
                 </a>
-                {{-- Data PO --}}
-                <a href="{{ route('suratjalan.index') }}"
-                   class="group flex items-center gap-2 px-3 py-1 rounded transition-all duration-200 {{ request()->routeIs('suratjalan.*') ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h6M6 19h12a2 2 0 002-2V7a2 2 0 00-2-2H9l-3 3v11a2 2 0 002 2z"/></svg>
-                    <span>Data PO</span>
-                </a>
+                {{-- Link Input PO di-nonaktifkan: akses form hanya lewat double click Data Invoice --}}
+                {{-- Link Data PO dihapus: akses Surat Jalan hanya dari alur Data Invoice --}}
+                {{-- Data Invoice --}}
             </div>
             
             <button @click="toggleFinance()"
@@ -337,7 +332,7 @@
     
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col md:ml-64" x-bind:class="{ 'md:ml-64': desktopSidebarOpen, 'md:ml-0': !desktopSidebarOpen }">
+    <div class="flex-1 flex flex-col md:ml-64">
         <header class="sticky top-0 z-30 h-16 bg-white/90 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-3">
                 <!-- Hamburger (desktop only) to restore sidebar when hidden -->
@@ -533,7 +528,6 @@
 
     @stack('modals')
     @stack('scripts')
-
 </body>
 </html>
 

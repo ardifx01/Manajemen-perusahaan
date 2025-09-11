@@ -24,9 +24,10 @@
     <!-- Menu -->
     <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
         @php
+            // Hapus link 'Input PO' dari sidebar. Form Input PO hanya bisa diakses via double click Data Invoice.
             $menus = [
                 ['name' => 'Dashboard', 'icon' => 'home', 'route' => 'dashboard'],
-                ['name' => 'Input PO', 'icon' => 'file-plus', 'route' => 'po.create'],
+                // ['name' => 'Input PO', 'icon' => 'file-plus', 'route' => 'po.create'], // disabled
                 ['name' => 'Data PO', 'icon' => 'truck', 'route' => 'suratjalan.index'],
                 ['name' => 'Customer', 'icon' => 'users', 'route' => 'customer.index'],
                 ['name' => 'Produk', 'icon' => 'package', 'route' => 'produk.index'],

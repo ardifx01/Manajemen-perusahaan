@@ -13,6 +13,7 @@ use App\Exports\SuratJalanExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use App\Models\JatuhTempo;
+use App\Services\DatabaseService;
 
 class SuratJalanController extends Controller
 {
@@ -26,10 +27,16 @@ class SuratJalanController extends Controller
         $year  = (int) ($request->get('year')  ?: now()->format('Y'));
 
         // Daftar tahun dari database
-        $dbYears = DB::table('pos')
-            ->selectRaw('DISTINCT YEAR(tanggal_po) as y')
-            ->pluck('y')
-            ->map(fn($v) => (int) $v);
+        $dbYears = collect();
+        $years = DB::table('pos')
+            ->select('tanggal_po')
+            ->distinct()
+            ->get()
+            ->map(function($item) {
+                return (int) date('Y', strtotime($item->tanggal_po));
+            });
+            
+        $dbYears = $years->unique()->sort()->values();
 
         // Rentang tahun 2025-2030 sebagai default
         $currentYear = (int) Carbon::now()->format('Y');
@@ -48,8 +55,11 @@ class SuratJalanController extends Controller
 
         // PERBAIKAN: Hilangkan filter yang terlalu ketat, tampilkan semua data PO
         $suratjalan = PO::with(['produkRel', 'kendaraanRel'])
-            ->when($year, fn($q) => $q->whereRaw('YEAR(tanggal_po) = ?', [$year]))
-            ->when($month, fn($q) => $q->whereRaw('MONTH(tanggal_po) = ?', [$month]))
+            ->when($year, fn($q) => $q->whereRaw(DatabaseService::year('tanggal_po') . ' = ?', [$year]))
+            ->when($month, fn($q) => $q->whereRaw(DatabaseService::month('tanggal_po') . ' = ?', [$month]))
+            // Hanya tampilkan data PO yang benar-benar diinput (bukan placeholder dari Data Invoice)
+            ->whereNotNull('no_po')
+            ->where('no_po', '!=', '-')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -58,8 +68,10 @@ class SuratJalanController extends Controller
 
         // PERBAIKAN: Tampilkan semua data PO tanpa filter relasi yang ketat
         $pos = PO::with(['produkRel', 'kendaraanRel'])
-            ->when($year, fn($q) => $q->whereRaw('YEAR(tanggal_po) = ?', [$year]))
-            ->when($month, fn($q) => $q->whereRaw('MONTH(tanggal_po) = ?', [$month]))
+            ->when($year, fn($q) => $q->whereRaw(DatabaseService::year('tanggal_po') . ' = ?', [$year]))
+            ->when($month, fn($q) => $q->whereRaw(DatabaseService::month('tanggal_po') . ' = ?', [$month]))
+            ->whereNotNull('no_po')
+            ->where('no_po', '!=', '-')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -75,13 +87,23 @@ class SuratJalanController extends Controller
             ->get();
 
         // Ringkasan total PO per bulan pada tahun terpilih
-        $monthlyStats = DB::table('pos')
-            ->selectRaw('MONTH(tanggal_po) as month, SUM(total) as total_sum, COUNT(*) as total_count')
-            ->when($year, fn($q) => $q->whereRaw('YEAR(tanggal_po) = ?', [$year]))
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
+        $monthlyStats = collect();
+        
+        for ($m = 1; $m <= 12; $m++) {
+            $monthData = DB::table('pos')
+                ->select(DB::raw('SUM(total) as total_sum, COUNT(*) as total_count'))
+                ->whereYear('tanggal_po', $year)
+                ->whereMonth('tanggal_po', $m)
+                ->first();
+                
+            if ($monthData) {
+                $monthlyStats->put($m, (object)[
+                    'month' => $m,
+                    'total_sum' => $monthData->total_sum ?? 0,
+                    'total_count' => $monthData->total_count ?? 0
+                ]);
+            }
+        }
 
         return view('suratjalan.index', [
             'suratjalan'      => $suratjalan,

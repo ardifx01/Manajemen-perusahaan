@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@php($hideSidebar = true)
 
 @section('title', 'Data Purchase Order')
 
@@ -67,17 +68,25 @@
             @php($namaBulanFull=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'])
             @php($tahunTerpilihLocal = (int) (request('year') ?? ($tahunNow ?? now()->format('Y'))))
 
-            <!-- Header ringkasan + filter tahun -->
+            <!-- Header ringkasan + filter tahun + kembali -->
             <div class="flex items-center justify-between mb-2">
                 <h2 class="text-sm sm:text-base font-semibold text-gray-800 dark:text-slate-100">Ringkasan Total PO per Bulan</h2>
-                <!-- Link Pilih Tahun -->
-                <button type="button" onclick="openYearModal()" 
-                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    Pilih Tahun ({{ $tahunTerpilihLocal }})
-                </button>
+                <div class="flex items-center gap-2">
+                    <!-- Link Pilih Tahun -->
+                    <button type="button" onclick="openYearModal()" 
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Pilih Tahun ({{ $tahunTerpilihLocal }})
+                    </button>
+                    <!-- Back to Data Invoice (di samping tombol tahun) -->
+                    <a href="{{ route('po.invoice.index') }}" 
+                       class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-slate-800 dark:text-gray-200 dark:border-slate-600 dark:hover:bg-slate-700">
+                        <i class="fa-solid fa-arrow-left mr-1.5"></i>
+                        Kembali ke Data Invoice
+                    </a>
+                </div>
             </div>
 
             <!-- Grid bulan yang bisa diklik -->

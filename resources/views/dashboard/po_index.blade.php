@@ -17,7 +17,7 @@
 @endpush
 
 @section('content')
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
+<div class="min-h-screen bg-transparent py-4 sm:py-8">
     <div class="max-w-6xl mx-auto px-2 sm:px-4">
         <!-- Header Section -->
         <div class="bg-white/95 dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
@@ -50,9 +50,53 @@
             </div>
         @endif
 
-        <form action="@isset($po) {{ route('po.update', $po->id) }} @else {{ route('po.store') }} @endisset" method="POST" class="font-sans font-inter">
+        @if ($errors->any())
+            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-700 p-4 mb-4 sm:mb-6 rounded-r-lg">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-triangle text-red-500 dark:text-red-300 mt-0.5"></i>
+                    <div>
+                        <p class="text-red-800 dark:text-red-300 font-semibold mb-1">Perbaiki input berikut:</p>
+                        <ul class="list-disc list-inside text-red-700 dark:text-red-200 text-sm">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Action Bar: Back + Lihat Data PO -->
+        <div class="mb-4">
+            <div class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gradient-to-r from-white to-blue-50/60 dark:from-slate-900/60 dark:to-slate-800/60 shadow-sm p-3 sm:p-4">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                        <i class="fa-solid fa-circle-info text-blue-600"></i>
+                        <span>Gunakan tombol berikut untuk navigasi cepat.</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('po.invoice.index') }}"
+                           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition bg-white text-blue-700 border-blue-200 hover:bg-blue-50 dark:bg-slate-900 dark:text-blue-300 dark:border-blue-900 dark:hover:bg-slate-800">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Kembali ke Data Invoice
+                        </a>
+                        <a id="btn-to-sj" href="{{ route('suratjalan.index', ['month' => now()->format('n'), 'year' => now()->format('Y')]) }}"
+                           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            <i class="fa-solid fa-table-list text-white"></i>
+                            Lihat Data PO (Surat Jalan)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="po-form" action="@isset($po) {{ route('po.update', $po->id) }} @else {{ route('po.store') }} @endisset" method="POST" class="font-sans font-inter">
             @csrf
             @isset($po) @method('PUT') @endisset
+            <!-- Nomor Urut Data Invoice (bukan No Invoice). Diisi dari query po_number saat datang dari Data Invoice -->
+            <input type="hidden" name="po_number" value="{{ request('po_number') ?? old('po_number', $po->po_number ?? '') }}">
+            <!-- Sumber navigasi, agar setelah simpan bisa kembali ke Data Invoice -->
+            <input type="hidden" name="from" value="{{ request('from') }}">
 
             <!-- Unified form layout without separate sections -->
             <div class="bg-white/95 dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-xl shadow-lg p-4 sm:p-6">
@@ -66,26 +110,15 @@
                         <select name="customer_id" id="customer" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" required>
                             <option value="">-- Pilih Customer --</option>
                             @foreach($customers as $c)
-                                @php
-                                    $deliveryParts = explode('/', $c->delivery_note_number ?? '');
-                                    $deliveryNomor = $deliveryParts[0] ?? '';
-                                    $deliveryPt = $deliveryParts[1] ?? '';
-                                    $deliveryTahun = $deliveryParts[2] ?? '';
-
-                                    $invoiceParts = explode('/', $c->invoice_number ?? '');
-                                    $invoiceNomor = $invoiceParts[0] ?? '';
-                                    $invoicePt = $invoiceParts[1] ?? '';
-                                    $invoiceTahun = $invoiceParts[2] ?? '';
-                                @endphp
                                 <option value="{{ $c->id }}" 
                                         data-address1="{{ $c->address_1 ?? '' }}" 
                                         data-address2="{{ $c->address_2 ?? '' }}"
-                                        data-delivery-nomor="{{ $deliveryNomor }}"
-                                        data-delivery-pt="{{ $deliveryPt }}"
-                                        data-delivery-tahun="{{ $deliveryTahun }}"
-                                        data-invoice-nomor="{{ $invoiceNomor }}"
-                                        data-invoice-pt="{{ $invoicePt }}"
-                                        data-invoice-tahun="{{ $invoiceTahun }}"
+                                        data-delivery-nomor="{{ (explode('/', $c->delivery_note_number ?? '')[0] ?? '') }}"
+                                        data-delivery-pt="{{ (explode('/', $c->delivery_note_number ?? '')[1] ?? '') }}"
+                                        data-delivery-tahun="{{ (explode('/', $c->delivery_note_number ?? '')[2] ?? '') }}"
+                                        data-invoice-nomor="{{ (explode('/', $c->invoice_number ?? '')[0] ?? '') }}"
+                                        data-invoice-pt="{{ (explode('/', $c->invoice_number ?? '')[1] ?? '') }}"
+                                        data-invoice-tahun="{{ (explode('/', $c->invoice_number ?? '')[2] ?? '') }}"
                                         data-payment-terms="{{ $c->payment_terms_days ?? 30 }}"
                                         data-debug-terms="{{ $c->payment_terms_days }}"
                                         @selected(old('customer_id', $po->customer_id ?? '') == $c->id)>
@@ -118,7 +151,7 @@
                             <i class="fas fa-calendar text-red-500 mr-1"></i>Tanggal PO
                         </label>
                         <div class="relative">
-                            <input type="date" name="tanggal_po" class="date-input w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg pl-3 pr-12 sm:pl-4 sm:pr-12 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('tanggal_po', isset($po) && $po->tanggal_po ? \Carbon\Carbon::parse($po->tanggal_po)->format('Y-m-d') : '') }}" required>
+                            <input type="date" name="tanggal_po" class="date-input w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg pl-3 pr-12 sm:pl-4 sm:pr-12 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ request('tanggal_po') ?? old('tanggal_po', isset($po) && $po->tanggal_po ? \Carbon\Carbon::parse($po->tanggal_po)->format('Y-m-d') : '') }}" required>
                             <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 dark:text-gray-200">
                                 <i class="fa-regular fa-calendar text-base"></i>
                             </span>
@@ -625,6 +658,54 @@ document.addEventListener('DOMContentLoaded', () => {
         // Prefill sekali di awal jika ada nilai
         fillMonthYearFromTanggalPO();
     }
+});
+</script>
+
+<script>
+// Validasi front-end sederhana sebelum submit untuk mencegah kegagalan yang tidak terlihat
+document.addEventListener('DOMContentLoaded', () => {
+    // Update link Data PO (Surat Jalan) mengikuti tanggal_po
+    const tanggalInput = document.querySelector('input[name="tanggal_po"]');
+    const btnSJ = document.getElementById('btn-to-sj');
+    function updateSuratJalanLink() {
+        if (!tanggalInput || !btnSJ || !tanggalInput.value) return;
+        const d = new Date(tanggalInput.value);
+        if (isNaN(d.getTime())) return;
+        const month = (d.getMonth() + 1);
+        const year = d.getFullYear();
+        const base = "{{ route('suratjalan.index') }}";
+        btnSJ.href = base + `?month=${month}&year=${year}`;
+    }
+    updateSuratJalanLink();
+    tanggalInput?.addEventListener('change', updateSuratJalanLink);
+
+    const form = document.getElementById('po-form');
+    if (!form) return;
+    form.addEventListener('submit', (e) => {
+        const customer = document.getElementById('customer');
+        const noPo = form.querySelector('input[name="no_po"]');
+        const tgl = form.querySelector('input[name="tanggal_po"]');
+        const rows = document.querySelectorAll('.item-row');
+        let itemValid = false;
+        rows.forEach(r => {
+            const produk = r.querySelector('.produk-select');
+            const qty = r.querySelector('.item-qty');
+            if (produk && produk.value && qty && parseInt(qty.value || '0') > 0) {
+                itemValid = true;
+            }
+        });
+
+        const errors = [];
+        if (!customer || !customer.value) errors.push('Customer wajib dipilih');
+        if (!noPo || !noPo.value || noPo.value.trim() === '-' ) errors.push('No PO wajib diisi dan tidak boleh "-"');
+        if (!tgl || !tgl.value) errors.push('Tanggal PO wajib diisi');
+        if (!itemValid) errors.push('Minimal 1 item produk dengan Qty > 0');
+
+        if (errors.length > 0) {
+            e.preventDefault();
+            alert('Form belum lengkap:\n- ' + errors.join('\n- '));
+        }
+    });
 });
 </script>
 @endsection

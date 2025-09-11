@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@php($hideSidebar = true)
 @section('title', 'Edit Data PO')
 
 @section('content')

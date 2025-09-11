@@ -222,11 +222,20 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::prefix('po')->name('po.')->group(function () {
         Route::get('/', [POController::class, 'index'])->name('index');
+        Route::get('/invoice', [POController::class, 'invoiceIndex'])->name('invoice.index');
         Route::get('/create', [POController::class, 'create'])->name('create');
         Route::post('/', [POController::class, 'store'])->name('store');
         Route::get('/{po}/edit', [POController::class, 'edit'])->name('edit');
         Route::put('/{po}', [POController::class, 'update'])->name('update');
         Route::delete('/{po}', [POController::class, 'destroy'])->name('destroy');
+        
+        // Route untuk invoice
+        Route::post('/invoice/quick-create', [POController::class, 'invoiceQuickCreate'])->name('invoice.quick-create');
+        Route::post('/invoice/set-next-number', [POController::class, 'setNextInvoiceNumber'])->name('invoice.set-next-number');
+        
+        // Route untuk halaman daftar invoice
+        Route::get('/invoice', [POController::class, 'invoiceIndex'])->name('invoice.index');
+        
         // Export PO di-nonaktifkan. Gunakan export di menu Surat Jalan.
         // Route::get('/export', [POExportController::class, 'exportToExcel'])->name('export');
     });

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
-use App\Models\Invoice;
-use App\Models\POItem;
 use App\Models\PO;
-use App\Models\Salary;
+use App\Models\POItem;
 use App\Models\Expense;
+use App\Models\Salary;
+use App\Models\SuratJalan;
+use App\Models\Kendaraan;
+use App\Models\Setting;
+use App\Services\DatabaseService;
 use App\Models\BarangMasuk;
 use App\Models\BarangKeluar;
 use Illuminate\Support\Facades\DB;
@@ -36,8 +39,8 @@ class DashboardController extends Controller
         // Total Invoice (diambil dari Surat Jalan/PO) sesuai bulan & tahun terpilih
         // Menggunakan field tanggal_po pada tabel PO
         $invoiceCount = (int) PO::where(function($q) use ($tahunNow, $bulanNow) {
-                $q->whereRaw('YEAR(tanggal_po) = ?', [$tahunNow])
-                  ->whereRaw('MONTH(tanggal_po) = ?', [$bulanNow]);
+                $q->whereRaw(DatabaseService::year('tanggal_po') . ' = ?', [$tahunNow])
+                  ->whereRaw(DatabaseService::month('tanggal_po') . ' = ?', [$bulanNow]);
             })->count();
 
         $totalGajiKaryawan = Employee::where('status', 'aktif')->sum('gaji_pokok');
@@ -67,24 +70,32 @@ class DashboardController extends Controller
             ->get();
 
         // Pendapatan Tahunan (Net per bulan untuk incYear berjalan)
-        $revenueNetByMonthRaw = POItem::join('pos', 'po_items.po_id', '=', 'pos.id')
-            ->whereRaw('YEAR(pos.tanggal_po) = ?', [$incYear])
-            ->selectRaw('MONTH(pos.tanggal_po) as bulan, SUM(po_items.total) as subtotal')
-            ->groupBy('bulan')
-            ->pluck('subtotal', 'bulan');
         $revenueNetByMonth = [];
         for ($m = 1; $m <= 12; $m++) {
-            $revenueNetByMonth[$m] = (int) ($revenueNetByMonthRaw[$m] ?? 0);
+            $monthTotal = POItem::join('pos', 'po_items.po_id', '=', 'pos.id')
+                ->whereYear('pos.tanggal_po', $incYear)
+                ->whereMonth('pos.tanggal_po', $m)
+                ->sum('po_items.total');
+            $revenueNetByMonth[$m] = (int) $monthTotal;
         }
 
         // Detail pendapatan per perusahaan per bulan (untuk incYear)
-        $revenueByCustomerByMonthRows = POItem::join('pos', 'po_items.po_id', '=', 'pos.id')
-            ->whereRaw('YEAR(pos.tanggal_po) = ?', [$incYear])
-            ->selectRaw('MONTH(pos.tanggal_po) as bulan, pos.customer as customer, SUM(po_items.total) as subtotal')
-            ->groupBy('bulan', 'pos.customer')
-            ->orderBy('bulan')
-            ->orderByDesc('subtotal')
-            ->get();
+        $revenueByCustomerByMonthRows = collect();
+        
+        for ($m = 1; $m <= 12; $m++) {
+            $monthData = POItem::join('pos', 'po_items.po_id', '=', 'pos.id')
+                ->whereYear('pos.tanggal_po', $incYear)
+                ->whereMonth('pos.tanggal_po', $m)
+                ->select('pos.customer', 
+                    DB::raw('SUM(po_items.total) as subtotal'),
+                    DB::raw("$m as bulan")
+                )
+                ->groupBy('pos.customer')
+                ->orderBy('subtotal', 'desc')
+                ->get();
+                
+            $revenueByCustomerByMonthRows = $revenueByCustomerByMonthRows->concat($monthData);
+        }
         $revenueByCustomerByMonth = [];
         foreach ($revenueByCustomerByMonthRows as $row) {
             $b = (int) ($row->bulan ?? 0);
@@ -129,10 +140,13 @@ class DashboardController extends Controller
                   ->whereYear('tanggal', $tahunNow);
             })->sum('amount');
 
-        $expensesByMonthRaw = Expense::whereYear('tanggal', $tahunNow)
-            ->selectRaw('MONTH(tanggal) as bulan, SUM(amount) as total')
-            ->groupBy('bulan')
-            ->pluck('total', 'bulan');
+        $expensesByMonthRaw = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $monthTotal = Expense::whereYear('tanggal', $tahunNow)
+                ->whereMonth('tanggal', $m)
+                ->sum('amount');
+            $expensesByMonthRaw[$m] = $monthTotal;
+        }
         $expensesByMonth = [];
         for ($m = 1; $m <= 12; $m++) {
             $expensesByMonth[$m] = (int) ($expensesByMonthRaw[$m] ?? 0);

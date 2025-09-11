@@ -11,9 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('kendaraans', function (Blueprint $table) {
-            $table->string('no_polisi')->nullable()->after('nama');
-        });
+        if (Schema::hasTable('kendaraans') && !Schema::hasColumn('kendaraans', 'no_polisi')) {
+            Schema::table('kendaraans', function (Blueprint $table) {
+                // Posisi kolom: jika ada 'nama' gunakan itu, jika ada 'nama_kendaraan' gunakan itu, jika tidak, tambah tanpa after()
+                if (Schema::hasColumn('kendaraans', 'nama')) {
+                    $table->string('no_polisi')->nullable()->after('nama');
+                } elseif (Schema::hasColumn('kendaraans', 'nama_kendaraan')) {
+                    $table->string('no_polisi')->nullable()->after('nama_kendaraan');
+                } else {
+                    $table->string('no_polisi')->nullable();
+                }
+            });
+        }
     }
 
     /**
@@ -21,8 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('kendaraans', function (Blueprint $table) {
-            $table->dropColumn('no_polisi');
-        });
+        if (Schema::hasTable('kendaraans') && Schema::hasColumn('kendaraans', 'no_polisi')) {
+            Schema::table('kendaraans', function (Blueprint $table) {
+                $table->dropColumn('no_polisi');
+            });
+        }
     }
 };
