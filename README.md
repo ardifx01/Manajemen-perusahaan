@@ -19,7 +19,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-✅%20Production%20Ready-success?style=flat-square" alt="Status">
-  <img src="https://img.shields.io/badge/Version-2.4.0-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.4.1-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square" alt="Build">
 </p>
@@ -71,6 +71,12 @@ Sistem manajemen operasional **end-to-end** untuk perusahaan distribusi, logisti
 | RESTful API | Alpine.js Reactive | Optimized Queries | Session Management |
 | Clean Code | Mobile Responsive | Lazy Loading | CSRF Protection |
 
+> Update Terbaru (2025-09-11)
+> - UI: Navbar halaman Data Invoice disejajarkan dengan garis sidebar agar konsisten dengan form lain (Surat Jalan/Jatuh Tempo).
+> - Tabel Invoice: perilaku responsif disempurnakan. Header dan isi kolom tidak turun (nowrap) sesuai kebutuhan.
+> - Scroll Horizontal: hanya aktif dan tersembunyi di SEL PRODUCT; kolom lain tidak terpengaruh. Ambang min-width diatur sehingga scroll tidak muncul terlalu sensitif.
+> - Struktur Header: perapihan struktur HTML Blade pada halaman Data Invoice agar layout stabil saat zoom/resize.
+>
 > Update Terbaru (2025-09-09)
 > - Excel Tanda Terima: F21 diisi tanggal PO dari tabel Surat Jalan dengan format `d/mmm/yyyy` (contoh: 9/Sep/2025).
 > - Excel Tanda Terima: E24 diisi deadline (tanggal_jatuh_tempo) dari modul Jatuh Tempo.
