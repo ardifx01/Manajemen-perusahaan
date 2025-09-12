@@ -19,7 +19,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-✅%20Production%20Ready-success?style=flat-square" alt="Status">
-  <img src="https://img.shields.io/badge/Version-2.4.1-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.5.0-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square" alt="Build">
 </p>
@@ -71,6 +71,14 @@ Sistem manajemen operasional **end-to-end** untuk perusahaan distribusi, logisti
 | RESTful API | Alpine.js Reactive | Optimized Queries | Session Management |
 | Clean Code | Mobile Responsive | Lazy Loading | CSRF Protection |
 
+> Update Terbaru (2025-09-12)
+> - PO: "No Surat Jalan" kini otomatis terisi dari `code_number` Customer (format CAM-TTG/2025 → Nomor=CAM, PT=TTG, Tahun=2025). Customer di form PO dibuat non-editable saat datang dari Data Invoice.
+> - PO: Input "No Invoice" di form PO dihapus; penomoran invoice dikelola dari halaman Data Invoice dengan logika lanjut nomor terbesar (bukan MEX terkecil). Alignment kolom No Invoice dirapikan agar rata kiri.
+> - PO: Tanggal PO default ke hari ini saat form dibuka dari Data Invoice; perubahan tanggal mengisi Tahun No Surat Jalan otomatis.
+> - Customer: Tambah field `code_number` (CAM-TTG/2025) pada Data Customer (form Tambah/Edit) dan tampilkan kolom "Kode Number" di tabel.
+> - Pengirim: Tambah kolom `kendaraan` dan `no_polisi` (DB, model, controller). Form Tambah/Edit Pengirim kini memiliki input Kendaraan dan No Polisi; tabel menampilkan kedua kolom tersebut.
+> - UI: Perbaikan builder baris dinamis pada Data Invoice agar kolom sesuai header (Tanggal, No Invoice, Customer, dst) dan badge No Invoice tidak "miring" ke kolom lain.
+>
 > Update Terbaru (2025-09-11)
 > - UI: Navbar halaman Data Invoice disejajarkan dengan garis sidebar agar konsisten dengan form lain (Surat Jalan/Jatuh Tempo).
 > - Tabel Invoice: perilaku responsif disempurnakan. Header dan isi kolom tidak turun (nowrap) sesuai kebutuhan.
@@ -704,6 +712,19 @@ gantt
 - [ ] 🤖 **API Integration** - RESTful API untuk third-party integration
 
 ## 📝 Changelog
+
+### 2025-09-12 (v2.5.0)
+- Purchase Order:
+  - Prefill No Surat Jalan dari `code_number` Customer (CAM-TTG/2025 → Nomor/PT/Tahun).
+  - Hapus input No Invoice di form PO; penomoran via Data Invoice (lanjut nomor terbesar, bukan celah kecil). Rapi rata-kiri kolom No Invoice dan urutan kolom baris dinamis.
+  - Tanggal PO default ke hari ini saat datang dari Data Invoice; sinkron tahun ke No Surat Jalan secara otomatis.
+- Customer:
+  - Tambah kolom `code_number` (form Tambah/Edit) dan tampilkan kolom "Kode Number" di listing.
+- Pengirim:
+  - Tambah kolom `kendaraan` dan `no_polisi` (migrasi, model, controller). Form Tambah/Edit mendukung input keduanya, listing menampilkan dua kolom baru.
+- UI/UX:
+  - Perbaikan kecil agar badge dan kolom tidak salah posisi; pengalaman dark mode tetap konsisten.
+
 
 ### 2025-09-09 (v2.4.0)
 - Export Tanda Terima (Excel):
