@@ -106,6 +106,8 @@
                     <tr>
                         <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm border-b divider">No</th>
                         <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[180px] border-b divider">Nama Pengirim</th>
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[160px] border-b divider">Kendaraan</th>
+                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[140px] border-b divider">No Polisi</th>
                         <th class="px-3 md:px-6 py-3 md:py-4 text-center font-semibold text-xs md:text-sm min-w-[140px] border-b divider">Aksi</th>
                     </tr>
                 </thead>
@@ -122,6 +124,12 @@
                                 </div>
                                 <span class="text-gray-900 dark:text-slate-200 font-medium text-sm">{{ $item->nama }}</span>
                             </div>
+                        </td>
+                        <td class="px-3 md:px-6 py-3 md:py-4">
+                            <span class="inline-block bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-200 px-2 py-1 rounded text-xs font-medium">{{ $item->kendaraan ?? '-' }}</span>
+                        </td>
+                        <td class="px-3 md:px-6 py-3 md:py-4">
+                            <span class="inline-block bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-200 px-2 py-1 rounded text-xs font-medium">{{ $item->no_polisi ?? '-' }}</span>
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4">
                             <div class="flex justify-center gap-2">
@@ -168,7 +176,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                         <x-table.action-buttons 
-                            onEdit="openEditModal({{ $item->id }}, {!! json_encode($item->nama) !!})"
+                            onEdit="openEditModal({{ $item->id }}, {!! json_encode($item->nama) !!}, {!! json_encode($item->kendaraan) !!}, {!! json_encode($item->no_polisi) !!})"
                             deleteAction="{{ route('pengirim.destroy', $item->id) }}"
                             confirmText="Yakin ingin menghapus pengirim ini?" />
                     </div>
@@ -223,6 +231,27 @@
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+                <!-- Kendaraan & No Polisi -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label for="add_kendaraan" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                            <i class="fa-solid fa-truck text-green-500"></i>
+                            <span>Kendaraan</span>
+                        </label>
+                        <input type="text" id="add_kendaraan" name="kendaraan"
+                               class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
+                               placeholder="Contoh: L300" value="{{ old('kendaraan') }}">
+                    </div>
+                    <div>
+                        <label for="add_no_polisi" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                            <i class="fa-solid fa-id-card text-yellow-500"></i>
+                            <span>No Polisi</span>
+                        </label>
+                        <input type="text" id="add_no_polisi" name="no_polisi"
+                               class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
+                               placeholder="Contoh: B 1234 CD" value="{{ old('no_polisi') }}">
+                    </div>
+                </div>
             </div>
             
             <!-- Action Buttons -->
@@ -262,10 +291,21 @@
             @method('PUT')
             <input type="hidden" id="oldNama" name="old_nama">
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pengirim <span class="text-red-500">*</span></label>
-                    <input type="text" id="editNama" name="nama" required 
-                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+                <div class="space-y-2">
+                    <label for="add_nama" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Pengirim</label>
+                    <input type="text" id="add_nama" name="nama" required
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
+                           placeholder="Masukkan nama pengirim">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kendaraan</label>
+                        <input type="text" id="editKendaraan" name="kendaraan" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No Polisi</label>
+                        <input type="text" id="editNoPolisi" name="no_polisi" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+                    </div>
                 </div>
             </div>
             <div class="flex justify-end space-x-3 mt-6">
@@ -381,7 +421,7 @@ function closeAddModal() {
     }, 300);
 }
 
-window.openEditModal = function(id, nama) {
+window.openEditModal = function(id, nama, kendaraan = '', noPolisi = '') {
     try {
         console.log('openEditModal pengirim:', { id, nama });
         const form = document.getElementById('editForm');
@@ -393,8 +433,12 @@ window.openEditModal = function(id, nama) {
         form.action = `{{ url('pengirim') }}/${id}`;
         const namaInput = document.getElementById('editNama');
         const oldNamaInput = document.getElementById('oldNama');
+        const editKendaraan = document.getElementById('editKendaraan');
+        const editNoPolisi = document.getElementById('editNoPolisi');
         if (namaInput) namaInput.value = nama ?? '';
         if (oldNamaInput) oldNamaInput.value = nama ?? '';
+        if (editKendaraan) editKendaraan.value = kendaraan ?? '';
+        if (editNoPolisi) editNoPolisi.value = noPolisi ?? '';
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         setTimeout(() => {

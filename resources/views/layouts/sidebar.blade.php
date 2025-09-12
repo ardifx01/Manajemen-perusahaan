@@ -30,7 +30,10 @@
                 // ['name' => 'Input PO', 'icon' => 'file-plus', 'route' => 'po.create'], // disabled
                 ['name' => 'Data PO', 'icon' => 'truck', 'route' => 'suratjalan.index'],
                 ['name' => 'Customer', 'icon' => 'users', 'route' => 'customer.index'],
-                ['name' => 'Produk', 'icon' => 'package', 'route' => 'produk.index'],
+                ['name' => 'Produk', 'icon' => 'package', 'route' => 'produk.index', 'subroutes' => [
+                    'barang.masuk.index','barang.masuk.create','barang.masuk.edit','barang.masuk.update','barang.masuk.store',
+                    'barang.keluar.index','barang.keluar.create','barang.keluar.edit','barang.keluar.update','barang.keluar.store'
+                ]],
                 ['name' => 'Kendaraan', 'icon' => 'truck', 'route' => 'kendaraan.index'],
             ];
             $currentRoute = Route::currentRouteName();

@@ -7,6 +7,7 @@ use App\Models\POItem;
 use App\Models\SuratJalan;
 use App\Models\Kendaraan;
 use App\Models\Produk;
+use App\Models\BarangKeluar;
 use App\Models\Customer;
 use App\Models\Pengirim; // Tambahkan model Pengirim
 use App\Models\JatuhTempo; // Sinkronisasi Jatuh Tempo dari PO
@@ -75,7 +76,30 @@ class POController extends Controller
             $prefillTanggal = now()->format('Y-m-d');
         }
 
-        return view('dashboard.po_index', compact('pos', 'kendaraans', 'produks', 'customers', 'pengirims', 'prefillTanggal'));
+        // Siapkan prefill No Surat Jalan dari code_number customer (format: BAG1-BAG2/BAG3)
+        $sjCodeParts = [null, null, null];
+        $sjNomor = $sjPt = $sjTahun = null;
+        if ($draft && $draft->customer_id) {
+            try {
+                $cust = Customer::find($draft->customer_id);
+                if ($cust && !empty($cust->code_number)) {
+                    $leftRight = explode('/', $cust->code_number);
+                    $left = $leftRight[0] ?? '';
+                    $p3 = $leftRight[1] ?? '';
+                    $lr = explode('-', $left);
+                    $p1 = $lr[0] ?? '';
+                    $p2 = $lr[1] ?? '';
+                    $sjCodeParts = [$p1 ?: null, $p2 ?: null, $p3 ?: null];
+                    $sjNomor = $p1 ?: null;
+                    $sjPt    = $p2 ?: null;
+                    $sjTahun = $p3 ?: null;
+                }
+            } catch (\Throwable $e) { /* ignore */ }
+        }
+
+        // Kirim draft sebagai $po agar binding form (customer_id, dsb) otomatis terpilih
+        $po = $draft;
+        return view('dashboard.po_index', compact('pos', 'kendaraans', 'produks', 'customers', 'pengirims', 'prefillTanggal', 'po', 'sjCodeParts', 'sjNomor', 'sjPt', 'sjTahun'));
     }
 
     public function store(Request $request)
@@ -161,6 +185,33 @@ class POController extends Controller
                 ]);
             }
 
+            // Validasi stok cukup per produk (gabungkan qty per produk dulu)
+            $qtyByProduk = [];
+            foreach ($items as $it) {
+                $qtyByProduk[$it['produk_id']] = ($qtyByProduk[$it['produk_id']] ?? 0) + (int) $it['qty'];
+            }
+
+            if (!empty($qtyByProduk)) {
+                $produkMap = Produk::query()
+                    ->whereIn('id', array_keys($qtyByProduk))
+                    ->withSum('barangMasuks as qty_masuk', 'qty')
+                    ->withSum('barangKeluars as qty_keluar', 'qty')
+                    ->get()
+                    ->keyBy('id');
+
+                $errors = [];
+                foreach ($qtyByProduk as $pid => $qtyReq) {
+                    $p = $produkMap->get($pid);
+                    $sisa = (int) (($p->qty_masuk ?? 0) - ($p->qty_keluar ?? 0));
+                    if ($qtyReq > $sisa) {
+                        $errors[] = 'Stok untuk "' . ($p->nama_produk ?? ('ID '.$pid)) . '" kurang. Sisa: ' . $sisa . ', diminta: ' . $qtyReq . '.';
+                    }
+                }
+                if (!empty($errors)) {
+                    throw ValidationException::withMessages(['items' => implode(' ', $errors)]);
+                }
+            }
+
             // Header mengambil item pertama untuk kolom legacy
             $first = $items->first();
             $sumTotal = (int) $items->sum(fn ($it) => (int) ($it['total'] ?? 0));
@@ -212,6 +263,16 @@ class POController extends Controller
                         'total'     => $it['total'],
                     ]);
                 }
+                // Catat Barang Keluar otomatis
+                foreach ($items as $it) {
+                    BarangKeluar::create([
+                        'produk_id' => $it['produk_id'],
+                        'qty'       => (int) $it['qty'],
+                        'tanggal'   => $data['tanggal_po'],
+                        'keterangan'=> 'Auto Keluar dari PO ' . ($data['no_po'] ?? ''),
+                        'user_id'   => auth()->id(),
+                    ]);
+                }
             } else {
                 // CREATE baris baru meskipun po_number sama (mendukung input >1x untuk No Urut yang sama)
                 $po = PO::create([
@@ -242,6 +303,16 @@ class POController extends Controller
                         'qty_jenis' => $it['qty_jenis'],
                         'harga'     => $it['harga'],
                         'total'     => $it['total'],
+                    ]);
+                }
+                // Catat Barang Keluar otomatis
+                foreach ($items as $it) {
+                    BarangKeluar::create([
+                        'produk_id' => $it['produk_id'],
+                        'qty'       => (int) $it['qty'],
+                        'tanggal'   => $data['tanggal_po'],
+                        'keterangan'=> 'Auto Keluar dari PO ' . ($data['no_po'] ?? ''),
+                        'user_id'   => auth()->id(),
                     ]);
                 }
             }
@@ -425,6 +496,31 @@ class POController extends Controller
                 ];
             });
 
+            // Validasi stok cukup per produk (gabungkan qty per produk dulu)
+            $qtyByProduk = [];
+            foreach ($items as $it) {
+                $qtyByProduk[$it['produk_id']] = ($qtyByProduk[$it['produk_id']] ?? 0) + (int) $it['qty'];
+            }
+            if (!empty($qtyByProduk)) {
+                $produkMap = Produk::query()
+                    ->whereIn('id', array_keys($qtyByProduk))
+                    ->withSum('barangMasuks as qty_masuk', 'qty')
+                    ->withSum('barangKeluars as qty_keluar', 'qty')
+                    ->get()
+                    ->keyBy('id');
+                $errors = [];
+                foreach ($qtyByProduk as $pid => $qtyReq) {
+                    $p = $produkMap->get($pid);
+                    $sisa = (int) (($p->qty_masuk ?? 0) - ($p->qty_keluar ?? 0));
+                    if ($qtyReq > $sisa) {
+                        $errors[] = 'Stok untuk "' . ($p->nama_produk ?? ('ID '.$pid)) . '" kurang. Sisa: ' . $sisa . ', diminta: ' . $qtyReq . '.';
+                    }
+                }
+                if (!empty($errors)) {
+                    throw ValidationException::withMessages(['items' => implode(' ', $errors)]);
+                }
+            }
+
             $first = $items->first();
             $sumTotal = (int) $items->sum(fn ($it) => (int) ($it['total'] ?? 0));
 
@@ -464,6 +560,20 @@ class POController extends Controller
                     'qty_jenis' => $it['qty_jenis'],
                     'harga'     => $it['harga'],
                     'total'     => $it['total'],
+                ]);
+            }
+
+            // Refresh Barang Keluar otomatis untuk PO ini (hapus yang lama berdasarkan keterangan standar)
+            try {
+                BarangKeluar::where('keterangan', 'Auto Keluar dari PO ' . ($data['no_po'] ?? $po->no_po))->delete();
+            } catch (\Throwable $e) { /* ignore */ }
+            foreach ($items as $it) {
+                BarangKeluar::create([
+                    'produk_id' => $it['produk_id'],
+                    'qty'       => (int) $it['qty'],
+                    'tanggal'   => $data['tanggal_po'],
+                    'keterangan'=> 'Auto Keluar dari PO ' . ($data['no_po'] ?? $po->no_po),
+                    'user_id'   => auth()->id(),
                 ]);
             }
         });
@@ -578,7 +688,8 @@ class POController extends Controller
                 ];
             });
 
-        return view('dashboard.po_invoice_index', compact('invoices'));
+        $customers = Customer::all();
+        return view('dashboard.po_invoice_index', compact('invoices', 'customers'));
     }
 
     /**
@@ -645,131 +756,51 @@ class POController extends Controller
     }
 
     /**
-     * Set nomor urut invoice berikutnya
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Quick-create: membuat draft baris invoice minimal.
+     * Menghormati optional next_hint (jika tersedia dan belum dipakai), serta membawa customer_id/customer.
      */
-    public function setNextInvoiceNumber(Request $request)
-    {
-        $request->validate([
-            'next_number' => 'required|integer|min:1'
-        ]);
-
-        $nextNumber = $request->input('next_number');
-
-        // Tolak jika nomor sudah digunakan
-        if (PO::where('po_number', (int)$nextNumber)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Nomor urut ' . $nextNumber . ' sudah digunakan. Silakan pilih nomor lain.'
-            ], 422);
-        }
-        
-        // Simpan ke settings jika tersedia, fallback ke session jika tabel belum ada
-        try {
-            Setting::setValue('next_invoice_number', (int)$nextNumber + 1); // langsung increment utk next
-            // Hapus override session jika ada
-            session()->forget('next_invoice_number_override');
-            $message = 'Nomor urut berikutnya diatur ke ' . $nextNumber . ' dan akan lanjut otomatis.';
-        } catch (\Throwable $e) {
-            // Fallback sementara menggunakan session agar fitur tetap jalan
-            session(['next_invoice_number_override' => (int)$nextNumber + 1]);
-            $message = 'Settings belum tersedia, menyimpan sementara di sesi. Nomor berikutnya diatur ke ' . $nextNumber . ' dan akan lanjut otomatis.';
-        }
-
-        // Buat satu baris draft di tabel pos dengan nomor yang ditentukan
-        $today = now();
-        try {
-            $po = PO::create([
-                'po_number'      => (int)$nextNumber,
-                'tanggal_po'     => $today->format('Y-m-d'),
-                'no_surat_jalan' => '-',
-                'no_po'          => '-',
-                'customer'       => '-',
-                'qty'            => 0,
-                'harga'          => 0,
-                'total'          => 0,
-                'kendaraan'      => '-',
-                'no_polisi'      => '-',
-                'alamat_1'       => '-',
-                'alamat_2'       => null,
-                'pengirim'       => null,
-            ]);
-        } catch (\Throwable $e) {
-            \Log::error('Gagal membuat draft melalui setNextInvoiceNumber: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal membuat draft invoice: ' . $e->getMessage(),
-            ], 500);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-            'id' => $po->id,
-            'po_number' => (int)$po->po_number,
-            'tanggal' => $today->format('Y-m-d'),
-            'tanggal_display' => $today->format('d/m/Y'),
-        ]);
-    }
-
-    /**
-     * Quick-create: Membuat entri PO minimal saat tombol Tambah invoice diklik.
-     * - Menentukan nomor urut (MEX) berdasarkan nilai di DB (mengisi celah nomor yang terhapus)
-     * - Mengisi tanggal_po = hari ini
-     * - Mengembalikan JSON: { success, id, po_number, tanggal, tanggal_display }
-     */
-    public function invoiceQuickCreate()
+    public function invoiceQuickCreate(Request $request)
     {
         try {
-            // Tentukan nomor berikutnya dengan MEX (Minimal EXcluded)
-            // Ambil semua nomor yang sudah terpakai
+            $hint       = (int) ($request->input('next_hint') ?? 0);
+            $customerId = $request->input('customer_id');
+            $customerNm = $request->input('customer');
+
+            // Kumpulkan nomor terpakai
             $usedNumbers = PO::query()
                 ->whereNotNull('po_number')
                 ->where('po_number', '>', 0)
                 ->pluck('po_number')
                 ->toArray();
             $used = array_fill_keys(array_map('intval', $usedNumbers), true);
-            // Sertakan nomor yang sedang di-reserve dalam sesi agar tidak bentrok antar klik cepat
-            $reserved = (array) (session('invoice_reserved_numbers', []));
-            foreach ($reserved as $r) { $used[(int)$r] = true; }
-            // Cari MEX mulai dari 1
-            $next = 1;
-            while (isset($used[$next])) { $next++; }
-            // Reserve nomor ini di sesi (akan dibersihkan saat simpan permanen)
-            $reserved[] = $next;
-            $reserved = array_values(array_slice(array_unique(array_map('intval', $reserved)), -200));
-            session(['invoice_reserved_numbers' => $reserved]);
 
-            // Update Setting hanya sebagai info terakhir (tidak dipakai sebagai sumber utama)
-            try {
-                Setting::setValue('next_invoice_number', $next + 1);
-                session()->forget('next_invoice_number_override');
-            } catch (\Throwable $e) {
-                session(['next_invoice_number_override' => $next + 1]);
+            // Kebijakan: lanjut dari nomor TERBESAR (max+1).
+            // Jika ada hint, lanjut dari max(hint, maxUsed)+1
+            $maxUsed = 0;
+            if (!empty($usedNumbers)) {
+                $maxUsed = (int) max(array_map('intval', $usedNumbers));
             }
-            
-            Log::info("Menggunakan nomor urut MEX: $next");
+            $base = $maxUsed;
+            if ($hint > 0) {
+                $base = max($base, (int)$hint);
+            }
+            $next = $base + 1;
+            while (isset($used[$next])) { $next++; }
 
             $today = now();
-
-            // Buat entri minimal (draft)
-            // Catatan: beberapa schema lama mewajibkan no_surat_jalan, no_po, customer NOT NULL
-            // sehingga kita isi placeholder '-'
             $po = PO::create([
                 'po_number'   => $next,
                 'tanggal_po'  => $today->format('Y-m-d'),
-                'no_surat_jalan' => '-',
                 'no_po'       => '-',
-                'customer'    => '-',
-                // jangan simpan teks Draft agar tampilan tidak menampilkan label tersebut
-                'produk'      => null,
+                'no_surat_jalan' => '-',
+                'produk_id'   => null,
                 'qty'         => 0,
+                'qty_jenis'   => 'PCS',
                 'harga'       => 0,
                 'total'       => 0,
-                'kendaraan'   => '-',
-                'no_polisi'   => '-',
-                'alamat_1'    => '-',
+                'customer_id' => $customerId,
+                'customer'    => $customerNm ?: '-',
+                'alamat_1'    => null,
                 'alamat_2'    => null,
                 'pengirim'    => null,
             ]);
@@ -780,6 +811,7 @@ class POController extends Controller
                 'po_number' => (int) $po->po_number,
                 'tanggal' => $today->format('Y-m-d'),
                 'tanggal_display' => $today->format('d/m/Y'),
+                'customer' => $po->customer,
             ]);
         } catch (\Throwable $e) {
             \Log::error('invoiceQuickCreate gagal: ' . $e->getMessage());
@@ -790,4 +822,58 @@ class POController extends Controller
         }
     }
 
+    /**
+     * Set nomor urut invoice berikutnya: menyimpan acuan next dan membuat satu draft baris dengan nomor yang dipilih.
+     */
+    public function setNextInvoiceNumber(Request $request)
+    {
+        $request->validate([
+            'next_number' => 'required|integer|min:1',
+            'customer_id' => 'nullable|integer',
+            'customer'    => 'nullable|string|max:255',
+        ]);
+
+        $nextNumber = (int) $request->input('next_number');
+        $customerId = $request->input('customer_id');
+        $customerNm = $request->input('customer');
+
+        if (PO::where('po_number', $nextNumber)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor urut ' . $nextNumber . ' sudah digunakan. Silakan pilih nomor lain.'
+            ], 422);
+        }
+
+        // Catat referensi next di settings/session (best-effort)
+        try { Setting::setValue('next_invoice_number', $nextNumber + 1); } catch (\Throwable $e) { session(['next_invoice_number_override' => $nextNumber + 1]); }
+
+        // Buat draft baris agar langsung muncul di tabel
+        $today = now();
+        $po = PO::create([
+            'po_number'   => $nextNumber,
+            'tanggal_po'  => $today->format('Y-m-d'),
+            'no_po'       => '-',
+            'no_surat_jalan' => '-',
+            'produk_id'   => null,
+            'qty'         => 0,
+            'qty_jenis'   => 'PCS',
+            'harga'       => 0,
+            'total'       => 0,
+            'customer_id' => $customerId,
+            'customer'    => $customerNm ?: '-',
+            'alamat_1'    => null,
+            'alamat_2'    => null,
+            'pengirim'    => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Nomor urut di-set ke ' . $nextNumber,
+            'id' => $po->id,
+            'po_number' => (int) $po->po_number,
+            'tanggal' => $today->format('Y-m-d'),
+            'tanggal_display' => $today->format('d/m/Y'),
+            'customer' => $po->customer,
+        ]);
+    }
 }

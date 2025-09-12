@@ -132,9 +132,15 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                        @php
+                            // Hitung jumlah invoice unik berdasarkan nomor urut (atau po_number)
+                            $groupedCount = collect($invoices ?? [])->groupBy(function($r){
+                                return $r->no_urut ?? ($r->po_number ?? null);
+                            })->count();
+                        @endphp
                         <span class="flex items-center gap-1">
                             <i class="fas fa-database text-xs"></i>
-                            Total: <span id="total-count" class="font-semibold text-indigo-600 dark:text-indigo-400">{{ count($invoices) }}</span>
+                            Total: <span id="total-count" class="font-semibold text-indigo-600 dark:text-indigo-400">{{ $groupedCount }}</span>
                         </span>
                         <span class="flex items-center gap-1">
                             <i class="fas fa-calendar text-xs"></i>
@@ -146,14 +152,14 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <button id="btn-set-nomor" type="button" class="inline-flex items-center justify-center gap-2 h-10 leading-none min-w-[160px] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-5 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200">
                         <i class="fas fa-cog"></i>
-                        <span>Atur Nomor Urut</span>
+                        <span>Atur No Invoice</span>
                     </button>
                     <button id="btn-tambah" type="button" class="inline-flex items-center justify-center gap-2 h-10 leading-none min-w-[160px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200">
                         <i class="fas fa-plus-circle"></i>
-                        <span>Tambah No Urut</span>
+                        <span>Tambah No Invoice</span>
                     </button>
                     <div class="relative">
-                        <input id="search-number" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Cari nomor urut..." class="w-48 md:w-60 h-10 leading-none px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <input id="search-number" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Cari no invoice..." class="w-48 md:w-60 h-10 leading-none px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                         <span class="absolute right-3 top-2.5 text-gray-400"><i class="fas fa-search"></i></span>
                     </div>
                 </div>
@@ -197,8 +203,8 @@
                         </div>
                     </div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                        <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 rounded-full">
-                            {{ count($invoices) }} data
+                        <span id="badge-count" class="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 rounded-full">
+                            {{ $groupedCount }} data
                         </span>
                     </div>
                 </div>
@@ -226,10 +232,10 @@
                                         Tanggal
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                     <div class="flex items-center gap-2">
                                         <i class="fas fa-hashtag text-indigo-500"></i>
-                                        No Urut
+                                        No Invoice
                                     </div>
                                 </th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
@@ -296,19 +302,17 @@
                                             </div>
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $first->tanggal }}</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($first->tanggal)->diffForHumans() }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-3">
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 text-indigo-800 dark:text-indigo-200">
-                                                {{ $noUrut }}
-                                            </span>
-                                        </div>
+                                    <td class="px-6 py-4 pr-10 whitespace-nowrap text-left">
+                                        @php $badgeVal = $noUrut ?: '-'; @endphp
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 text-indigo-800 dark:text-indigo-200 align-middle shadow-sm">
+                                            {{ $badgeVal }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $first->customer ?? 'N/A' }}</div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[220px] md:max-w-[300px] lg:max-w-[420px] ml-1 mr-1">{{ $first->customer ?? 'N/A' }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $isMulti ? '-' : ($first->no_po ?? '-') }}</div>
@@ -475,6 +479,54 @@
     </div>
 </div>
 
+<!-- Modal Pilih Customer untuk Tambah/Atur No Invoice -->
+<div id="modal-pilih-customer" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl w-full max-w-md rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden">
+            <div class="px-6 py-5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
+                <h3 class="text-lg font-bold" id="title-pilih-customer">Pilih Customer</h3>
+                <p class="text-indigo-100 text-sm">Customer wajib dipilih sebelum melanjutkan</p>
+            </div>
+            <div class="p-6 space-y-4">
+                @php
+                    // Ambil daftar customer dari data customer (id + name)
+                    $allCustomers = isset($customers) ? collect($customers)->map(fn($c) => ['id' => $c->id, 'name' => $c->name]) : collect([]);
+                @endphp
+                <label for="select-pilih-customer" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Customer</label>
+                <select id="select-pilih-customer" class="w-full h-11 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">-- Pilih Customer --</option>
+                    @foreach($allCustomers as $cust)
+                        <option value="{{ $cust['id'] }}" data-name="{{ $cust['name'] }}">{{ $cust['name'] }}</option>
+                    @endforeach
+                </select>
+                @if(!isset($customers))
+                    <p class="text-xs text-red-500">Data customer tidak tersedia di halaman ini. Pastikan controller mengirimkan variabel $customers.</p>
+                @endif
+
+                <!-- No Invoice Berikutnya (hanya untuk mode ATUR) -->
+                <div id="wrap-next-number" class="hidden">
+                    <label for="next-number" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-hashtag text-indigo-500 mr-1"></i>
+                        No Invoice Berikutnya
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="next-number-pick" min="1" placeholder="1000" class="w-full h-11 px-3 pl-10 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                        <span class="absolute left-3 inset-y-0 flex items-center text-gray-400 font-bold">#</span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Contoh: 1000, 2000, 5000</p>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-end gap-3">
+                <button type="button" id="btn-cancel-pilih-customer" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">Batal</button>
+                <button type="button" id="btn-confirm-pilih-customer" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white">Lanjut</button>
+            </div>
+        </div>
+    </div>
+    <!-- simpan mode aksi: tambah | atur -->
+    <input type="hidden" id="state-pilih-customer-mode" value="">
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -486,6 +538,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnSaveNomor = document.getElementById('btn-save-nomor');
     const inputNextNumber = document.getElementById('next-number');
     const totalCount = document.getElementById('total-count');
+    const badgeCount = document.getElementById('badge-count');
+    // Modal pilih customer
+    const modalPilihCustomer = document.getElementById('modal-pilih-customer');
+    const selectPilihCustomer = document.getElementById('select-pilih-customer');
+    const btnCancelPilihCustomer = document.getElementById('btn-cancel-pilih-customer');
+    const btnConfirmPilihCustomer = document.getElementById('btn-confirm-pilih-customer');
+    const stateModeEl = document.getElementById('state-pilih-customer-mode');
+    let pickedCustomerId = '';
+    let pickedCustomerName = '';
+    // Seed nomor berikutnya (diisi saat 'Atur No Invoice')
+    let nextInvoiceSeed = null;
 
     // URL endpoints
     const editUrlTemplate = "{{ route('po.edit', 0) }}"; // tetap dipakai untuk tombol Edit di kolom Aksi
@@ -513,6 +576,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     window.openEditForm = openEditForm;
 
+    // === Auto update counter (tanpa refresh) ===
+    function recalcCounter() {
+        try {
+            const rows = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
+            // Hitung hanya baris data (exclude placeholder empty rows)
+            const dataRows = rows.filter(r => r.querySelector('td'));
+            const n = dataRows.length;
+            if (totalCount) totalCount.textContent = n;
+            if (badgeCount) badgeCount.textContent = n + ' data';
+        } catch (e) { /* no-op */ }
+    }
+    // Inisialisasi awal
+    recalcCounter();
+    // Amati perubahan pada tbody (baris bertambah/berkurang)
+    if (tbody) {
+        const obs = new MutationObserver(() => recalcCounter());
+        obs.observe(tbody, { childList: true, subtree: false });
+    }
+
     // Highlight baris berdasarkan parameter highlight_id
     try {
         const params = new URLSearchParams(window.location.search);
@@ -535,12 +617,22 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('Highlight row failed:', e);
     }
 
-    // Modal atur nomor urut
+    // Helper open customer picker
+    function openCustomerPicker(mode) {
+        stateModeEl.value = mode; // 'tambah' | 'atur'
+        selectPilihCustomer.value = '';
+        pickedCustomerId = '';
+        pickedCustomerName = '';
+        document.getElementById('title-pilih-customer').textContent = mode === 'atur' ? 'Pilih Customer untuk Atur No Invoice' : 'Pilih Customer untuk Tambah No Invoice';
+        // toggle input nomor
+        const wrapNum = document.getElementById('wrap-next-number');
+        if (wrapNum) wrapNum.classList.toggle('hidden', mode !== 'atur');
+        modalPilihCustomer.classList.remove('hidden');
+        setTimeout(() => selectPilihCustomer.focus(), 50);
+    }
+
     if (btnSetNomor) {
-        btnSetNomor.addEventListener('click', function() {
-            modalSetNomor.classList.remove('hidden');
-            inputNextNumber.focus();
-        });
+        btnSetNomor.addEventListener('click', function() { openCustomerPicker('atur'); });
     }
 
     if (btnCancelSetNomor) {
@@ -550,124 +642,138 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Simpan pengaturan nomor urut
-    if (btnSaveNomor) {
-        btnSaveNomor.addEventListener('click', async function() {
-            const nextNumber = inputNextNumber.value.trim();
-            if (!nextNumber || nextNumber < 1) {
-                alert('Masukkan nomor urut yang valid (minimal 1)');
-                return;
-            }
+    // Modal pilih customer actions
+    btnCancelPilihCustomer?.addEventListener('click', () => { modalPilihCustomer.classList.add('hidden'); });
+    btnConfirmPilihCustomer?.addEventListener('click', async () => {
+        const sel = selectPilihCustomer;
+        const custId = (sel?.value || '').trim();
+        const custName = sel?.options[sel.selectedIndex]?.dataset?.name || '';
+        if (!custId) { alert('Silakan pilih customer.'); sel?.focus(); return; }
+        pickedCustomerId = custId;
+        pickedCustomerName = custName;
+        const mode = stateModeEl.value;
+        if (mode === 'atur') {
+            const numInput = document.getElementById('next-number-pick');
+            const nextVal = (numInput?.value || '').trim();
+            if (!nextVal || parseInt(nextVal) < 1) { alert('Masukkan No Invoice berikutnya yang valid (>=1).'); numInput?.focus(); return; }
+            // kirim dan tutup modal setelah sukses
+            await doSetNextNumber(pickedCustomerId, pickedCustomerName, parseInt(nextVal));
+            modalPilihCustomer.classList.add('hidden');
+        } else if (mode === 'tambah') {
+            await doQuickCreate(pickedCustomerId, pickedCustomerName);
+            modalPilihCustomer.classList.add('hidden');
+        }
+    });
 
-            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            
-            try {
-                btnSaveNomor.disabled = true;
-                btnSaveNomor.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-                
-                const response = await fetch(setNextNumberUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        next_number: parseInt(nextNumber)
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Success notification
-                    showNotification(result.message, 'success');
-
-                    // Hapus baris "Belum ada data" jika ada
-                    const emptyRow = tbody.querySelector('td[colspan]');
-                    if (emptyRow) {
-                        emptyRow.closest('tr').remove();
-                    }
-
-                    // Sisipkan baris baru berdasarkan response controller
-                    if (result.id && result.po_number && result.tanggal_display) {
-                        const newRow = createNewInvoiceRow({
-                            id: result.id,
-                            po_number: result.po_number,
-                            tanggal_display: result.tanggal_display
-                        });
-                        tbody.appendChild(newRow);
-                        sortTableAscending();
-
-                        // Update counter
-                        const currentCount = parseInt(totalCount.textContent) || 0;
-                        totalCount.textContent = currentCount + 1;
-                    }
-
-                    // Tutup modal
-                    modalSetNomor.classList.add('hidden');
-                    inputNextNumber.value = '';
-                } else {
-                    throw new Error(result.message || 'Gagal menyimpan nomor urut');
+    // Helper set next number (dipakai saat mode ATUR di modal ini)
+    async function doSetNextNumber(custId, custName, nextNumber) {
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        try {
+            const response = await fetch(setNextNumberUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    next_number: parseInt(nextNumber),
+                    customer_id: custId,
+                    customer: custName
+                })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showNotification(result.message, 'success');
+                const emptyRow = tbody.querySelector('td[colspan]');
+                if (emptyRow) emptyRow.closest('tr').remove();
+                if (result.id && result.po_number && result.tanggal_display) {
+                    const newRow = createNewInvoiceRow({ id: result.id, po_number: result.po_number, tanggal_display: result.tanggal_display, customer: pickedCustomerName });
+                    tbody.appendChild(newRow);
+                    sortTableAscending();
+                    const currentCount = parseInt(totalCount.textContent) || 0;
+                    totalCount.textContent = currentCount + 1;
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                showNotification('Terjadi kesalahan: ' + error.message, 'error');
-            } finally {
-                btnSaveNomor.disabled = false;
-                btnSaveNomor.innerHTML = '<i class="fas fa-save"></i> Simpan Pengaturan';
+                // Set seed agar penambahan berikutnya menjadi +1
+                nextInvoiceSeed = parseInt(nextNumber);
+            } else {
+                throw new Error(result.message || 'Gagal menyimpan nomor urut');
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Terjadi kesalahan: ' + error.message, 'error');
+        }
     }
 
     // Tombol tambah invoice
+    // Abstraksi proses quick-create agar bisa dipanggil dari modal
+    async function doQuickCreate(custId, custName) {
+        try {
+            if (!custId) throw new Error('Customer belum dipilih');
+            btnTambah.disabled = true;
+            btnTambah.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Membuat...</span>';
+            
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const payload = { customer_id: custId, customer: custName };
+            if (typeof nextInvoiceSeed === 'number') {
+                payload.next_hint = nextInvoiceSeed + 1; // minta ke server gunakan seed+1 jika didukung
+            }
+            const res = await fetch(quickCreateUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await res.json();
+            if (!data || !data.success) {
+                throw new Error(data?.message || 'Gagal membuat invoice');
+            }
+
+            // Hapus baris "Belum ada data" jika ada
+            const emptyRow = tbody.querySelector('td[colspan]');
+            if (emptyRow) {
+                emptyRow.closest('tr').remove();
+            }
+
+            // Tambah baris baru dan urutkan
+            if (!data.customer) { data.customer = custName; }
+            const newRow = createNewInvoiceRow(data);
+            tbody.appendChild(newRow);
+            sortTableAscending();
+
+            // Update counter
+            const currentCount = parseInt(totalCount.textContent) || 0;
+            totalCount.textContent = currentCount + 1;
+
+            showNotification(`Invoice #${data.po_number} berhasil dibuat`, 'success');
+
+            // Update seed ke nomor terbaru dari server
+            if (data.po_number) {
+                const n = parseInt(data.po_number);
+                if (!isNaN(n)) nextInvoiceSeed = n;
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Gagal membuat invoice: ' + error.message, 'error');
+        } finally {
+            btnTambah.disabled = false;
+            btnTambah.innerHTML = '<i class="fas fa-plus-circle"></i> <span>Tambah No Invoice</span>';
+        }
+    }
+
     if (btnTambah) {
         btnTambah.addEventListener('click', async function() {
             try {
-                btnTambah.disabled = true;
-                btnTambah.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Membuat...</span>';
-                
-                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                const res = await fetch(quickCreateUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token,
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify({})
-                });
-                
-                const data = await res.json();
-                if (!data || !data.success) {
-                    throw new Error(data?.message || 'Gagal membuat invoice');
-                }
-
-                // Hapus baris "Belum ada data" jika ada
-                const emptyRow = tbody.querySelector('td[colspan]');
-                if (emptyRow) {
-                    emptyRow.closest('tr').remove();
-                }
-
-                // Tetap di halaman Data Invoice: tambahkan baris baru dan urutkan
-                const newRow = createNewInvoiceRow(data);
-                tbody.appendChild(newRow);
-                sortTableAscending();
-
-                // Update counter
-                const currentCount = parseInt(totalCount.textContent) || 0;
-                totalCount.textContent = currentCount + 1;
-
-                // Notifikasi sukses
-                showNotification(`Invoice #${data.po_number} berhasil dibuat`, 'success');
-                
+                openCustomerPicker('tambah');
             } catch (error) {
-                console.error('Error:', error);
-                showNotification('Gagal membuat invoice: ' + error.message, 'error');
-            } finally {
-                btnTambah.disabled = false;
-                btnTambah.innerHTML = '<i class="fas fa-plus-circle"></i> <span>Tambah No Urut</span>';
+                console.error('Error open picker:', error);
+                showNotification('Gagal membuka pemilihan customer: ' + error.message, 'error');
             }
         });
     }
@@ -692,14 +798,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900 dark:text-white">-</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 text-indigo-800 dark:text-indigo-200">
+            <!-- No Invoice -->
+            <td class="px-6 py-4 pr-10 whitespace-nowrap text-left">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 text-indigo-800 dark:text-indigo-200 align-middle shadow-sm">
                     ${data.po_number}
                 </span>
             </td>
+            <!-- Customer -->
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900 dark:text-white">${data.customer || '-'}</div>
+            </td>
+            <!-- No PO -->
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900 dark:text-white">-</div>
             </td>

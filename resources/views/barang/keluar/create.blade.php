@@ -13,18 +13,22 @@
 
             <div>
                 <label class="block text-sm mb-1">Nama Barang</label>
-                <select name="produk_id" class="w-full rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800" required>
+                <select id="produkSelect" name="produk_id" class="w-full rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800" required>
                     <option value="">-- Pilih Barang --</option>
                     @foreach ($produks as $p)
-                        <option value="{{ $p->id }}" @selected(old('produk_id')==$p->id)>{{ $p->nama_produk }}</option>
+                        @php($sisa = (int) (($p->qty_masuk ?? 0) - ($p->qty_keluar ?? 0)))
+                        <option value="{{ $p->id }}" data-sisa="{{ $sisa }}" @selected((old('produk_id', $selectedProdukId ?? 0))==$p->id)>
+                            {{ $p->nama_produk }}
+                        </option>
                     @endforeach
                 </select>
+                <div id="infoSisa" class="text-xs text-gray-600 dark:text-gray-300 mt-1"></div>
                 @error('produk_id')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
             </div>
 
             <div>
                 <label class="block text-sm mb-1">Qty</label>
-                <input type="number" name="qty" value="{{ old('qty', 1) }}" min="1" class="w-full rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800" required>
+                <input id="qtyInput" type="number" name="qty" value="{{ old('qty', 1) }}" min="1" class="w-full rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800" required>
                 @error('qty')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
             </div>
 
@@ -46,4 +50,25 @@
         </form>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const select = document.getElementById('produkSelect');
+  const info = document.getElementById('infoSisa');
+  const qty = document.getElementById('qtyInput');
+  function updateSisa() {
+    const opt = select.options[select.selectedIndex];
+    const sisa = parseInt(opt?.getAttribute('data-sisa') || '0');
+    if (!isNaN(sisa)) {
+      info.textContent = 'Sisa stok: ' + sisa.toLocaleString('id-ID');
+      qty.max = Math.max(sisa, 1);
+      if (parseInt(qty.value || '0') > sisa) qty.value = sisa || 1;
+    } else {
+      info.textContent = '';
+      qty.removeAttribute('max');
+    }
+  }
+  select.addEventListener('change', updateSisa);
+  updateSisa();
+});
+</script>
 @endsection

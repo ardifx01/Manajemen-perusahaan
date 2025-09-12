@@ -24,6 +24,9 @@ class Produk extends Model
         'deskripsi',
     ];
 
+    // Otomatis tambahkan atribut sisa_stok ke serialization
+    protected $appends = ['sisa_stok'];
+
     /**
      * Relasi ke Pos
      * Satu produk bisa digunakan di banyak surat jalan / PO
@@ -31,5 +34,29 @@ class Produk extends Model
     public function pos()
     {
         return $this->hasMany(Pos::class, 'produk_id');
+    }
+
+    /**
+     * Relasi stok: Barang Masuk dan Barang Keluar
+     */
+    public function barangMasuks()
+    {
+        return $this->hasMany(BarangMasuk::class, 'produk_id');
+    }
+
+    public function barangKeluars()
+    {
+        return $this->hasMany(BarangKeluar::class, 'produk_id');
+    }
+
+    /**
+     * Accessor sisa_stok = total qty_masuk - qty_keluar
+     * Menggunakan nilai withSum jika sudah di-load untuk efisiensi
+     */
+    public function getSisaStokAttribute(): int
+    {
+        $masuk = $this->getAttribute('qty_masuk') ?? $this->barangMasuks()->sum('qty');
+        $keluar = $this->getAttribute('qty_keluar') ?? $this->barangKeluars()->sum('qty');
+        return (int) ($masuk - $keluar);
     }
 }

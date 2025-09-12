@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
         (function(){
@@ -40,7 +41,7 @@
       };
       if (mq.addEventListener) { mq.addEventListener('change', onChange); } else { mq.addListener(onChange); }
     })();
-  " class="flex font-sans bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100">
+  " class="flex font-sans bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100 overflow-x-hidden">
 
       <aside id="sidebar" class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen flex flex-col transform transition-transform duration-300 fixed inset-y-0 left-0 z-40 -translate-x-full md:fixed md:inset-y-0 md:left-0 overflow-hidden"
            x-bind:class="{
@@ -332,7 +333,7 @@
     
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col md:ml-64">
+    <div class="flex-1 flex flex-col md:ml-64 overflow-x-hidden">
         <header class="sticky top-0 z-30 h-16 bg-white/90 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-3">
                 <!-- Hamburger (desktop only) to restore sidebar when hidden -->
@@ -465,6 +466,23 @@
         </main>
         @endif
     </div>
+
+    <!-- Auto-wrap tables to ensure horizontal scrolling on small screens -->
+    <script>
+      (function(){
+        try {
+          const candidates = document.querySelectorAll('main table, .flex-1 table, table.min-w-full, table.table-auto');
+          candidates.forEach(function(tbl){
+            // Skip if table already inside a scroll container
+            if (tbl.closest('.responsive-scroll, .overflow-x-auto')) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'overflow-x-auto responsive-scroll';
+            tbl.parentNode.insertBefore(wrap, tbl);
+            wrap.appendChild(tbl);
+          });
+        } catch(e) { /* no-op */ }
+      })();
+    </script>
 
     <script>
         (function(){

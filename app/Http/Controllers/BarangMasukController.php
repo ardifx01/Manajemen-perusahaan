@@ -23,10 +23,15 @@ class BarangMasukController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        $produks = Produk::orderBy('nama_produk')->get();
-        return view('barang.masuk.create', compact('produks'));
+        $produks = Produk::query()
+            ->withSum('barangMasuks as qty_masuk', 'qty')
+            ->withSum('barangKeluars as qty_keluar', 'qty')
+            ->orderBy('nama_produk')
+            ->get();
+        $selectedProdukId = (int) $request->query('produk_id', 0);
+        return view('barang.masuk.create', compact('produks', 'selectedProdukId'));
     }
 
     /**

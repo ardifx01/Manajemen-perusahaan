@@ -14,7 +14,21 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
+    <body class="font-sans text-gray-900 antialiased overflow-x-hidden">
         {{ $slot }}
+        <script>
+          (function(){
+            try {
+              const candidates = document.querySelectorAll('main table, table.min-w-full, table.table-auto, body > table');
+              candidates.forEach(function(tbl){
+                if (tbl.closest('.responsive-scroll, .overflow-x-auto')) return;
+                const wrap = document.createElement('div');
+                wrap.className = 'overflow-x-auto responsive-scroll';
+                tbl.parentNode.insertBefore(wrap, tbl);
+                wrap.appendChild(tbl);
+              });
+            } catch(e) {}
+          })();
+        </script>
     </body>
 </html>

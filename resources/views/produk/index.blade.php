@@ -19,13 +19,23 @@
                     <p class="text-gray-500 dark:text-slate-400 mt-1 text-sm sm:text-base">Kelola data Barang perusahaan</p>
                 </div>
             </div>
-            <!-- Primary blue button to match Customer -->
-            <button onclick="openAddModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-500 px-4 sm:px-9 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                <span>Tambah Barang</span>
-            </button>
+            <!-- Primary buttons -->
+            <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <button onclick="openAddModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-500 px-4 sm:px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span>Tambah Barang</span>
+                </button>
+                <a href="{{ route('barang.masuk.create') }}" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/></svg>
+                    <span>Barang Masuk</span>
+                </a>
+                <a href="{{ route('barang.keluar.create') }}" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white px-4 sm:px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-rose-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 8v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2m13 6l-5-5m0 0l-5 5m5-5v12"/></svg>
+                    <span>Barang Keluar</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -40,6 +50,8 @@
             </div>
         </div>
     @endif
+
+    
 
     <!-- Error Alert -->
     @if(session('error'))
@@ -122,15 +134,15 @@
                                     <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                                     </svg>
-                                    <span>Harga PCS</span>
+                                    <span>Harga</span>
                                 </div>
                             </th>
-                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-xs sm:text-sm min-w-[120px]">
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-xs sm:text-sm min-w-[100px]">
                                 <div class="flex items-center space-x-1 sm:space-x-2">
                                     <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M7 15l3-3 4 4 4-6" />
                                     </svg>
-                                    <span>Harga SET</span>
+                                    <span>Sisa Stok</span>
                                 </div>
                             </th>
                             <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-xs sm:text-sm min-w-[140px]">
@@ -159,18 +171,20 @@
                                     </div>
                                 </td>
                                 <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                    <!-- Made price badges responsive -->
+                                    @php
+                                        $displayHarga = ($produk->harga_set ?? 0) > 0 ? ($produk->harga_set) : ($produk->harga_pcs ?? 0);
+                                        $labelHarga = ($produk->harga_set ?? 0) > 0 ? 'SET' : 'PCS';
+                                    @endphp
                                     <span class="bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-200 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
-                                        {{ $produk->harga_pcs ? 'Rp ' . number_format($produk->harga_pcs, 0, ',', '.') : '-' }}
+                                        {{ $displayHarga ? ('Rp ' . number_format($displayHarga, 0, ',', '.') . ' / ' . $labelHarga) : '-' }}
                                     </span>
                                 </td>
                                 <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                    <span class="bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-200 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
-                                        {{ $produk->harga_set ? 'Rp ' . number_format($produk->harga_set, 0, ',', '.') : '-' }}
+                                    <span class="bg-blue-50 dark:bg-slate-700 text-blue-700 dark:text-slate-200 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
+                                        {{ number_format($produk->sisa_stok, 0, ',', '.') }}
                                     </span>
                                 </td>
                                 <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                    <!-- Gunakan komponen aksi seragam -->
                                     <div class="flex justify-center">
                                         <x-table.action-buttons 
                                             onEdit="openEditModal({{ $produk->id }}, {!! json_encode($produk->nama_produk) !!}, {{ $produk->harga_pcs ?? 0 }}, {{ $produk->harga_set ?? 0 }})"
@@ -244,26 +258,27 @@
                            placeholder="Masukkan nama Barang">
                 </div>
                 
-                <!-- Harga PCS -->
+                <!-- Tipe Harga + Input Dinamis -->
                 <div class="space-y-2">
-                    <label for="add_harga_pcs" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
-                        <i class="fa-solid fa-tag text-blue-500"></i>
-                        <span>Harga PCS</span>
+                    <label class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-toggle-on text-blue-500"></i>
+                        <span>Tipe Harga</span>
                     </label>
-                    <input type="number" id="add_harga_pcs" name="harga_pcs" required value="{{ old('harga_pcs') }}"
-                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
-                           placeholder="Masukkan harga per PCS" min="0">
+                    <select id="add_price_type" onchange="(function(sel){var lbl=document.getElementById('add_harga_label');var inp=document.getElementById('add_harga');if(!lbl||!inp)return;var isSet=sel.value==='set';lbl.textContent=isSet?'Harga (SET)':'Harga (PCS)';inp.name=isSet?'harga_set':'harga_pcs';inp.placeholder=isSet?'Masukkan harga per SET':'Masukkan harga per PCS';})(this); handleAddPriceTypeChange();" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
+                        <option value="pcs" {{ old('price_type')==='pcs' ? 'selected' : '' }}>Harga PCS</option>
+                        <option value="set" {{ old('price_type')==='set' ? 'selected' : '' }}>Harga SET</option>
+                    </select>
                 </div>
                 
-                <!-- Harga SET -->
-                <div class="space-y-2">
-                    <label for="add_harga_set" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
-                        <i class="fa-solid fa-tags text-blue-500"></i>
-                        <span>Harga SET</span>
+                <!-- Input Harga Dinamis -->
+                <div class="space-y-2" id="wrap_add_harga">
+                    <label for="add_harga" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+                        <i class="fa-solid fa-tag text-blue-500"></i>
+                        <span id="add_harga_label">Harga (PCS)</span>
                     </label>
-                    <input type="number" id="add_harga_set" name="harga_set" required value="{{ old('harga_set') }}"
+                    <input type="number" id="add_harga" name="harga_pcs" value="{{ old('harga_pcs') }}"
                            class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
-                           placeholder="Masukkan harga per SET" min="0">
+                           placeholder="Masukkan harga per PCS" min="0" required>
                 </div>
             </div>
             
@@ -318,18 +333,21 @@
                            placeholder="Masukkan nama Barang">
                 </div>
                 
-                <div>
-                    <label for="edit_harga_pcs" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Harga PCS</label>
-                    <input type="number" id="edit_harga_pcs" name="harga_pcs" required
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-red-500 transition-colors duration-200 text-sm sm:text-base"
-                           placeholder="Masukkan harga per PCS" min="0">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Tipe Harga</label>
+                    <select id="edit_price_type" onchange="handleEditPriceTypeChange()" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400">
+                        <option value="pcs">Harga PCS</option>
+                        <option value="set">Harga SET</option>
+                    </select>
                 </div>
-                
-                <div>
-                    <label for="edit_harga_set" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Harga SET</label>
-                    <input type="number" id="edit_harga_set" name="harga_set" required
+                <!-- Satu input harga dinamis -->
+                <div class="space-y-2" id="wrap_edit_harga">
+                    <label for="edit_harga" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                        <span id="edit_harga_label">Harga (PCS)</span>
+                    </label>
+                    <input type="number" id="edit_harga" name="harga_pcs"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-red-500 transition-colors duration-200 text-sm sm:text-base"
-                           placeholder="Masukkan harga per SET" min="0">
+                           placeholder="Masukkan harga per PCS" min="0" required>
                 </div>
             </div>
             
@@ -375,6 +393,10 @@ function openAddModal() {
     // Focus ke input pertama
     setTimeout(() => {
         document.getElementById('add_nama_produk').focus();
+        // Sinkronkan label input harga sesuai pilihan tipe saat modal dibuka
+        if (typeof handleAddPriceTypeChange === 'function') {
+            handleAddPriceTypeChange();
+        }
     }, 300);
 }
 
@@ -407,18 +429,36 @@ window.openEditModal = function(id, nama, hargaPcs, hargaSet) {
         }
         form.action = `{{ url('produk') }}/${id}`;
         const namaInput = document.getElementById('edit_nama_produk');
-        const hargaPcsInput = document.getElementById('edit_harga_pcs');
-        const hargaSetInput = document.getElementById('edit_harga_set');
+        const editHargaInput = document.getElementById('edit_harga');
+        const editHargaLabel = document.getElementById('edit_harga_label');
+        const editPriceType = document.getElementById('edit_price_type');
         if (namaInput) namaInput.value = nama ?? '';
-        if (hargaPcsInput) hargaPcsInput.value = (hargaPcs ?? '') === 0 ? '' : (hargaPcs ?? '');
-        if (hargaSetInput) hargaSetInput.value = (hargaSet ?? '') === 0 ? '' : (hargaSet ?? '');
+        // Tentukan tipe berdasarkan nilai yang ada (prioritaskan SET jika >0)
+        const useSet = (parseFloat(hargaSet ?? 0) > 0);
+        if (editPriceType) editPriceType.value = useSet ? 'set' : 'pcs';
+        // Sinkronkan label + name input dan set value
+        if (useSet) {
+            if (editHargaLabel) editHargaLabel.textContent = 'Harga (SET)';
+            if (editHargaInput) {
+                editHargaInput.name = 'harga_set';
+                editHargaInput.placeholder = 'Masukkan harga per SET';
+                editHargaInput.value = (hargaSet ?? '') === 0 ? '' : (hargaSet ?? '');
+            }
+        } else {
+            if (editHargaLabel) editHargaLabel.textContent = 'Harga (PCS)';
+            if (editHargaInput) {
+                editHargaInput.name = 'harga_pcs';
+                editHargaInput.placeholder = 'Masukkan harga per PCS';
+                editHargaInput.value = (hargaPcs ?? '') === 0 ? '' : (hargaPcs ?? '');
+            }
+        }
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
         setTimeout(() => namaInput?.focus(), 100);
     } catch (e) {
         console.error('[Produk] Gagal membuka modal edit:', e);
-        alert('Terjadi masalah saat membuka form edit produk. Muat ulang halaman lalu coba lagi.');
+        // Jangan tampilkan alert mengganggu, cukup log error
     }
 }
 
@@ -460,6 +500,7 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeAddModal();
         closeEditModal();
+        
     }
 });
 
@@ -475,6 +516,8 @@ window.addEventListener('orientationchange', function() {
         }
     }, 100);
 });
+
+// (Import Cepat dihapus)
 </script>
 
 <script>
@@ -499,6 +542,69 @@ document.addEventListener('DOMContentLoaded', function () {
     if (hasErrors || hasSessionError) {
         openAddModal();
     }
+
+    // === Harga type toggle (Add) - SINGLE INPUT DYNAMIC ===
+    window.handleAddPriceTypeChange = function() {
+        const addPriceType = document.getElementById('add_price_type');
+        const addHarga = document.getElementById('add_harga');
+        const addHargaLabel = document.getElementById('add_harga_label');
+        
+        const type = addPriceType?.value || 'pcs';
+        
+        // Update label dan atribut input sesuai tipe
+        if (type === 'set') {
+            if (addHargaLabel) addHargaLabel.textContent = 'Harga (SET)';
+            if (addHarga) {
+                addHarga.name = 'harga_set';
+                addHarga.placeholder = 'Masukkan harga per SET';
+            }
+        } else {
+            if (addHargaLabel) addHargaLabel.textContent = 'Harga (PCS)';
+            if (addHarga) {
+                addHarga.name = 'harga_pcs';
+                addHarga.placeholder = 'Masukkan harga per PCS';
+            }
+        }
+        
+        setTimeout(() => addHarga?.focus(), 100);
+    };
+    
+    // Panggil saat DOM ready
+    handleAddPriceTypeChange();
+    // Binding robust: update saat dropdown berubah
+    const addPriceTypeEl = document.getElementById('add_price_type');
+    if (addPriceTypeEl) {
+        addPriceTypeEl.addEventListener('change', window.handleAddPriceTypeChange);
+        addPriceTypeEl.addEventListener('input', window.handleAddPriceTypeChange);
+    }
 });
+
+// === Harga type toggle (Edit) - Single Input Dynamic ===
+function handleEditPriceTypeChange() {
+    const selectEl = document.getElementById('edit_price_type');
+    const editHarga = document.getElementById('edit_harga');
+    const editHargaLabel = document.getElementById('edit_harga_label');
+    const type = selectEl?.value || 'pcs';
+    if (type === 'set') {
+        if (editHargaLabel) editHargaLabel.textContent = 'Harga (SET)';
+        if (editHarga) {
+            editHarga.name = 'harga_set';
+            editHarga.placeholder = 'Masukkan harga per SET';
+        }
+    } else {
+        if (editHargaLabel) editHargaLabel.textContent = 'Harga (PCS)';
+        if (editHarga) {
+            editHarga.name = 'harga_pcs';
+            editHarga.placeholder = 'Masukkan harga per PCS';
+        }
+    }
+}
+const editTypeEl = document.getElementById('edit_price_type');
+if (editTypeEl) {
+    editTypeEl.addEventListener('change', handleEditPriceTypeChange);
+    editTypeEl.addEventListener('input', handleEditPriceTypeChange);
+}
+// Sinkronkan sekali saat script dimuat
+handleEditPriceTypeChange();
 </script>
 @endsection

@@ -15,7 +15,11 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $produks = Produk::all();
+        // Eager-load total qty masuk & keluar agar perhitungan sisa stok efisien
+        $produks = Produk::query()
+            ->withSum('barangMasuks as qty_masuk', 'qty')
+            ->withSum('barangKeluars as qty_keluar', 'qty')
+            ->get();
         return view('produk.index', compact('produks'));
     }
 
@@ -47,11 +51,15 @@ class ProdukController extends Controller
                 $validated['kode_produk'] = $this->generateKodeProduk();
             }
 
-            // Set harga default jika kosong
-            if (empty($validated['harga']) && !empty($validated['harga_pcs'])) {
-                $validated['harga'] = $validated['harga_pcs'];
-            } elseif (empty($validated['harga'])) {
-                $validated['harga'] = 0;
+            // Set harga final berdasarkan input yang tersedia (prioritaskan SET jika ada)
+            if (empty($validated['harga'])) {
+                if (!empty($validated['harga_set']) && (float)$validated['harga_set'] > 0) {
+                    $validated['harga'] = $validated['harga_set'];
+                } elseif (!empty($validated['harga_pcs']) && (float)$validated['harga_pcs'] > 0) {
+                    $validated['harga'] = $validated['harga_pcs'];
+                } else {
+                    $validated['harga'] = 0;
+                }
             }
 
             // Set default untuk field yang kosong
@@ -135,11 +143,15 @@ class ProdukController extends Controller
                 $validated['kode_produk'] = $this->generateKodeProduk();
             }
 
-            // Set harga default
-            if (empty($validated['harga']) && !empty($validated['harga_pcs'])) {
-                $validated['harga'] = $validated['harga_pcs'];
-            } elseif (empty($validated['harga'])) {
-                $validated['harga'] = 0;
+            // Set harga final berdasarkan input yang tersedia (prioritaskan SET jika ada)
+            if (empty($validated['harga'])) {
+                if (!empty($validated['harga_set']) && (float)$validated['harga_set'] > 0) {
+                    $validated['harga'] = $validated['harga_set'];
+                } elseif (!empty($validated['harga_pcs']) && (float)$validated['harga_pcs'] > 0) {
+                    $validated['harga'] = $validated['harga_pcs'];
+                } else {
+                    $validated['harga'] = 0;
+                }
             }
 
             // Set default untuk field yang kosong

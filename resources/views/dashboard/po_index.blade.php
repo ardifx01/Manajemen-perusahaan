@@ -25,11 +25,11 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 dark:text-gray-100">
-                        @isset($po) 
+                        @if(isset($po) && request('from') !== 'invoice')
                             <i class="fas fa-edit text-blue-600 mr-2"></i>Edit Purchase Order
-                        @else 
+                        @else
                             <i class="fas fa-plus-circle text-green-600 mr-2"></i>Input Purchase Order
-                        @endisset
+                        @endif
                     </h1>
                     <p class="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">Kelola data purchase order dengan mudah</p>
                 </div>
@@ -90,9 +90,9 @@
             </div>
         </div>
 
-        <form id="po-form" action="@isset($po) {{ route('po.update', $po->id) }} @else {{ route('po.store') }} @endisset" method="POST" class="font-sans font-inter">
+        <form id="po-form" action="@if(isset($po) && request('from') !== 'invoice') {{ route('po.update', $po->id) }} @else {{ route('po.store') }} @endif" method="POST" class="font-sans font-inter">
             @csrf
-            @isset($po) @method('PUT') @endisset
+            @if(isset($po) && request('from') !== 'invoice') @method('PUT') @endif
             <!-- Nomor Urut Data Invoice (bukan No Invoice). Diisi dari query po_number saat datang dari Data Invoice -->
             <input type="hidden" name="po_number" value="{{ request('po_number') ?? old('po_number', $po->po_number ?? '') }}">
             <!-- Sumber navigasi, agar setelah simpan bisa kembali ke Data Invoice -->
@@ -102,39 +102,33 @@
             <div class="bg-white/95 dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-xl shadow-lg p-4 sm:p-6">
                 <!-- Made grid responsive: 1 col on mobile, 2 on tablet, 3 on desktop -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    <!-- Customer Selection -->
+                    <!-- Customer (non-editable, auto-filled from Data Invoice) -->
                     <div class="space-y-2">
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-building text-blue-500 mr-1"></i>Customer
                         </label>
-                        <select name="customer_id" id="customer" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" required>
-                            <option value="">-- Pilih Customer --</option>
-                            @foreach($customers as $c)
-                                <option value="{{ $c->id }}" 
-                                        data-address1="{{ $c->address_1 ?? '' }}" 
-                                        data-address2="{{ $c->address_2 ?? '' }}"
-                                        data-delivery-nomor="{{ (explode('/', $c->delivery_note_number ?? '')[0] ?? '') }}"
-                                        data-delivery-pt="{{ (explode('/', $c->delivery_note_number ?? '')[1] ?? '') }}"
-                                        data-delivery-tahun="{{ (explode('/', $c->delivery_note_number ?? '')[2] ?? '') }}"
-                                        data-invoice-nomor="{{ (explode('/', $c->invoice_number ?? '')[0] ?? '') }}"
-                                        data-invoice-pt="{{ (explode('/', $c->invoice_number ?? '')[1] ?? '') }}"
-                                        data-invoice-tahun="{{ (explode('/', $c->invoice_number ?? '')[2] ?? '') }}"
-                                        data-payment-terms="{{ $c->payment_terms_days ?? 30 }}"
-                                        data-debug-terms="{{ $c->payment_terms_days }}"
-                                        @selected(old('customer_id', $po->customer_id ?? '') == $c->id)>
-                                    {{ $c->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div id="customer-payment-info" class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg hidden">
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-info-circle text-blue-600 dark:text-blue-400"></i>
-                                <div class="text-sm">
-                                    <span class="font-medium text-blue-800 dark:text-blue-300">Payment Terms:</span>
-                                    <span id="payment-terms-text" class="text-blue-700 dark:text-blue-200"></span>
-                                </div>
-                            </div>
+                        <div class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-gray-100 dark:bg-gray-800/70">
+                            {{ old('customer_name', $po->customer ?? '-') }}
                         </div>
+                        <!-- Hidden input to keep backend validation and JS compatibility -->
+                        @php
+                            // Hitung prefill SJ parts di sini (blok Customer) karena $noSuratJalanParts belum terdefinisi di bawah
+                            $prefSJParts = [];
+                            if (isset($po) && $po->no_surat_jalan && trim($po->no_surat_jalan) !== '-') {
+                                $prefSJParts = explode('/', $po->no_surat_jalan);
+                            } elseif (request('from') === 'invoice' && isset($sjCodeParts) && is_array($sjCodeParts)) {
+                                $prefSJParts = $sjCodeParts;
+                            }
+                            $sjNomor = isset($prefSJParts[0]) && trim((string)$prefSJParts[0]) !== '-' ? $prefSJParts[0] : '';
+                            $sjPt    = isset($prefSJParts[1]) && trim((string)$prefSJParts[1]) !== '-' ? $prefSJParts[1] : '';
+                            $sjTahun = isset($prefSJParts[2]) && trim((string)$prefSJParts[2]) !== '-' ? $prefSJParts[2] : '';
+                        @endphp
+                        <input type="hidden" name="customer_id" id="customer"
+                               value="{{ old('customer_id', $po->customer_id ?? '') }}"
+                               data-sj-nomor="{{ $sjNomor }}"
+                               data-sj-pt="{{ $sjPt }}"
+                               data-sj-tahun="{{ $sjTahun }}"
+                               required>
                     </div>
 
                     <!-- No PO -->
@@ -142,7 +136,7 @@
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                             <i class="fas fa-file-invoice text-green-500 mr-1"></i>No PO
                         </label>
-                        <input type="text" name="no_po" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('no_po', $po->no_po ?? '') }}" required>
+                        <input type="text" name="no_po" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('no_po', (isset($po) && ($po->no_po ?? '') === '-') ? '' : ($po->no_po ?? '')) }}" required>
                     </div>
 
                     <!-- Tanggal PO -->
@@ -151,36 +145,20 @@
                             <i class="fas fa-calendar text-red-500 mr-1"></i>Tanggal PO
                         </label>
                         <div class="relative">
-                            <input type="date" name="tanggal_po" class="date-input w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg pl-3 pr-12 sm:pl-4 sm:pr-12 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ request('tanggal_po') ?? old('tanggal_po', isset($po) && $po->tanggal_po ? \Carbon\Carbon::parse($po->tanggal_po)->format('Y-m-d') : '') }}" required>
+                            <input type="date" name="tanggal_po" class="date-input w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg pl-3 pr-12 sm:pl-4 sm:pr-12 py-2 sm:py-3 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{
+                                old('tanggal_po',
+                                    request('from') === 'invoice'
+                                        ? now()->format('Y-m-d')
+                                        : (isset($po) && $po->tanggal_po ? \Carbon\Carbon::parse($po->tanggal_po)->format('Y-m-d') : (request('tanggal_po') ?? ''))
+                                )
+                            }}" required>
                             <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 dark:text-gray-200">
                                 <i class="fa-regular fa-calendar text-base"></i>
                             </span>
                         </div>
                     </div>
 
-                    <!-- No Invoice (3 bagian) -->
-                    <div class="space-y-2 md:col-span-2 lg:col-span-3">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
-                            <i class="fas fa-file-invoice-dollar text-indigo-500 mr-1"></i>No Invoice
-                        </label>
-                        @php
-                            $noInvoiceParts = [];
-                            if (isset($po) && $po->no_invoice) {
-                                $noInvoiceParts = explode('/', $po->no_invoice);
-                            }
-                        @endphp
-                        <div class="flex flex-col sm:flex-row gap-2 sm:items-center w-full min-w-0">
-                            <div class="flex gap-2 items-center w-full">
-                                <input type="number" id="invoice_nomor" name="no_invoice_nomor" inputmode="numeric" pattern="[0-9]*" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_invoice_nomor', $noInvoiceParts[0] ?? '') }}">
-                                <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
-                                <input type="text" id="invoice_pt" name="no_invoice_pt" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[2] basis-1/2 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="PT" value="{{ old('no_invoice_pt', $noInvoiceParts[1] ?? '') }}">
-                                <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
-                                <input type="number" id="invoice_tanggal" name="no_invoice_tanggal" inputmode="numeric" pattern="[0-9]*" min="1" max="12" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Bulan" value="{{ old('no_invoice_tanggal') }}">
-                                <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
-                                <input type="number" id="invoice_tahun" name="no_invoice_tahun" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Tahun" value="{{ old('no_invoice_tahun', $noInvoiceParts[2] ?? '') }}">
-                            </div>
-                        </div>
-                    </div>
+                    <!-- No Invoice section removed: nomor diatur dari Data Invoice -->
 
                     <!-- No Surat Jalan -->
                     <!-- Made no surat jalan responsive with better mobile layout -->
@@ -191,12 +169,19 @@
                         <div class="flex flex-col sm:flex-row gap-2 sm:items-center w-full min-w-0">
                             @php
                                 $noSuratJalanParts = [];
-                                if (isset($po) && $po->no_surat_jalan) {
+                                if (isset($po) && $po->no_surat_jalan && trim($po->no_surat_jalan) !== '-') {
                                     $noSuratJalanParts = explode('/', $po->no_surat_jalan);
+                                } elseif (request('from') === 'invoice' && isset($sjCodeParts) && is_array($sjCodeParts)) {
+                                    // sjCodeParts: [nomor, pt, tahun]
+                                    $noSuratJalanParts = $sjCodeParts;
+                                }
+                                // Normalisasi: jika bagian '-' maka kosongkan agar tidak error pada input number
+                                foreach ($noSuratJalanParts as $k => $v) {
+                                    if (is_string($v) && trim($v) === '-') $noSuratJalanParts[$k] = '';
                                 }
                             @endphp
                             <div class="flex gap-2 items-center w-full">
-                                <input type="number" name="no_surat_jalan_nomor" id="delivery_nomor" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_surat_jalan_nomor', $noSuratJalanParts[0] ?? '') }}" required>
+                                <input type="text" name="no_surat_jalan_nomor" id="delivery_nomor" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[1] basis-1/4 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="Nomor" value="{{ old('no_surat_jalan_nomor', $noSuratJalanParts[0] ?? '') }}" required>
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
                                 <input type="text" name="no_surat_jalan_pt" id="delivery_pt" class="border-2 border-gray-200 dark:border-gray-700 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-sm sm:text-base flex-[2] basis-1/2 min-w-0 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" placeholder="PT" value="{{ old('no_surat_jalan_pt', $noSuratJalanParts[1] ?? '') }}" required>
                                 <span class="text-gray-400 font-bold text-sm sm:text-base">/</span>
@@ -225,43 +210,39 @@
                         <input type="text" name="address_2" id="address_2" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 transition-all duration-200" value="{{ old('address_2', $po->alamat_2 ?? '') }}" placeholder="Alamat tambahan (opsional)">
                     </div>
 
-                    <!-- CHANGED: Pengirim field from input text to select dropdown -->
-                    <!-- Pengirim -->
-                    <div class="space-y-2">
+                    <!-- Pengiriman: Pengirim + Kendaraan + No Polisi (digabung dalam satu baris) -->
+                    <div class="space-y-2 md:col-span-2 lg:col-span-3">
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
-                            <i class="fas fa-user text-orange-500 mr-1"></i>Pengirim
+                            <i class="fas fa-truck-fast text-purple-600 mr-1"></i>Pengiriman
                         </label>
-                        <select name="pengirim" id="pengirim" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-500/30 transition-all duration-200">
-                            <option value="">-- Pilih Pengirim --</option>
-                            @foreach($pengirims as $p)
-                                <option value="{{ $p->nama }}" @selected(old('pengirim', $po->pengirim ?? '') == $p->nama)>
-                                    {{ $p->nama }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Kendaraan -->
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
-                            <i class="fas fa-car text-green-500 mr-1"></i>Kendaraan
-                        </label>
-                        <select name="kendaraan" id="kendaraan" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-500/30 transition-all duration-200">
-                            <option value="">-- Pilih Kendaraan --</option>
-                            @foreach($kendaraans as $k)
-                                <option value="{{ $k->nama }}" data-nopol="{{ $k->no_polisi }}" @selected(old('kendaraan', $po->kendaraan ?? '') == $k->nama)>
-                                    {{ $k->nama }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- No Polisi -->
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
-                            <i class="fas fa-id-card text-yellow-500 mr-1"></i>No Polisi
-                        </label>
-                        <input type="text" name="no_polisi" id="no_polisi" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-100" value="{{ old('no_polisi', $po->no_polisi ?? '') }}" readonly>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <!-- Pengirim -->
+                            <div>
+                                <select name="pengirim" id="pengirim" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-500/30 transition-all duration-200">
+                                    <option value="">-- Pilih Pengirim --</option>
+                                    @foreach($pengirims as $p)
+                                        <option value="{{ $p->nama }}" @selected(old('pengirim', $po->pengirim ?? '') == $p->nama)>
+                                            {{ $p->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <!-- Kendaraan -->
+                            <div>
+                                <select name="kendaraan" id="kendaraan" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-500/30 transition-all duration-200">
+                                    <option value="">-- Pilih Kendaraan --</option>
+                                    @foreach($kendaraans as $k)
+                                        <option value="{{ $k->nama }}" data-nopol="{{ $k->no_polisi }}" @selected(old('kendaraan', $po->kendaraan ?? '') == $k->nama)>
+                                            {{ $k->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <!-- No Polisi (readonly) -->
+                            <div>
+                                <input type="text" name="no_polisi" id="no_polisi" class="w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-100" value="{{ old('no_polisi', $po->no_polisi ?? '') }}" readonly>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Produk (Dynamic Items) -->
@@ -635,22 +616,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Tambahkan event agar saat user ganti customer, field jadi editable dulu lalu diisi dan dikunci lagi
-    customerSelect.addEventListener('change', function() {
-        updateCustomerAddresses();
-    });
+    // Tambahkan event hanya jika customerSelect adalah SELECT
+    if (customerSelect && customerSelect.tagName === 'SELECT') {
+        customerSelect.addEventListener('change', function() {
+            updateCustomerAddresses();
+        });
+    }
 
     // Attach to initial row
     document.querySelectorAll('.item-row').forEach(row => attachRowEvents(row));
     renumberRows();
     kendaraanSelect.addEventListener('change', updateNoPolisi);
-    customerSelect.addEventListener('change', updateCustomerAddresses);
+    if (customerSelect && customerSelect.tagName === 'SELECT') {
+        customerSelect.addEventListener('change', updateCustomerAddresses);
+    }
 
     // Initialize on page load
     document.querySelectorAll('.item-row').forEach(row => calculateRowTotal(row));
     updateGrandTotal();
     updateNoPolisi();
-    updateCustomerAddresses();
+    // Prefill No Surat Jalan jika #customer bukan SELECT
+    if (customerSelect && customerSelect.tagName !== 'SELECT') {
+        try {
+            const n = customerSelect.dataset.sjNomor || '';
+            const p = customerSelect.dataset.sjPt || '';
+            const t = customerSelect.dataset.sjTahun || '';
+            if (deliveryNomorInput && !deliveryNomorInput.value && n) deliveryNomorInput.value = n;
+            if (deliveryPtInput && !deliveryPtInput.value && p) deliveryPtInput.value = p;
+            if (deliveryTahunInput && !deliveryTahunInput.value && t) deliveryTahunInput.value = t;
+        } catch (e) { /* ignore */ }
+    } else {
+        // Jika SELECT, pakai mekanisme lama
+        updateCustomerAddresses();
+    }
 
     // Hook: saat tanggal PO berubah, isi Bulan/Tahun otomatis
     if (tanggalPOInput) {

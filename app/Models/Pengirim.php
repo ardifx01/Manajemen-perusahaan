@@ -15,6 +15,8 @@ class Pengirim extends Model
     // Kolom yang bisa diisi mass-assignment
     protected $fillable = [
         'nama',
+        'kendaraan',
+        'no_polisi',
     ];
 
     /**

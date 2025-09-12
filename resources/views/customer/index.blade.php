@@ -95,17 +95,9 @@
                         <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[140px] border-b divider">
                             <div class="flex items-center space-x-1 md:space-x-2">
                                 <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
                                 </svg>
-                                <span>No Surat Jalan</span>
-                            </div>
-                        </th>
-                        <th class="px-3 md:px-6 py-3 md:py-4 text-left font-semibold text-xs md:text-sm min-w-[140px] border-b divider">
-                            <div class="flex items-center space-x-1 md:space-x-2">
-                                <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                <span>No Invoice</span>
+                                <span>Kode Number</span>
                             </div>
                         </th>
                         <!-- Made address columns responsive with min-width -->
@@ -152,23 +144,11 @@
                                 </div>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
-                                <span class="badge badge-blue">
-                                    @if($customer->delivery_note_nomor || $customer->delivery_note_pt || $customer->delivery_note_tahun)
-                                        {{ $customer->delivery_note_nomor ?? '-' }}/{{ $customer->delivery_note_pt ?? '-' }}/{{ $customer->delivery_note_tahun ?? '-' }}
-                                    @else
-                                        -
-                                    @endif
+                                <span class="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 px-2 md:px-3 py-1 rounded-full text-xs font-medium">
+                                    {{ $customer->code_number ?? '-' }}
                                 </span>
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4">
-                                <span class="badge badge-purple">
-                                    @if($customer->invoice_nomor || $customer->invoice_pt || $customer->invoice_tahun)
-                                        {{ $customer->invoice_nomor ?? '-' }}/{{ $customer->invoice_pt ?? '-' }}/{{ $customer->invoice_tahun ?? '-' }}
-                                    @else
-                                        -
-                                    @endif
-                                </span>
-                            </td>
+                            
                             <td class="px-3 md:px-6 py-3 md:py-4">
                                 <span class="bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-200 px-2 md:px-3 py-1 rounded-full text-xs font-medium">
                                     {{ $customer->address_1 ?? '-' }}
@@ -181,7 +161,7 @@
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
                                 <x-table.action-buttons 
-                                    onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {!! json_encode($customer->delivery_note_pt) !!}, {!! json_encode($customer->delivery_note_tahun) !!}, {!! json_encode($customer->invoice_pt) !!}, {!! json_encode($customer->invoice_tahun) !!}, {{ $customer->payment_terms_days ?? 30 }})"
+                                    onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {{ $customer->payment_terms_days ?? 30 }})"
                                     deleteAction="{{ route('customer.destroy', $customer->id) }}"
                                     confirmText="Yakin ingin menghapus customer ini?"
                                 />
@@ -189,7 +169,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
+                            <td colspan="5" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center space-y-4">
                                     <div class="bg-gray-100 dark:bg-slate-700 p-6 rounded-full">
                                         <svg class="w-12 h-12 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,27 +203,13 @@
                             <span class="text-gray-900 dark:text-slate-100 font-semibold">{{ $customer->name }}</span>
                         </div>
                         <div class="mt-2 space-y-1 text-sm">
-                            <div>Surat Jalan: 
-                                <span class="badge badge-blue">
-                                    @if($customer->delivery_note_nomor || $customer->delivery_note_pt || $customer->delivery_note_tahun)
-                                        {{ $customer->delivery_note_nomor ?? '-' }}/{{ $customer->delivery_note_pt ?? '-' }}/{{ $customer->delivery_note_tahun ?? '-' }}
-                                    @else - @endif
-                                </span>
-                            </div>
-                            <div>Invoice: 
-                                <span class="badge badge-purple">
-                                    @if($customer->invoice_nomor || $customer->invoice_pt || $customer->invoice_tahun)
-                                        {{ $customer->invoice_nomor ?? '-' }}/{{ $customer->invoice_pt ?? '-' }}/{{ $customer->invoice_tahun ?? '-' }}
-                                    @else - @endif
-                                </span>
-                            </div>
                             <div class="text-gray-700 dark:text-slate-300">Alamat 1: <span class="font-medium">{{ $customer->address_1 ?? '-' }}</span></div>
                             <div class="text-gray-700 dark:text-slate-300">Alamat 2: <span class="font-medium">{{ $customer->address_2 ?? '-' }}</span></div>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2">
                         <x-table.action-buttons 
-                            onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {!! json_encode($customer->delivery_note_pt) !!}, {!! json_encode($customer->delivery_note_tahun) !!}, {!! json_encode($customer->invoice_pt) !!}, {!! json_encode($customer->invoice_tahun) !!}, {{ $customer->payment_terms_days ?? 30 }})"
+                            onEdit="window.openEditModal({{ $customer->id }}, {!! json_encode($customer->name) !!}, {!! json_encode($customer->address_1) !!}, {!! json_encode($customer->address_2) !!}, {{ $customer->payment_terms_days ?? 30 }})"
                             deleteAction="{{ route('customer.destroy', $customer->id) }}"
                             confirmText="Yakin ingin menghapus customer ini?"
                         />
@@ -293,25 +259,22 @@
                            placeholder="Masukkan nama customer">
                 </div>
 
+                <!-- Kode Number (3 input dengan pemisah '-' dan '/') -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Surat Jalan</label>
-                    <!-- Hanya Kode PT -->
-                    <div class="grid grid-cols-1 gap-2 items-center">
-                        <input type="text" id="add_delivery_note_pt" name="delivery_note_pt"
-                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Kode PT">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Kode Number</label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="add_code_1" class="w-20 px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg text-sm" placeholder="XXX">
+                        <span class="text-gray-500 dark:text-slate-400">-</span>
+                        <input type="text" id="add_code_2" class="w-24 px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg text-sm" placeholder="YYY">
+                        <span class="text-gray-500 dark:text-slate-400">/</span>
+                        <input type="text" id="add_code_3" class="w-20 px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg text-sm" placeholder="ZZZ">
                     </div>
+                    <!-- Hidden field untuk gabungan -->
+                    <input type="hidden" name="code_number" id="add_code_number" value="">
+                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Format: BAG1-BAG2/BAG3</p>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No Invoice</label>
-                    <!-- Hanya Kode PT -->
-                    <div class="grid grid-cols-1 gap-2 items-center">
-                        <input type="text" id="add_invoice_pt" name="invoice_pt"
-                               class="px-2 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500 transition-colors duration-200 text-sm"
-                               placeholder="Kode PT">
-                    </div>
-                </div>
+                
 
                 <div>
                     <label for="add_payment_terms_days" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Terms Pembayaran (Hari)</label>
@@ -391,16 +354,21 @@
                            class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
                            placeholder="Masukkan nama customer">
                 </div>
+
+                <!-- Kode Number (Edit) -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">Kode Number</label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="edit_code_1" class="w-20 px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg text-sm" placeholder="XXX">
+                        <span class="text-gray-500 dark:text-slate-400">-</span>
+                        <input type="text" id="edit_code_2" class="w-24 px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg text-sm" placeholder="YYY">
+                        <span class="text-gray-500 dark:text-slate-400">/</span>
+                        <input type="text" id="edit_code_3" class="w-20 px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg text-sm" placeholder="ZZZ">
+                    </div>
+                    <input type="hidden" name="code_number" id="edit_code_number" value="">
+                </div>
                 
                 <div class="space-y-2">
-                    <label for="edit_no_surat_jalan" class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-300">
-                        <i class="fa-solid fa-file-text text-blue-500"></i>
-                        <span>No Surat Jalan</span>
-                    </label>
-                    <input type="text" id="edit_no_surat_jalan" name="no_surat_jalan" required
-                           class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 transition-all duration-200"
-                           placeholder="Masukkan no surat jalan">
-
                     <div>
                         <label for="edit_address_2" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alamat 2</label>
                         <input type="text" id="edit_address_2" name="address_2"
@@ -474,7 +442,7 @@ function closeAddModal() {
     }, 300);
 }
 
-function openEditModal(id, name, address1, address2, deliveryNotePt, deliveryNoteTahun, invoicePt, invoiceTahun, paymentTermsDays) {
+function openEditModal(id, name, address1, address2, paymentTermsDays) {
     document.getElementById('editModal').classList.remove('hidden');
     document.getElementById('editModal').classList.add('flex');
     // Set action menggunakan base URL Laravel agar aman di subfolder
@@ -484,15 +452,11 @@ function openEditModal(id, name, address1, address2, deliveryNotePt, deliveryNot
         return;
     }
     form.action = "{{ url('/customer') }}/" + id;
-    document.getElementById('edit_name').value = name;
-    document.getElementById('edit_delivery_note_pt').value = deliveryNotePt || '';
-    document.getElementById('edit_delivery_note_tahun').value = deliveryNoteTahun || '';
-    document.getElementById('edit_invoice_pt').value = invoicePt || '';
-    document.getElementById('edit_invoice_tahun').value = invoiceTahun || '';
-    document.getElementById('edit_payment_terms_days').value = paymentTermsDays || 30;
-    document.getElementById('edit_address_1').value = address1 || '';
-    document.getElementById('edit_address_2').value = address2 || '';
-    document.getElementById('edit_name').focus();
+    const nameEl = document.getElementById('edit_name');
+    if (nameEl) nameEl.value = name;
+    const addr2El = document.getElementById('edit_address_2');
+    if (addr2El) addr2El.value = address2 || '';
+    if (nameEl) nameEl.focus();
 }
 
 function closeEditModal() {
@@ -505,11 +469,14 @@ function closeEditModal() {
 document.getElementById('addCustomerForm').addEventListener('submit', function() {
     document.getElementById('addSubmitBtn').disabled = true;
     document.getElementById('addLoading').classList.remove('hidden');
+    // Set gabungan code_number saat submit
+    if (window.combineAddCodeNumber) window.combineAddCodeNumber();
 });
 
 document.getElementById('editCustomerForm').addEventListener('submit', function() {
     document.getElementById('editSubmitBtn').disabled = true;
     document.getElementById('editLoading').classList.remove('hidden');
+    if (window.combineEditCodeNumber) window.combineEditCodeNumber();
 });
 
 // Close modal when clicking outside
@@ -581,6 +548,36 @@ window.addEventListener('DOMContentLoaded', function() {
         searchInput.addEventListener('input', applyFilter);
     }
     applyFilter();
+
+    // Listener untuk menyusun kode number (Add)
+    const ac1 = document.getElementById('add_code_1');
+    const ac2 = document.getElementById('add_code_2');
+    const ac3 = document.getElementById('add_code_3');
+    const addHidden = document.getElementById('add_code_number');
+    function combineAdd() {
+        if (!addHidden) return;
+        const p1 = (ac1?.value || '').trim();
+        const p2 = (ac2?.value || '').trim();
+        const p3 = (ac3?.value || '').trim();
+        addHidden.value = [p1, p2].filter(Boolean).join('-') + (p3 ? '/' + p3 : '');
+    }
+    window.combineAddCodeNumber = combineAdd;
+    [ac1, ac2, ac3].forEach(el => el && el.addEventListener('input', combineAdd));
+
+    // Listener untuk menyusun kode number (Edit)
+    const ec1 = document.getElementById('edit_code_1');
+    const ec2 = document.getElementById('edit_code_2');
+    const ec3 = document.getElementById('edit_code_3');
+    const editHidden = document.getElementById('edit_code_number');
+    function combineEdit() {
+        if (!editHidden) return;
+        const p1 = (ec1?.value || '').trim();
+        const p2 = (ec2?.value || '').trim();
+        const p3 = (ec3?.value || '').trim();
+        editHidden.value = [p1, p2].filter(Boolean).join('-') + (p3 ? '/' + p3 : '');
+    }
+    window.combineEditCodeNumber = combineEdit;
+    [ec1, ec2, ec3].forEach(el => el && el.addEventListener('input', combineEdit));
 });
 
 // Delegasi klik: pastikan tombol Edit selalu memanggil handler

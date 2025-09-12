@@ -22,6 +22,7 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'code_number' => 'nullable|string|max:100',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
@@ -64,6 +65,7 @@ class CustomerController extends Controller
 
         // Add nama_customer field with same value as name
         $validated['nama_customer'] = $validated['name'];
+        // code_number akan tersimpan jika dikirim dari form
         
         Customer::create($validated);
 
@@ -134,6 +136,7 @@ class CustomerController extends Controller
 
         // Add nama_customer field with same value as name for update too
         $validated['nama_customer'] = $validated['name'];
+        // code_number akan ikut diupdate jika dikirim
         
         $customer->update($validated);
 

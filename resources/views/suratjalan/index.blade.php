@@ -119,7 +119,8 @@
         
         
         <div class="w-full">
-            <table class="w-full table-auto text-[11px] sm:text-xs break-words">
+            <div class="overflow-x-auto responsive-scroll">
+            <table class="w-full table-auto text-[11px] sm:text-xs break-words min-w-[720px]">
                 <thead class="bg-gray-100 dark:bg-slate-700">
                     <tr>
                         <th class="py-1.5 px-1.5 text-left text-xs font-medium text-gray-600 dark:text-slate-200 uppercase tracking-tight border-r border-gray-200 dark:border-slate-700 w-8">
@@ -225,6 +226,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 </div>

@@ -334,3 +334,41 @@ canvas {
 .dark .sidebar-scroll:hover::-webkit-scrollbar-thumb {
   background-color: rgba(209,213,219,0.7); /* gray-300 */
 }
+
+/* --- Global responsive media helpers --- */
+/* Make images and videos fluid by default to prevent overflow on small screens */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure SVG and canvas don't overflow their container */
+svg, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Iframes (e.g., maps, embeds) shouldn't overflow horizontally */
+iframe {
+  max-width: 100%;
+}
+
+/* Simple horizontal scroll wrapper for wide content (tables, code blocks) */
+.responsive-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
+  /* Hide scrollbar visuals but keep scrolling functional */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+.responsive-scroll::-webkit-scrollbar { display: none; } /* Chrome, Safari */
+
+/* Optional: compact table cells on smaller screens when applied */
+@media (max-width: 640px) {
+  .table-compact td, .table-compact th {
+    padding-left: 0.5rem; /* 8px */
+    padding-right: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}

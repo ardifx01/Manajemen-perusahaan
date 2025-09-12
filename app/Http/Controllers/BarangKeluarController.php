@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\BarangKeluar;
 use App\Models\Produk;
 
@@ -11,22 +12,42 @@ class BarangKeluarController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $items = BarangKeluar::with('produk')
-            ->latest('tanggal')
-            ->paginate(10);
+        $customer = trim((string) $request->query('customer', ''));
+        $date = $request->query('date');
 
-        return view('barang.keluar.index', compact('items'));
+        $query = BarangKeluar::query()
+            ->with('produk')
+            // Join ke POS berdasarkan pola keterangan standar "Auto Keluar dari PO {no_po}"
+            ->leftJoin('pos', function($join) {
+                $join->on(DB::raw("barang_keluars.keterangan"), '=', DB::raw("CONCAT('Auto Keluar dari PO ', pos.no_po)"));
+            })
+            ->select('barang_keluars.*', DB::raw('pos.customer as customer_name'));
+
+        if ($customer !== '') {
+            $query->where(function($q) use ($customer) {
+                $q->where('pos.customer', 'like', "%$customer%")
+                  ->orWhere('barang_keluars.keterangan', 'like', "%$customer%");
+            });
+        }
+        if (!empty($date)) {
+            $query->whereDate('barang_keluars.tanggal', '=', $date);
+        }
+
+        $items = $query->latest('barang_keluars.tanggal')->paginate(15)->withQueryString();
+
+        return view('barang.keluar.index', compact('items', 'customer', 'date'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        $produks = Produk::orderBy('nama_produk')->get();
-        return view('barang.keluar.create', compact('produks'));
+        // Input manual dinonaktifkan: barang keluar dibuat otomatis dari PO
+        return redirect()->route('barang.keluar.index')
+            ->with('error', 'Input manual Barang Keluar dinonaktifkan. Data berasal otomatis dari PO.');
     }
 
     /**
@@ -34,18 +55,7 @@ class BarangKeluarController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'produk_id' => ['required','exists:produks,id'],
-            'qty' => ['required','integer','min:1'],
-            'tanggal' => ['required','date'],
-            'keterangan' => ['nullable','string'],
-        ]);
-
-        $data['user_id'] = auth()->id();
-
-        BarangKeluar::create($data);
-
-        return redirect()->route('barang.keluar.index')->with('success', 'Barang Keluar berhasil ditambahkan.');
+        abort(403, 'Input manual Barang Keluar dinonaktifkan.');
     }
 
     /**
@@ -53,8 +63,7 @@ class BarangKeluarController extends Controller
      */
     public function edit(BarangKeluar $keluar)
     {
-        $produks = Produk::orderBy('nama_produk')->get();
-        return view('barang.keluar.edit', compact('keluar','produks'));
+        abort(403, 'Edit Barang Keluar dinonaktifkan.');
     }
 
     /**
@@ -62,16 +71,7 @@ class BarangKeluarController extends Controller
      */
     public function update(Request $request, BarangKeluar $keluar)
     {
-        $data = $request->validate([
-            'produk_id' => ['required','exists:produks,id'],
-            'qty' => ['required','integer','min:1'],
-            'tanggal' => ['required','date'],
-            'keterangan' => ['nullable','string'],
-        ]);
-
-        $keluar->update($data);
-
-        return redirect()->route('barang.keluar.index')->with('success', 'Barang Keluar berhasil diperbarui.');
+        abort(403, 'Update Barang Keluar dinonaktifkan.');
     }
 
     /**
@@ -79,7 +79,6 @@ class BarangKeluarController extends Controller
      */
     public function destroy(BarangKeluar $keluar)
     {
-        $keluar->delete();
-        return redirect()->route('barang.keluar.index')->with('success', 'Barang Keluar berhasil dihapus.');
+        abort(403, 'Hapus Barang Keluar dinonaktifkan.');
     }
 }

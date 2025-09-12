@@ -21,8 +21,8 @@
 
     <!-- Invoice Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="overflow-x-auto responsive-scroll">
+            <table class="min-w-full min-w-[800px] divide-y divide-gray-200 table-compact">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No Invoice</th>
@@ -32,7 +32,7 @@
                         <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jatuh Tempo</th>
                         <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                         <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="py-1 px-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        <th class="py-1 px-1.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-20">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -53,12 +53,13 @@
                                     {{ $inv->status }}
                                 </span>
                             </td>
-                            <td class="py-1 px-1.5 text-xs space-x-1">
-                                <button onclick="editInvoice({{ $inv->id }})" class="text-blue-600 hover:text-blue-900">Edit</button>
-                                <form method="POST" action="{{ route('invoice.destroy', $inv) }}" class="inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Yakin hapus?')">Hapus</button>
-                                </form>
+                            <td class="py-1 px-1.5 text-xs text-center">
+                                <x-table.action-buttons 
+                                    onEdit="editInvoice({{ $inv->id }})"
+                                    deleteAction="{{ route('invoice.destroy', $inv) }}"
+                                    confirmText="Yakin hapus invoice {{ $inv->no_invoice }}?"
+                                    :forceFull="true"
+                                />
                             </td>
                         </tr>
                     @empty
@@ -90,7 +91,7 @@
                     @csrf
                     <div id="methodField"></div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">No Invoice</label>
                             <input type="text" name="no_invoice" id="no_invoice" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -106,7 +107,7 @@
                         <input type="text" name="customer" id="customer" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Alamat 1</label>
                             <input type="text" name="alamat_1" id="alamat_1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -117,7 +118,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Tanggal Invoice</label>
                             <input type="date" name="tanggal_invoice" id="tanggal_invoice" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -128,7 +129,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Produk</label>
                             <select name="produk_id" id="produk_id" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -151,7 +152,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Harga</label>
                             <input type="number" name="harga" id="harga" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -162,7 +163,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Pajak</label>
                             <input type="number" name="pajak" id="pajak" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">

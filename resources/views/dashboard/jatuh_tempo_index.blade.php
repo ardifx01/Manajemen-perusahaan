@@ -44,7 +44,7 @@
     <!-- Tips/Peringatan: Pilih Bulan -->
     
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-orange-50 p-4 rounded-lg border border-orange-200 dark:bg-orange-900/20 dark:border-orange-800">
             <div class="flex items-center">
                 <div class="p-2 bg-orange-500 rounded-lg dark:bg-orange-600">

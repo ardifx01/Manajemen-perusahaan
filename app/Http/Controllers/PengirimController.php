@@ -10,7 +10,7 @@ class PengirimController extends Controller
     public function index()
     {
         $pengirims = DB::table('pengirim')
-            ->select('id', 'nama')
+            ->select('id', 'nama', 'kendaraan', 'no_polisi')
             ->orderBy('nama', 'asc')
             ->get();
         
@@ -21,6 +21,8 @@ class PengirimController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'kendaraan' => 'nullable|string|max:255',
+            'no_polisi' => 'nullable|string|max:50',
         ]);
 
         $exists = DB::table('pengirim')
@@ -33,6 +35,8 @@ class PengirimController extends Controller
 
         DB::table('pengirim')->insert([
             'nama' => $request->nama,
+            'kendaraan' => $request->kendaraan,
+            'no_polisi' => $request->no_polisi,
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -44,12 +48,16 @@ class PengirimController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'kendaraan' => 'nullable|string|max:255',
+            'no_polisi' => 'nullable|string|max:50',
         ]);
 
         DB::table('pengirim')
             ->where('id', $id)
             ->update([
                 'nama' => $request->nama,
+                'kendaraan' => $request->kendaraan,
+                'no_polisi' => $request->no_polisi,
                 'updated_at' => now()
             ]);
 

@@ -100,8 +100,16 @@
 
     <!-- Tabel Karyawan -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:bg-slate-900/40 dark:border-white/10">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-white/10">
+        <div class="sm:hidden bg-gray-50 dark:bg-slate-800 px-4 py-2 text-xs text-gray-500 dark:text-slate-400 border-b dark:border-slate-700">
+            <div class="flex items-center space-x-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                </svg>
+                <span>Geser tabel ke samping untuk melihat kolom lain</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto responsive-scroll">
+            <table class="min-w-full min-w-[900px] divide-y divide-gray-200 dark:divide-white/10">
                 <thead class="bg-gray-50 dark:bg-slate-800/60">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider dark:text-gray-300">Karyawan</th>
